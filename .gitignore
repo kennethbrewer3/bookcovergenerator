@@ -1,0 +1,85 @@
+# Operating system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# IDE and editor files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Dart and Flutter generated files
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Flutter web and desktop ephemeral files
+**/Flutter/ephemeral/
+**/flutter_export_environment.sh
+**/generated_plugin_registrant.dart
+
+# Flutter generated platform plugin files
+**/GeneratedPluginRegistrant.*
+
+# Coverage and test output
+coverage/
+test-results/
+*.lcov
+
+# Logs
+*.log
+logs/
+
+# Environment and local configuration
+.env
+.env.*
+*.local
+
+# Serverpod runtime files and local secrets
+**/config/passwords.yaml
+**/config/*-passwords.yaml
+**/config/local.yaml
+**/config/*.local.yaml
+**/.serverpod/
+**/generated/
+
+# Serverpod generated web app build output
+book_cover_designer_server/web/app/
+
+# CocoaPods generated files
+**/Pods/
+**/.symlinks/
+
+# Xcode generated files
+**/DerivedData/
+**/*.xcuserstate
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Android generated files
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+
+# macOS build products
+**/macos/Flutter/ephemeral/
+
+# Generated documentation
+/doc/api/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo

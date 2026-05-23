@@ -1,0 +1,709 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
+import 'package:either_dart/either.dart';
+import 'package:flutter/services.dart';
+import 'package:file_saver/file_saver.dart';
+
+/*
+Common professional layout patterns:
+
+Option A — Title top, Author bottom
+
+Most common for fiction.
+
+Option B — Author top, Title center
+
+Common in non-fiction / branding books.
+
+Option C — Big center title, small author top or bottom
+
+Modern minimal style.
+ */
+enum CoverLayout {
+  /// Option A: Title near top, author near bottom
+  titleTopAuthorBottom,
+
+  /// Option B: Author near top, title centered
+  authorTopTitleCenter,
+
+  /// Option C: Big title centered, author/subtitle smaller (modern)
+  bigCenterTitle,
+}
+
+class GenerateEbookCoverService {
+  Future<Either<String, ByteData>> generateImage({
+    required double coverWidth,
+    required double coverHeight,
+    required int numColors,
+    required Random random,
+    required String title,
+    required String author,
+
+    /// Optional subtitle line under the title
+    String? subtitle,
+
+    /// Optional top banner (e.g., "2nd Edition", "Preview", "V1.0")
+    String? versionBanner,
+
+    /// Layout selector (Option A/B/C)
+    CoverLayout layout = CoverLayout.bigCenterTitle,
+
+    /// Background image bytes (PNG/JPG/etc). If null/empty, fallbackColor is used.
+    Uint8List? backgroundImageBytes,
+
+    /// Fallback background color when no image is provided.
+    Color? fallbackColor,
+  }) async {
+    final resolvedFallbackColor =
+        fallbackColor ?? _generateRandomBackgroundColor(random);
+    final sw = Stopwatch()..start();
+
+    try {
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, coverWidth, coverHeight));
+      final dstRect = Rect.fromLTWH(0, 0, coverWidth, coverHeight);
+
+      ui.Image? bgImage;
+
+      // 1) Paint background
+      if (backgroundImageBytes != null && backgroundImageBytes.isNotEmpty) {
+        bgImage = await _decodeToUiImage(backgroundImageBytes);
+
+        final srcRect = _srcRectForCoverFit(
+          srcW: bgImage.width.toDouble(),
+          srcH: bgImage.height.toDouble(),
+          dstW: coverWidth,
+          dstH: coverHeight,
+        );
+
+        canvas.drawImageRect(
+          bgImage,
+          srcRect,
+          dstRect,
+          Paint()..filterQuality = FilterQuality.high,
+        );
+      } else {
+        canvas.drawRect(dstRect, Paint()..color = resolvedFallbackColor);
+      }
+
+      // 2) Dynamic contrast detection (image preferred, else fallback color)
+      final bgLuminance = bgImage != null
+          ? await _estimateImageLuminance(bgImage)
+          : _luminanceOfColor(resolvedFallbackColor);
+
+      // If background is light => use dark text; else use light text
+      final useDarkText = bgLuminance > 0.55;
+      final textColor = useDarkText ? Colors.black : Colors.white;
+
+      // Scrim/shadow tuned to background brightness
+      final scrimColor = useDarkText
+          ? Colors.white.withValues(alpha: 0.18)
+          : Colors.black.withValues(alpha: 0.28);
+
+      final shadowColor = useDarkText
+          ? const Color(0x66000000)
+          : const Color(0xAA000000);
+
+      // 3) Border (optional)
+      canvas.drawRect(
+        dstRect,
+        Paint()
+          ..color = (useDarkText ? Colors.black : Colors.white).withValues(alpha: 0.20)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+
+      // 4) Optional version banner
+      if (versionBanner != null && versionBanner.trim().isNotEmpty) {
+        _drawVersionBanner(
+          canvas: canvas,
+          coverWidth: coverWidth,
+          coverHeight: coverHeight,
+          text: versionBanner.trim(),
+          textColor: textColor,
+          backgroundColor: scrimColor,
+        );
+      }
+
+      // 5) Draw typography by selected layout
+      switch (layout) {
+        case CoverLayout.titleTopAuthorBottom:
+          _drawLayoutA(
+            canvas: canvas,
+            coverWidth: coverWidth,
+            coverHeight: coverHeight,
+            title: title,
+            subtitle: subtitle,
+            author: author,
+            textColor: textColor,
+            scrimColor: scrimColor,
+            shadowColor: shadowColor,
+          );
+          break;
+
+        case CoverLayout.authorTopTitleCenter:
+          _drawLayoutB(
+            canvas: canvas,
+            coverWidth: coverWidth,
+            coverHeight: coverHeight,
+            title: title,
+            subtitle: subtitle,
+            author: author,
+            textColor: textColor,
+            scrimColor: scrimColor,
+            shadowColor: shadowColor,
+          );
+          break;
+
+        case CoverLayout.bigCenterTitle:
+          _drawLayoutC(
+            canvas: canvas,
+            coverWidth: coverWidth,
+            coverHeight: coverHeight,
+            title: title,
+            subtitle: subtitle,
+            author: author,
+            textColor: textColor,
+            scrimColor: scrimColor,
+            shadowColor: shadowColor,
+          );
+          break;
+      }
+
+      // 6) Export PNG
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(coverWidth.round(), coverHeight.round());
+      final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+
+      if (pngBytes == null) return const Left("Failed to generate image");
+
+      sw.stop();
+      debugPrint('TOTAL: ${sw.elapsedMilliseconds}ms');
+      return Right(pngBytes);
+    } catch (e, st) {
+      debugPrint('generateImage error: $e\n$st');
+      return Left('Failed to generate cover: $e');
+    }
+  }
+
+  // ----------------------------
+  // Layouts (A/B/C)
+  // ----------------------------
+
+  void _drawLayoutA({
+    required Canvas canvas,
+    required double coverWidth,
+    required double coverHeight,
+    required String title,
+    required String? subtitle,
+    required String author,
+    required Color textColor,
+    required Color scrimColor,
+    required Color shadowColor,
+  }) {
+    final padX = coverWidth * 0.08;
+    final maxW = coverWidth - padX * 2;
+
+    // Title block near top
+    final titleTopY = coverHeight * 0.16;
+
+    // Author near bottom
+    final authorBottomY = coverHeight * 0.86;
+
+    // Auto-fit title
+    final titlePainter = _fitText(
+      text: title.trim(),
+      maxWidth: maxW,
+      maxLines: 3,
+      maxFontSize: coverWidth * 0.14, // scales with size
+      minFontSize: coverWidth * 0.07,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor,
+        fontSize: fs,
+        fontWeight: FontWeight.w900,
+        height: 1.05,
+        letterSpacing: 0.3,
+        shadows: [Shadow(blurRadius: 14, offset: const Offset(0, 6), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final subtitlePainter = (subtitle != null && subtitle.trim().isNotEmpty)
+        ? _fitText(
+      text: subtitle.trim(),
+      maxWidth: maxW,
+      maxLines: 2,
+      maxFontSize: coverWidth * 0.06,
+      minFontSize: coverWidth * 0.045,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor.withValues(alpha: 0.92),
+        fontSize: fs,
+        fontWeight: FontWeight.w700,
+        height: 1.15,
+        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    )
+        : null;
+
+    final authorPainter = _fitText(
+      text: author.trim(),
+      maxWidth: maxW,
+      maxLines: 1,
+      maxFontSize: coverWidth * 0.055,
+      minFontSize: coverWidth * 0.04,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor,
+        fontSize: fs,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.8,
+        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    // Draw scrim behind title/subtitle
+    final titleBlockH = titlePainter.height + (subtitlePainter != null ? (coverHeight * 0.02 + subtitlePainter.height) : 0);
+    _drawScrim(
+      canvas: canvas,
+      x: padX,
+      y: titleTopY - 18,
+      w: maxW,
+      h: titleBlockH + 36,
+      color: scrimColor,
+      radius: 18,
+    );
+
+    // Paint title and subtitle
+    titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, titleTopY));
+    if (subtitlePainter != null) {
+      final subY = titleTopY + titlePainter.height + coverHeight * 0.02;
+      subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, subY));
+    }
+
+    // Draw scrim behind author
+    _drawScrim(
+      canvas: canvas,
+      x: padX,
+      y: authorBottomY - authorPainter.height - 18,
+      w: maxW,
+      h: authorPainter.height + 36,
+      color: scrimColor,
+      radius: 18,
+    );
+
+    authorPainter.paint(
+      canvas,
+      Offset((coverWidth - authorPainter.width) / 2, authorBottomY - authorPainter.height),
+    );
+  }
+
+  void _drawLayoutB({
+    required Canvas canvas,
+    required double coverWidth,
+    required double coverHeight,
+    required String title,
+    required String? subtitle,
+    required String author,
+    required Color textColor,
+    required Color scrimColor,
+    required Color shadowColor,
+  }) {
+    final padX = coverWidth * 0.08;
+    final maxW = coverWidth - padX * 2;
+
+    // Author top
+    final authorTopY = coverHeight * 0.12;
+
+    // Title center
+    final titleCenterY = coverHeight * 0.42;
+
+    final authorPainter = _fitText(
+      text: author.trim(),
+      maxWidth: maxW,
+      maxLines: 1,
+      maxFontSize: coverWidth * 0.055,
+      minFontSize: coverWidth * 0.04,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor,
+        fontSize: fs,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.0,
+        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final titlePainter = _fitText(
+      text: title.trim(),
+      maxWidth: maxW,
+      maxLines: 3,
+      maxFontSize: coverWidth * 0.16,
+      minFontSize: coverWidth * 0.08,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor,
+        fontSize: fs,
+        fontWeight: FontWeight.w900,
+        height: 1.03,
+        letterSpacing: 0.2,
+        shadows: [Shadow(blurRadius: 14, offset: const Offset(0, 6), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final subtitlePainter = (subtitle != null && subtitle.trim().isNotEmpty)
+        ? _fitText(
+      text: subtitle.trim(),
+      maxWidth: maxW,
+      maxLines: 2,
+      maxFontSize: coverWidth * 0.065,
+      minFontSize: coverWidth * 0.045,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor.withValues(alpha: 0.92),
+        fontSize: fs,
+        fontWeight: FontWeight.w700,
+        height: 1.15,
+        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    )
+        : null;
+
+    // Author scrim
+    _drawScrim(
+      canvas: canvas,
+      x: padX,
+      y: authorTopY - 16,
+      w: maxW,
+      h: authorPainter.height + 32,
+      color: scrimColor,
+      radius: 18,
+    );
+    authorPainter.paint(canvas, Offset((coverWidth - authorPainter.width) / 2, authorTopY));
+
+    // Title block scrim (centered vertically around title/subtitle)
+    final blockH = titlePainter.height + (subtitlePainter != null ? (coverHeight * 0.02 + subtitlePainter.height) : 0);
+    final blockTopY = titleCenterY - (blockH / 2);
+
+    _drawScrim(
+      canvas: canvas,
+      x: padX,
+      y: blockTopY - 18,
+      w: maxW,
+      h: blockH + 36,
+      color: scrimColor,
+      radius: 18,
+    );
+
+    titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, blockTopY));
+
+    if (subtitlePainter != null) {
+      final subY = blockTopY + titlePainter.height + coverHeight * 0.02;
+      subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, subY));
+    }
+  }
+
+  void _drawLayoutC({
+    required Canvas canvas,
+    required double coverWidth,
+    required double coverHeight,
+    required String title,
+    required String? subtitle,
+    required String author,
+    required Color textColor,
+    required Color scrimColor,
+    required Color shadowColor,
+  }) {
+    final padX = coverWidth * 0.08;
+    final maxW = coverWidth - padX * 2;
+
+    // Big title centered, author/subtitle smaller below (modern)
+    final centerY = coverHeight * 0.46;
+
+    final titlePainter = _fitText(
+      text: title.trim(),
+      maxWidth: maxW,
+      maxLines: 4,
+      maxFontSize: coverWidth * 0.18,
+      minFontSize: coverWidth * 0.09,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor,
+        fontSize: fs,
+        fontWeight: FontWeight.w900,
+        height: 1.02,
+        letterSpacing: 0.1,
+        shadows: [Shadow(blurRadius: 16, offset: const Offset(0, 7), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final subtitlePainter = (subtitle != null && subtitle.trim().isNotEmpty)
+        ? _fitText(
+      text: subtitle.trim(),
+      maxWidth: maxW,
+      maxLines: 2,
+      maxFontSize: coverWidth * 0.06,
+      minFontSize: coverWidth * 0.042,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor.withValues(alpha: 0.92),
+        fontSize: fs,
+        fontWeight: FontWeight.w700,
+        height: 1.15,
+        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    )
+        : null;
+
+    final authorPainter = _fitText(
+      text: author.trim(),
+      maxWidth: maxW,
+      maxLines: 1,
+      maxFontSize: coverWidth * 0.05,
+      minFontSize: coverWidth * 0.038,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor.withValues(alpha: 0.95),
+        fontSize: fs,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.1,
+        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final gap1 = coverHeight * 0.02;
+    final gap2 = coverHeight * 0.03;
+
+    final blockH = titlePainter.height +
+        (subtitlePainter != null ? (gap1 + subtitlePainter.height) : 0) +
+        gap2 +
+        authorPainter.height;
+
+    final topY = centerY - blockH / 2;
+
+    _drawScrim(
+      canvas: canvas,
+      x: padX,
+      y: topY - 18,
+      w: maxW,
+      h: blockH + 36,
+      color: scrimColor,
+      radius: 18,
+    );
+
+    double y = topY;
+    titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, y));
+    y += titlePainter.height;
+
+    if (subtitlePainter != null) {
+      y += gap1;
+      subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, y));
+      y += subtitlePainter.height;
+    }
+
+    y += gap2;
+    authorPainter.paint(canvas, Offset((coverWidth - authorPainter.width) / 2, y));
+  }
+
+  // ----------------------------
+  // Helpers: banner, scrim, text fitting, bg luminance
+  // ----------------------------
+
+  void _drawVersionBanner({
+    required Canvas canvas,
+    required double coverWidth,
+    required double coverHeight,
+    required String text,
+    required Color textColor,
+    required Color backgroundColor,
+  }) {
+    final pad = coverWidth * 0.06;
+    final bannerH = coverHeight * 0.06;
+    final bannerW = coverWidth * 0.58;
+
+    final rect = Rect.fromLTWH(coverWidth - pad - bannerW, pad, bannerW, bannerH);
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(14));
+
+    canvas.drawRRect(rrect, Paint()..color = backgroundColor);
+
+    final painter = _fitText(
+      text: text,
+      maxWidth: bannerW - 24,
+      maxLines: 1,
+      maxFontSize: bannerH * 0.55,
+      minFontSize: bannerH * 0.35,
+      styleBuilder: (fs) => TextStyle(
+        color: textColor,
+        fontSize: fs,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.8,
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final dx = rect.left + (bannerW - painter.width) / 2;
+    final dy = rect.top + (bannerH - painter.height) / 2;
+    painter.paint(canvas, Offset(dx, dy));
+  }
+
+  void _drawScrim({
+    required Canvas canvas,
+    required double x,
+    required double y,
+    required double w,
+    required double h,
+    required Color color,
+    required double radius,
+  }) {
+    final rect = Rect.fromLTWH(x, y, w, h);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(radius)),
+      Paint()..color = color,
+    );
+  }
+
+  TextPainter _fitText({
+    required String text,
+    required double maxWidth,
+    required int maxLines,
+    required double maxFontSize,
+    required double minFontSize,
+    required TextStyle Function(double fontSize) styleBuilder,
+    TextAlign textAlign = TextAlign.left,
+  }) {
+    // Binary-search the font size for best fit.
+    double lo = minFontSize;
+    double hi = maxFontSize;
+
+    TextPainter best = _layoutPainter(text, styleBuilder(lo), maxWidth, maxLines, textAlign);
+
+    for (int i = 0; i < 14; i++) {
+      final mid = (lo + hi) / 2;
+      final tp = _layoutPainter(text, styleBuilder(mid), maxWidth, maxLines, textAlign);
+
+      final fits = !tp.didExceedMaxLines && tp.width <= maxWidth + 0.001;
+      if (fits) {
+        best = tp;
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+
+    return best;
+  }
+
+  TextPainter _layoutPainter(
+      String text,
+      TextStyle style,
+      double maxWidth,
+      int maxLines,
+      TextAlign textAlign,
+      ) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      ellipsis: '…',
+    )..layout(maxWidth: maxWidth);
+    return tp;
+  }
+
+  Future<ui.Image> _decodeToUiImage(Uint8List bytes) async {
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  }
+
+  Rect _srcRectForCoverFit({
+    required double srcW,
+    required double srcH,
+    required double dstW,
+    required double dstH,
+  }) {
+    final srcAspect = srcW / srcH;
+    final dstAspect = dstW / dstH;
+
+    if (srcAspect > dstAspect) {
+      final newSrcW = srcH * dstAspect;
+      final x = (srcW - newSrcW) / 2;
+      return Rect.fromLTWH(x, 0, newSrcW, srcH);
+    } else {
+      final newSrcH = srcW / dstAspect;
+      final y = (srcH - newSrcH) / 2;
+      return Rect.fromLTWH(0, y, srcW, newSrcH);
+    }
+  }
+
+  // Dynamic contrast: estimate luminance from a small sample grid of pixels.
+  Future<double> _estimateImageLuminance(ui.Image image) async {
+    // Use raw RGBA to sample quickly
+    final bd = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    if (bd == null) return 0.3; // assume dark-ish if unknown
+
+    final bytes = bd.buffer.asUint8List();
+    final w = image.width;
+    final h = image.height;
+
+    // Sample a grid (e.g. 12x12) for speed
+    const gx = 12;
+    const gy = 12;
+
+    double sum = 0;
+    int count = 0;
+
+    for (int iy = 0; iy < gy; iy++) {
+      final y = ((iy + 0.5) * h / gy).floor().clamp(0, h - 1);
+      for (int ix = 0; ix < gx; ix++) {
+        final x = ((ix + 0.5) * w / gx).floor().clamp(0, w - 1);
+        final idx = (y * w + x) * 4;
+
+        final r = bytes[idx] / 255.0;
+        final g = bytes[idx + 1] / 255.0;
+        final b = bytes[idx + 2] / 255.0;
+
+        // Relative luminance (sRGB approximate)
+        final lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        sum += lum;
+        count++;
+      }
+    }
+
+    return count == 0 ? 0.3 : (sum / count);
+  }
+
+  double _luminanceOfColor(Color c) {
+    // Color.computeLuminance() is fine and stable.
+    return c.computeLuminance();
+  }
+
+  Color _generateRandomBackgroundColor(Random rd) {
+    // Pick a random hue, keep saturation + lightness in aesthetic range.
+    final hue = rd.nextDouble() * 360;
+    final saturation = 0.45 + rd.nextDouble() * 0.35; // 0.45–0.80
+    final lightness = 0.25 + rd.nextDouble() * 0.35;  // 0.25–0.60
+
+    return HSLColor.fromAHSL(1.0, hue, saturation, lightness).toColor();
+  }
+
+  Future<String?> saveCoverPng({
+    required ByteData pngBytes,
+    required String fileNameWithoutExtension,
+  }) async {
+    final bytes = pngBytes.buffer.asUint8List();
+
+    // Returns a path on some platforms; on Web it may return null/unused.
+    final result = await FileSaver.instance.saveFile(
+      name: fileNameWithoutExtension,
+      bytes: bytes,
+      fileExtension: 'png',
+      mimeType: MimeType.png,
+    );
+
+    return result;
+  }
+
+}
