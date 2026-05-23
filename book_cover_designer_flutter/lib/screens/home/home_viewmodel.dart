@@ -182,9 +182,15 @@ class HomeViewModel extends BaseViewModel {
         setError('Failed to save cover: null cover');
       }
 
+      final fileNameWithoutExtension = [
+        _normalizeFileNameSegment(ebookTitleController.text),
+        _normalizeFileNameSegment(authorNameController.text),
+        'book_cover',
+      ].where((segment) => segment.isNotEmpty).join('_');
+
       await _coverService.saveCoverPng(
         pngBytes: _cover!,
-        fileNameWithoutExtension: 'ebook_cover_${DateTime.now().millisecondsSinceEpoch}',
+        fileNameWithoutExtension: fileNameWithoutExtension,
       );
     } catch (e, st) {
       setError('Failed to save cover: $e');
@@ -222,6 +228,17 @@ class HomeViewModel extends BaseViewModel {
   String? _optionalText(String value) {
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  String _normalizeFileNameSegment(String value) {
+    final normalized = value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+    if (normalized.isEmpty) return 'untitled';
+    return normalized;
   }
 
   @override
