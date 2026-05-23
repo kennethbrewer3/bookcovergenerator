@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -21,35 +22,89 @@ class HomeViewModel extends BaseViewModel {
 
   final ebookTitleController = TextEditingController();
   final authorNameController = TextEditingController();
+  final subtitleController = TextEditingController();
+  final taglineController = TextEditingController();
+  final seriesTitleController = TextEditingController();
+  final editionLineController = TextEditingController();
+  final cornerBadgeTextController = TextEditingController();
 
   ByteData? _cover;
   ByteData? get cover => _cover;
   CoverLayout _selectedLayout = CoverLayout.bigCenterTitle;
   CoverLayout get selectedLayout => _selectedLayout;
+  CornerBadgePosition _selectedCornerBadgePosition = CornerBadgePosition.topRight;
+  CornerBadgePosition get selectedCornerBadgePosition =>
+      _selectedCornerBadgePosition;
 
   // Optional: keep these if you use them elsewhere
   String ebookTitle = '';
   String authorName = '';
+  Timer? _coverUpdateDebounce;
+  bool _hasPendingCoverUpdate = false;
+  double _taglineTopOffset = 0;
+  double get taglineTopOffset => _taglineTopOffset;
+  double _seriesTitleTopOffset = 0;
+  double get seriesTitleTopOffset => _seriesTitleTopOffset;
+  double _editionLineTopOffset = 0;
+  double get editionLineTopOffset => _editionLineTopOffset;
 
   HomeViewModel() {
     // Keep VM state in sync with controllers and recompute validity on every edit
     ebookTitleController.addListener(_onFieldsChanged);
     authorNameController.addListener(_onFieldsChanged);
+    subtitleController.addListener(_onFieldsChanged);
+    taglineController.addListener(_onFieldsChanged);
+    seriesTitleController.addListener(_onFieldsChanged);
+    editionLineController.addListener(_onFieldsChanged);
+    cornerBadgeTextController.addListener(_onFieldsChanged);
   }
 
 // SegmentedButton expects a Set
   Set<CoverLayout> get selectedLayoutSet => {_selectedLayout};
+  Set<CornerBadgePosition> get selectedCornerBadgePositionSet => {
+    _selectedCornerBadgePosition,
+  };
 
   void setSelectedLayout(CoverLayout value) {
     if (_selectedLayout == value) return;
     _selectedLayout = value;
     notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setSelectedCornerBadgePosition(CornerBadgePosition value) {
+    if (_selectedCornerBadgePosition == value) return;
+    _selectedCornerBadgePosition = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setTaglineTopOffset(double value) {
+    if (_taglineTopOffset == value) return;
+    _taglineTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setSeriesTitleTopOffset(double value) {
+    if (_seriesTitleTopOffset == value) return;
+    _seriesTitleTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setEditionLineTopOffset(double value) {
+    if (_editionLineTopOffset == value) return;
+    _editionLineTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
   }
 
   void _onFieldsChanged() {
     ebookTitle = ebookTitleController.text;
     authorName = authorNameController.text;
     notifyListeners(); // makes isFormValid reactive
+    _scheduleCoverUpdate();
   }
 
   // --- ViewModel validators (UI will call these in TextFormField.validator) ---
@@ -77,9 +132,14 @@ class HomeViewModel extends BaseViewModel {
           validateAuthorName(authorNameController.text) == null;
 
   Future<void> fetchCover() async {
-    if (isBusy) return;
+    if (!isFormValid) return;
+    if (isBusy) {
+      _hasPendingCoverUpdate = true;
+      return;
+    }
     setBusy(true);
     try {
+      _hasPendingCoverUpdate = false;
       final result = await _coverService.generateImage(
         coverWidth: coverWidth,
         coverHeight: coverHeight,
@@ -87,6 +147,15 @@ class HomeViewModel extends BaseViewModel {
         random: Random(),
         title: ebookTitleController.text,
         author: authorNameController.text,
+        subtitle: _optionalText(subtitleController.text),
+        tagline: _optionalText(taglineController.text),
+        seriesTitle: _optionalText(seriesTitleController.text),
+        editionLine: _optionalText(editionLineController.text),
+        taglineTopOffset: taglineTopOffset,
+        seriesTitleTopOffset: seriesTitleTopOffset,
+        editionLineTopOffset: editionLineTopOffset,
+        cornerBadgeText: _optionalText(cornerBadgeTextController.text),
+        cornerBadgePosition: selectedCornerBadgePosition,
         layout: selectedLayout,
       );
 
@@ -99,6 +168,9 @@ class HomeViewModel extends BaseViewModel {
       debugPrint('fetchCover exception: $e\n$st');
     } finally {
       setBusy(false);
+      if (_hasPendingCoverUpdate && isFormValid) {
+        _scheduleCoverUpdate();
+      }
     }
   }
 
@@ -125,15 +197,50 @@ class HomeViewModel extends BaseViewModel {
   void clearFields() {
     ebookTitleController.clear();
     authorNameController.clear();
+    subtitleController.clear();
+    taglineController.clear();
+    seriesTitleController.clear();
+    editionLineController.clear();
+    cornerBadgeTextController.clear();
+    _taglineTopOffset = 0;
+    _seriesTitleTopOffset = 0;
+    _editionLineTopOffset = 0;
+    _coverUpdateDebounce?.cancel();
+    _hasPendingCoverUpdate = false;
     notifyListeners();
+  }
+
+  void _scheduleCoverUpdate() {
+    _coverUpdateDebounce?.cancel();
+    if (!isFormValid) return;
+    _coverUpdateDebounce = Timer(
+      const Duration(milliseconds: 350),
+      fetchCover,
+    );
+  }
+
+  String? _optionalText(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   @override
   void dispose() {
+    _coverUpdateDebounce?.cancel();
     ebookTitleController.removeListener(_onFieldsChanged);
     authorNameController.removeListener(_onFieldsChanged);
+    subtitleController.removeListener(_onFieldsChanged);
+    taglineController.removeListener(_onFieldsChanged);
+    seriesTitleController.removeListener(_onFieldsChanged);
+    editionLineController.removeListener(_onFieldsChanged);
+    cornerBadgeTextController.removeListener(_onFieldsChanged);
     ebookTitleController.dispose();
     authorNameController.dispose();
+    subtitleController.dispose();
+    taglineController.dispose();
+    seriesTitleController.dispose();
+    editionLineController.dispose();
+    cornerBadgeTextController.dispose();
     super.dispose();
   }
 }

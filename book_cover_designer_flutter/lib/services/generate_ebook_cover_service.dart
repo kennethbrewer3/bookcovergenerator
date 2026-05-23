@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
@@ -32,6 +33,13 @@ enum CoverLayout {
   bigCenterTitle,
 }
 
+enum CornerBadgePosition {
+  topLeft,
+  topRight,
+  bottomLeft,
+  bottomRight,
+}
+
 class GenerateEbookCoverService {
   Future<Either<String, ByteData>> generateImage({
     required double coverWidth,
@@ -44,8 +52,14 @@ class GenerateEbookCoverService {
     /// Optional subtitle line under the title
     String? subtitle,
 
-    /// Optional top banner (e.g., "2nd Edition", "Preview", "V1.0")
-    String? versionBanner,
+    String? tagline,
+    String? seriesTitle,
+    String? editionLine,
+    double taglineTopOffset = 0,
+    double seriesTitleTopOffset = 0,
+    double editionLineTopOffset = 0,
+    String? cornerBadgeText,
+    CornerBadgePosition cornerBadgePosition = CornerBadgePosition.topRight,
 
     /// Layout selector (Option A/B/C)
     CoverLayout layout = CoverLayout.bigCenterTitle,
@@ -115,17 +129,32 @@ class GenerateEbookCoverService {
           ..strokeWidth = 2,
       );
 
-      // 4) Optional version banner
-      if (versionBanner != null && versionBanner.trim().isNotEmpty) {
-        _drawVersionBanner(
+      if (cornerBadgeText != null && cornerBadgeText.trim().isNotEmpty) {
+        _drawCornerBadge(
           canvas: canvas,
           coverWidth: coverWidth,
           coverHeight: coverHeight,
-          text: versionBanner.trim(),
+          text: cornerBadgeText.trim(),
+          position: cornerBadgePosition,
           textColor: textColor,
           backgroundColor: scrimColor,
         );
       }
+
+      _drawOptionalMetadata(
+        canvas: canvas,
+        coverWidth: coverWidth,
+        coverHeight: coverHeight,
+        tagline: tagline,
+        seriesTitle: seriesTitle,
+        editionLine: editionLine,
+        taglineTopOffset: taglineTopOffset,
+        seriesTitleTopOffset: seriesTitleTopOffset,
+        editionLineTopOffset: editionLineTopOffset,
+        textColor: textColor,
+        scrimColor: scrimColor,
+        shadowColor: shadowColor,
+      );
 
       // 5) Draw typography by selected layout
       switch (layout) {
@@ -511,21 +540,37 @@ class GenerateEbookCoverService {
   // Helpers: banner, scrim, text fitting, bg luminance
   // ----------------------------
 
-  void _drawVersionBanner({
+  void _drawCornerBadge({
     required Canvas canvas,
     required double coverWidth,
     required double coverHeight,
     required String text,
+    required CornerBadgePosition position,
     required Color textColor,
     required Color backgroundColor,
   }) {
-    final pad = coverWidth * 0.06;
-    final bannerH = coverHeight * 0.06;
-    final bannerW = coverWidth * 0.58;
-
-    final rect = Rect.fromLTWH(coverWidth - pad - bannerW, pad, bannerW, bannerH);
+    final bannerH = coverHeight * 0.055;
+    final bannerW = coverWidth * 0.72;
+    final cornerOffset = coverWidth * 0.18;
+    final isLeft = position == CornerBadgePosition.topLeft ||
+        position == CornerBadgePosition.bottomLeft;
+    final isTop = position == CornerBadgePosition.topLeft ||
+        position == CornerBadgePosition.topRight;
+    final center = Offset(
+      isLeft ? cornerOffset : coverWidth - cornerOffset,
+      isTop ? cornerOffset : coverHeight - cornerOffset,
+    );
+    final angle = isLeft == isTop ? -pi / 4 : pi / 4;
+    final rect = Rect.fromCenter(
+      center: Offset.zero,
+      width: bannerW,
+      height: bannerH,
+    );
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(14));
 
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(angle);
     canvas.drawRRect(rrect, Paint()..color = backgroundColor);
 
     final painter = _fitText(
@@ -546,6 +591,79 @@ class GenerateEbookCoverService {
     final dx = rect.left + (bannerW - painter.width) / 2;
     final dy = rect.top + (bannerH - painter.height) / 2;
     painter.paint(canvas, Offset(dx, dy));
+    canvas.restore();
+  }
+
+  void _drawOptionalMetadata({
+    required Canvas canvas,
+    required double coverWidth,
+    required double coverHeight,
+    required String? tagline,
+    required String? seriesTitle,
+    required String? editionLine,
+    required double taglineTopOffset,
+    required double seriesTitleTopOffset,
+    required double editionLineTopOffset,
+    required Color textColor,
+    required Color scrimColor,
+    required Color shadowColor,
+  }) {
+    final padX = coverWidth * 0.08;
+    final maxW = coverWidth - padX * 2;
+    final entries = <({String text, double y, double maxFontSize})>[
+      if (seriesTitle != null && seriesTitle.trim().isNotEmpty)
+        (
+          text: seriesTitle.trim(),
+          y: coverHeight * (0.055 + seriesTitleTopOffset),
+          maxFontSize: coverWidth * 0.045,
+        ),
+      if (tagline != null && tagline.trim().isNotEmpty)
+        (
+          text: tagline.trim(),
+          y: coverHeight * (0.74 + taglineTopOffset),
+          maxFontSize: coverWidth * 0.05,
+        ),
+      if (editionLine != null && editionLine.trim().isNotEmpty)
+        (
+          text: editionLine.trim(),
+          y: coverHeight * (0.915 + editionLineTopOffset),
+          maxFontSize: coverWidth * 0.04,
+        ),
+    ];
+
+    for (final entry in entries) {
+      final painter = _fitText(
+        text: entry.text,
+        maxWidth: maxW,
+        maxLines: 1,
+        maxFontSize: entry.maxFontSize,
+        minFontSize: coverWidth * 0.03,
+        styleBuilder: (fs) => TextStyle(
+          color: textColor.withValues(alpha: 0.94),
+          fontSize: fs,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.7,
+          shadows: [
+            Shadow(
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+              color: shadowColor,
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      );
+      _drawScrim(
+        canvas: canvas,
+        x: padX,
+        y: entry.y - 10,
+        w: maxW,
+        h: painter.height + 20,
+        color: scrimColor,
+        radius: 14,
+      );
+      painter.paint(canvas, Offset((coverWidth - painter.width) / 2, entry.y));
+    }
   }
 
   void _drawScrim({

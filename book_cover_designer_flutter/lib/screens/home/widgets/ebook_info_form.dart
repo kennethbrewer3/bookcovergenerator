@@ -47,6 +47,88 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 ),
                 validator: viewModel.validateAuthorName,
               ),
+              TextFormField(
+                controller: viewModel.subtitleController,
+                decoration: const InputDecoration(
+                  labelText: 'Subtitle',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              TextFormField(
+                controller: viewModel.taglineController,
+                decoration: const InputDecoration(
+                  labelText: 'Tagline',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              _TopOffsetSlider(
+                label: 'Tagline Top Offset',
+                value: viewModel.taglineTopOffset,
+                onChanged: viewModel.setTaglineTopOffset,
+              ),
+              TextFormField(
+                controller: viewModel.seriesTitleController,
+                decoration: const InputDecoration(
+                  labelText: 'Series Title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              _TopOffsetSlider(
+                label: 'Series Title Top Offset',
+                value: viewModel.seriesTitleTopOffset,
+                onChanged: viewModel.setSeriesTitleTopOffset,
+              ),
+              TextFormField(
+                controller: viewModel.editionLineController,
+                decoration: const InputDecoration(
+                  labelText: 'Edition Line',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              _TopOffsetSlider(
+                label: 'Edition Line Top Offset',
+                value: viewModel.editionLineTopOffset,
+                onChanged: viewModel.setEditionLineTopOffset,
+              ),
+              TextFormField(
+                controller: viewModel.cornerBadgeTextController,
+                decoration: const InputDecoration(
+                  labelText: 'Corner Badge',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SegmentedButton<CornerBadgePosition>(
+                showSelectedIcon: false,
+                segments: const <ButtonSegment<CornerBadgePosition>>[
+                  ButtonSegment(
+                    value: CornerBadgePosition.topLeft,
+                    icon: Icon(Icons.north_west),
+                    label: Text('Top Left'),
+                  ),
+                  ButtonSegment(
+                    value: CornerBadgePosition.topRight,
+                    icon: Icon(Icons.north_east),
+                    label: Text('Top Right'),
+                  ),
+                  ButtonSegment(
+                    value: CornerBadgePosition.bottomLeft,
+                    icon: Icon(Icons.south_west),
+                    label: Text('Bottom Left'),
+                  ),
+                  ButtonSegment(
+                    value: CornerBadgePosition.bottomRight,
+                    icon: Icon(Icons.south_east),
+                    label: Text('Bottom Right'),
+                  ),
+                ],
+                selected: viewModel.selectedCornerBadgePositionSet,
+                onSelectionChanged: (selection) {
+                  viewModel.setSelectedCornerBadgePosition(selection.first);
+                  if (_formKey.currentState!.validate()) {
+                    viewModel.fetchCover();
+                  }
+                },
+              ),
               Text(
                 'Cover Layout',
                 style: AppTextStyles.h3(context),
@@ -122,6 +204,36 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TopOffsetSlider extends StatelessWidget {
+  const _TopOffsetSlider({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('$label: ${(value * 100).round()}%'),
+        Slider(
+          value: value,
+          min: -0.25,
+          max: 0.25,
+          divisions: 100,
+          label: '${(value * 100).round()}%',
+          onChanged: onChanged,
+        ),
+      ],
     );
   }
 }
