@@ -44,8 +44,6 @@ class GenerateEbookCoverService {
   Future<Either<String, ByteData>> generateImage({
     required double coverWidth,
     required double coverHeight,
-    required int numColors,
-    required Random random,
     required String title,
     required String author,
 
@@ -58,6 +56,11 @@ class GenerateEbookCoverService {
     double taglineTopOffset = 0,
     double seriesTitleTopOffset = 0,
     double editionLineTopOffset = 0,
+    double titleTopOffset = 0,
+    double authorTopOffset = 0,
+    double subtitleTopOffset = 0,
+    double titleTopAuthorBottomTopOffset = 0,
+    double authorTopTitleCenterTopOffset = 0,
     String? cornerBadgeText,
     CornerBadgePosition cornerBadgePosition = CornerBadgePosition.topRight,
 
@@ -68,10 +71,22 @@ class GenerateEbookCoverService {
     Uint8List? backgroundImageBytes,
 
     /// Fallback background color when no image is provided.
-    Color? fallbackColor,
+    required Color backgroundColor,
+    required Color titleTextColor,
+    required Color subtitleTextColor,
+    required Color authorTextColor,
+    required Color titleBoxColor,
+    required Color authorBoxColor,
+    required Color subtitleBoxColor,
+    required Color taglineTextColor,
+    required Color taglineBoxColor,
+    required Color seriesTitleTextColor,
+    required Color seriesTitleBoxColor,
+    required Color editionLineTextColor,
+    required Color editionLineBoxColor,
+    required Color cornerBadgeTextColor,
+    required Color cornerBadgeColor,
   }) async {
-    final resolvedFallbackColor =
-        fallbackColor ?? _generateRandomBackgroundColor(random);
     final sw = Stopwatch()..start();
 
     try {
@@ -99,22 +114,15 @@ class GenerateEbookCoverService {
           Paint()..filterQuality = FilterQuality.high,
         );
       } else {
-        canvas.drawRect(dstRect, Paint()..color = resolvedFallbackColor);
+        canvas.drawRect(dstRect, Paint()..color = backgroundColor);
       }
 
       // 2) Dynamic contrast detection (image preferred, else fallback color)
       final bgLuminance = bgImage != null
           ? await _estimateImageLuminance(bgImage)
-          : _luminanceOfColor(resolvedFallbackColor);
+          : _luminanceOfColor(backgroundColor);
 
-      // If background is light => use dark text; else use light text
       final useDarkText = bgLuminance > 0.55;
-      final textColor = useDarkText ? Colors.black : Colors.white;
-
-      // Scrim/shadow tuned to background brightness
-      final scrimColor = useDarkText
-          ? Colors.white.withValues(alpha: 0.18)
-          : Colors.black.withValues(alpha: 0.28);
 
       final shadowColor = useDarkText
           ? const Color(0x66000000)
@@ -136,8 +144,8 @@ class GenerateEbookCoverService {
           coverHeight: coverHeight,
           text: cornerBadgeText.trim(),
           position: cornerBadgePosition,
-          textColor: textColor,
-          backgroundColor: scrimColor,
+          textColor: cornerBadgeTextColor,
+          backgroundColor: cornerBadgeColor,
         );
       }
 
@@ -151,8 +159,12 @@ class GenerateEbookCoverService {
         taglineTopOffset: taglineTopOffset,
         seriesTitleTopOffset: seriesTitleTopOffset,
         editionLineTopOffset: editionLineTopOffset,
-        textColor: textColor,
-        scrimColor: scrimColor,
+        taglineTextColor: taglineTextColor,
+        taglineBoxColor: taglineBoxColor,
+        seriesTitleTextColor: seriesTitleTextColor,
+        seriesTitleBoxColor: seriesTitleBoxColor,
+        editionLineTextColor: editionLineTextColor,
+        editionLineBoxColor: editionLineBoxColor,
         shadowColor: shadowColor,
       );
 
@@ -166,9 +178,17 @@ class GenerateEbookCoverService {
             title: title,
             subtitle: subtitle,
             author: author,
-            textColor: textColor,
-            scrimColor: scrimColor,
+            titleTextColor: titleTextColor,
+            subtitleTextColor: subtitleTextColor,
+            authorTextColor: authorTextColor,
+            titleBoxColor: titleBoxColor,
+            authorBoxColor: authorBoxColor,
+            subtitleBoxColor: subtitleBoxColor,
             shadowColor: shadowColor,
+            topOffset: titleTopAuthorBottomTopOffset,
+            titleTopOffset: titleTopOffset,
+            authorTopOffset: authorTopOffset,
+            subtitleTopOffset: subtitleTopOffset,
           );
           break;
 
@@ -180,9 +200,17 @@ class GenerateEbookCoverService {
             title: title,
             subtitle: subtitle,
             author: author,
-            textColor: textColor,
-            scrimColor: scrimColor,
+            titleTextColor: titleTextColor,
+            subtitleTextColor: subtitleTextColor,
+            authorTextColor: authorTextColor,
+            titleBoxColor: titleBoxColor,
+            authorBoxColor: authorBoxColor,
+            subtitleBoxColor: subtitleBoxColor,
             shadowColor: shadowColor,
+            topOffset: authorTopTitleCenterTopOffset,
+            titleTopOffset: titleTopOffset,
+            authorTopOffset: authorTopOffset,
+            subtitleTopOffset: subtitleTopOffset,
           );
           break;
 
@@ -194,9 +222,16 @@ class GenerateEbookCoverService {
             title: title,
             subtitle: subtitle,
             author: author,
-            textColor: textColor,
-            scrimColor: scrimColor,
+            titleTextColor: titleTextColor,
+            subtitleTextColor: subtitleTextColor,
+            authorTextColor: authorTextColor,
+            titleBoxColor: titleBoxColor,
+            authorBoxColor: authorBoxColor,
+            subtitleBoxColor: subtitleBoxColor,
             shadowColor: shadowColor,
+            titleTopOffset: titleTopOffset,
+            authorTopOffset: authorTopOffset,
+            subtitleTopOffset: subtitleTopOffset,
           );
           break;
       }
@@ -228,28 +263,31 @@ class GenerateEbookCoverService {
     required String title,
     required String? subtitle,
     required String author,
-    required Color textColor,
-    required Color scrimColor,
+    required Color titleTextColor,
+    required Color subtitleTextColor,
+    required Color authorTextColor,
+    required Color titleBoxColor,
+    required Color authorBoxColor,
+    required Color subtitleBoxColor,
     required Color shadowColor,
+    required double topOffset,
+    required double titleTopOffset,
+    required double authorTopOffset,
+    required double subtitleTopOffset,
   }) {
     final padX = coverWidth * 0.08;
     final maxW = coverWidth - padX * 2;
-
-    // Title block near top
-    final titleTopY = coverHeight * 0.16;
-
-    // Author near bottom
-    final authorBottomY = coverHeight * 0.86;
-
-    // Auto-fit title
+    final titleBaseY = coverHeight * (0.16 + topOffset);
+    final titleTopY = titleBaseY + (coverHeight * titleTopOffset);
+    final authorBottomY = coverHeight * (0.86 + authorTopOffset);
     final titlePainter = _fitText(
       text: title.trim(),
       maxWidth: maxW,
       maxLines: 3,
-      maxFontSize: coverWidth * 0.14, // scales with size
+      maxFontSize: coverWidth * 0.14,
       minFontSize: coverWidth * 0.07,
       styleBuilder: (fs) => TextStyle(
-        color: textColor,
+        color: titleTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w900,
         height: 1.05,
@@ -258,25 +296,23 @@ class GenerateEbookCoverService {
       ),
       textAlign: TextAlign.center,
     );
-
     final subtitlePainter = (subtitle != null && subtitle.trim().isNotEmpty)
         ? _fitText(
-      text: subtitle.trim(),
-      maxWidth: maxW,
-      maxLines: 2,
-      maxFontSize: coverWidth * 0.06,
-      minFontSize: coverWidth * 0.045,
-      styleBuilder: (fs) => TextStyle(
-        color: textColor.withValues(alpha: 0.92),
-        fontSize: fs,
-        fontWeight: FontWeight.w700,
-        height: 1.15,
-        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
-      ),
-      textAlign: TextAlign.center,
-    )
+            text: subtitle.trim(),
+            maxWidth: maxW,
+            maxLines: 2,
+            maxFontSize: coverWidth * 0.06,
+            minFontSize: coverWidth * 0.045,
+            styleBuilder: (fs) => TextStyle(
+              color: subtitleTextColor,
+              fontSize: fs,
+              fontWeight: FontWeight.w700,
+              height: 1.15,
+              shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+            ),
+            textAlign: TextAlign.center,
+          )
         : null;
-
     final authorPainter = _fitText(
       text: author.trim(),
       maxWidth: maxW,
@@ -284,7 +320,7 @@ class GenerateEbookCoverService {
       maxFontSize: coverWidth * 0.055,
       minFontSize: coverWidth * 0.04,
       styleBuilder: (fs) => TextStyle(
-        color: textColor,
+        color: authorTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.8,
@@ -292,41 +328,15 @@ class GenerateEbookCoverService {
       ),
       textAlign: TextAlign.center,
     );
-
-    // Draw scrim behind title/subtitle
-    final titleBlockH = titlePainter.height + (subtitlePainter != null ? (coverHeight * 0.02 + subtitlePainter.height) : 0);
-    _drawScrim(
-      canvas: canvas,
-      x: padX,
-      y: titleTopY - 18,
-      w: maxW,
-      h: titleBlockH + 36,
-      color: scrimColor,
-      radius: 18,
-    );
-
-    // Paint title and subtitle
+    _drawScrim(canvas: canvas, x: padX, y: titleTopY - 18, w: maxW, h: titlePainter.height + 36, color: titleBoxColor, radius: 18);
     titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, titleTopY));
     if (subtitlePainter != null) {
-      final subY = titleTopY + titlePainter.height + coverHeight * 0.02;
+      final subY = titleBaseY + titlePainter.height + coverHeight * (0.02 + subtitleTopOffset);
+      _drawScrim(canvas: canvas, x: padX, y: subY - 14, w: maxW, h: subtitlePainter.height + 28, color: subtitleBoxColor, radius: 18);
       subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, subY));
     }
-
-    // Draw scrim behind author
-    _drawScrim(
-      canvas: canvas,
-      x: padX,
-      y: authorBottomY - authorPainter.height - 18,
-      w: maxW,
-      h: authorPainter.height + 36,
-      color: scrimColor,
-      radius: 18,
-    );
-
-    authorPainter.paint(
-      canvas,
-      Offset((coverWidth - authorPainter.width) / 2, authorBottomY - authorPainter.height),
-    );
+    _drawScrim(canvas: canvas, x: padX, y: authorBottomY - authorPainter.height - 18, w: maxW, h: authorPainter.height + 36, color: authorBoxColor, radius: 18);
+    authorPainter.paint(canvas, Offset((coverWidth - authorPainter.width) / 2, authorBottomY - authorPainter.height));
   }
 
   void _drawLayoutB({
@@ -336,19 +346,22 @@ class GenerateEbookCoverService {
     required String title,
     required String? subtitle,
     required String author,
-    required Color textColor,
-    required Color scrimColor,
+    required Color titleTextColor,
+    required Color subtitleTextColor,
+    required Color authorTextColor,
+    required Color titleBoxColor,
+    required Color authorBoxColor,
+    required Color subtitleBoxColor,
     required Color shadowColor,
+    required double topOffset,
+    required double titleTopOffset,
+    required double authorTopOffset,
+    required double subtitleTopOffset,
   }) {
     final padX = coverWidth * 0.08;
     final maxW = coverWidth - padX * 2;
-
-    // Author top
-    final authorTopY = coverHeight * 0.12;
-
-    // Title center
+    final authorTopY = coverHeight * (0.12 + topOffset + authorTopOffset);
     final titleCenterY = coverHeight * 0.42;
-
     final authorPainter = _fitText(
       text: author.trim(),
       maxWidth: maxW,
@@ -356,7 +369,7 @@ class GenerateEbookCoverService {
       maxFontSize: coverWidth * 0.055,
       minFontSize: coverWidth * 0.04,
       styleBuilder: (fs) => TextStyle(
-        color: textColor,
+        color: authorTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.0,
@@ -364,7 +377,6 @@ class GenerateEbookCoverService {
       ),
       textAlign: TextAlign.center,
     );
-
     final titlePainter = _fitText(
       text: title.trim(),
       maxWidth: maxW,
@@ -372,7 +384,7 @@ class GenerateEbookCoverService {
       maxFontSize: coverWidth * 0.16,
       minFontSize: coverWidth * 0.08,
       styleBuilder: (fs) => TextStyle(
-        color: textColor,
+        color: titleTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w900,
         height: 1.03,
@@ -381,55 +393,33 @@ class GenerateEbookCoverService {
       ),
       textAlign: TextAlign.center,
     );
-
     final subtitlePainter = (subtitle != null && subtitle.trim().isNotEmpty)
         ? _fitText(
-      text: subtitle.trim(),
-      maxWidth: maxW,
-      maxLines: 2,
-      maxFontSize: coverWidth * 0.065,
-      minFontSize: coverWidth * 0.045,
-      styleBuilder: (fs) => TextStyle(
-        color: textColor.withValues(alpha: 0.92),
-        fontSize: fs,
-        fontWeight: FontWeight.w700,
-        height: 1.15,
-        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
-      ),
-      textAlign: TextAlign.center,
-    )
+            text: subtitle.trim(),
+            maxWidth: maxW,
+            maxLines: 2,
+            maxFontSize: coverWidth * 0.065,
+            minFontSize: coverWidth * 0.045,
+            styleBuilder: (fs) => TextStyle(
+              color: subtitleTextColor,
+              fontSize: fs,
+              fontWeight: FontWeight.w700,
+              height: 1.15,
+              shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+            ),
+            textAlign: TextAlign.center,
+          )
         : null;
-
-    // Author scrim
-    _drawScrim(
-      canvas: canvas,
-      x: padX,
-      y: authorTopY - 16,
-      w: maxW,
-      h: authorPainter.height + 32,
-      color: scrimColor,
-      radius: 18,
-    );
+    _drawScrim(canvas: canvas, x: padX, y: authorTopY - 16, w: maxW, h: authorPainter.height + 32, color: authorBoxColor, radius: 18);
     authorPainter.paint(canvas, Offset((coverWidth - authorPainter.width) / 2, authorTopY));
-
-    // Title block scrim (centered vertically around title/subtitle)
     final blockH = titlePainter.height + (subtitlePainter != null ? (coverHeight * 0.02 + subtitlePainter.height) : 0);
-    final blockTopY = titleCenterY - (blockH / 2);
-
-    _drawScrim(
-      canvas: canvas,
-      x: padX,
-      y: blockTopY - 18,
-      w: maxW,
-      h: blockH + 36,
-      color: scrimColor,
-      radius: 18,
-    );
-
+    final blockTopBaseY = titleCenterY - (blockH / 2);
+    final blockTopY = blockTopBaseY + (coverHeight * titleTopOffset);
+    _drawScrim(canvas: canvas, x: padX, y: blockTopY - 18, w: maxW, h: titlePainter.height + 36, color: titleBoxColor, radius: 18);
     titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, blockTopY));
-
     if (subtitlePainter != null) {
-      final subY = blockTopY + titlePainter.height + coverHeight * 0.02;
+      final subY = blockTopBaseY + titlePainter.height + coverHeight * (0.02 + subtitleTopOffset);
+      _drawScrim(canvas: canvas, x: padX, y: subY - 14, w: maxW, h: subtitlePainter.height + 28, color: subtitleBoxColor, radius: 18);
       subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, subY));
     }
   }
@@ -441,16 +431,20 @@ class GenerateEbookCoverService {
     required String title,
     required String? subtitle,
     required String author,
-    required Color textColor,
-    required Color scrimColor,
+    required Color titleTextColor,
+    required Color subtitleTextColor,
+    required Color authorTextColor,
+    required Color titleBoxColor,
+    required Color authorBoxColor,
+    required Color subtitleBoxColor,
     required Color shadowColor,
+    required double titleTopOffset,
+    required double authorTopOffset,
+    required double subtitleTopOffset,
   }) {
     final padX = coverWidth * 0.08;
     final maxW = coverWidth - padX * 2;
-
-    // Big title centered, author/subtitle smaller below (modern)
     final centerY = coverHeight * 0.46;
-
     final titlePainter = _fitText(
       text: title.trim(),
       maxWidth: maxW,
@@ -458,7 +452,7 @@ class GenerateEbookCoverService {
       maxFontSize: coverWidth * 0.18,
       minFontSize: coverWidth * 0.09,
       styleBuilder: (fs) => TextStyle(
-        color: textColor,
+        color: titleTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w900,
         height: 1.02,
@@ -467,25 +461,23 @@ class GenerateEbookCoverService {
       ),
       textAlign: TextAlign.center,
     );
-
     final subtitlePainter = (subtitle != null && subtitle.trim().isNotEmpty)
         ? _fitText(
-      text: subtitle.trim(),
-      maxWidth: maxW,
-      maxLines: 2,
-      maxFontSize: coverWidth * 0.06,
-      minFontSize: coverWidth * 0.042,
-      styleBuilder: (fs) => TextStyle(
-        color: textColor.withValues(alpha: 0.92),
-        fontSize: fs,
-        fontWeight: FontWeight.w700,
-        height: 1.15,
-        shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
-      ),
-      textAlign: TextAlign.center,
-    )
+            text: subtitle.trim(),
+            maxWidth: maxW,
+            maxLines: 2,
+            maxFontSize: coverWidth * 0.06,
+            minFontSize: coverWidth * 0.042,
+            styleBuilder: (fs) => TextStyle(
+              color: subtitleTextColor,
+              fontSize: fs,
+              fontWeight: FontWeight.w700,
+              height: 1.15,
+              shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
+            ),
+            textAlign: TextAlign.center,
+          )
         : null;
-
     final authorPainter = _fitText(
       text: author.trim(),
       maxWidth: maxW,
@@ -493,7 +485,7 @@ class GenerateEbookCoverService {
       maxFontSize: coverWidth * 0.05,
       minFontSize: coverWidth * 0.038,
       styleBuilder: (fs) => TextStyle(
-        color: textColor.withValues(alpha: 0.95),
+        color: authorTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.1,
@@ -501,39 +493,23 @@ class GenerateEbookCoverService {
       ),
       textAlign: TextAlign.center,
     );
-
     final gap1 = coverHeight * 0.02;
     final gap2 = coverHeight * 0.03;
-
-    final blockH = titlePainter.height +
-        (subtitlePainter != null ? (gap1 + subtitlePainter.height) : 0) +
-        gap2 +
-        authorPainter.height;
-
+    final blockH = titlePainter.height + (subtitlePainter != null ? (gap1 + subtitlePainter.height) : 0) + gap2 + authorPainter.height;
     final topY = centerY - blockH / 2;
-
-    _drawScrim(
-      canvas: canvas,
-      x: padX,
-      y: topY - 18,
-      w: maxW,
-      h: blockH + 36,
-      color: scrimColor,
-      radius: 18,
-    );
-
-    double y = topY;
-    titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, y));
-    y += titlePainter.height;
-
+    final titleY = topY + (coverHeight * titleTopOffset);
+    _drawScrim(canvas: canvas, x: padX, y: titleY - 18, w: maxW, h: titlePainter.height + 36, color: titleBoxColor, radius: 18);
+    titlePainter.paint(canvas, Offset((coverWidth - titlePainter.width) / 2, titleY));
+    double authorY = topY + titlePainter.height;
     if (subtitlePainter != null) {
-      y += gap1;
-      subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, y));
-      y += subtitlePainter.height;
+      final subtitleY = topY + titlePainter.height + gap1 + (coverHeight * subtitleTopOffset);
+      _drawScrim(canvas: canvas, x: padX, y: subtitleY - 14, w: maxW, h: subtitlePainter.height + 28, color: subtitleBoxColor, radius: 18);
+      subtitlePainter.paint(canvas, Offset((coverWidth - subtitlePainter.width) / 2, subtitleY));
+      authorY += gap1 + subtitlePainter.height;
     }
-
-    y += gap2;
-    authorPainter.paint(canvas, Offset((coverWidth - authorPainter.width) / 2, y));
+    authorY += gap2 + (coverHeight * authorTopOffset);
+    _drawScrim(canvas: canvas, x: padX, y: authorY - 18, w: maxW, h: authorPainter.height + 36, color: authorBoxColor, radius: 18);
+    authorPainter.paint(canvas, Offset((coverWidth - authorPainter.width) / 2, authorY));
   }
 
   // ----------------------------
@@ -604,30 +580,46 @@ class GenerateEbookCoverService {
     required double taglineTopOffset,
     required double seriesTitleTopOffset,
     required double editionLineTopOffset,
-    required Color textColor,
-    required Color scrimColor,
+    required Color taglineTextColor,
+    required Color taglineBoxColor,
+    required Color seriesTitleTextColor,
+    required Color seriesTitleBoxColor,
+    required Color editionLineTextColor,
+    required Color editionLineBoxColor,
     required Color shadowColor,
   }) {
     final padX = coverWidth * 0.08;
     final maxW = coverWidth - padX * 2;
-    final entries = <({String text, double y, double maxFontSize})>[
+    final entries = <({
+      String text,
+      double y,
+      double maxFontSize,
+      Color textColor,
+      Color boxColor,
+    })>[
       if (seriesTitle != null && seriesTitle.trim().isNotEmpty)
         (
           text: seriesTitle.trim(),
           y: coverHeight * (0.055 + seriesTitleTopOffset),
           maxFontSize: coverWidth * 0.045,
+          textColor: seriesTitleTextColor,
+          boxColor: seriesTitleBoxColor,
         ),
       if (tagline != null && tagline.trim().isNotEmpty)
         (
           text: tagline.trim(),
           y: coverHeight * (0.74 + taglineTopOffset),
           maxFontSize: coverWidth * 0.05,
+          textColor: taglineTextColor,
+          boxColor: taglineBoxColor,
         ),
       if (editionLine != null && editionLine.trim().isNotEmpty)
         (
           text: editionLine.trim(),
           y: coverHeight * (0.915 + editionLineTopOffset),
           maxFontSize: coverWidth * 0.04,
+          textColor: editionLineTextColor,
+          boxColor: editionLineBoxColor,
         ),
     ];
 
@@ -639,7 +631,7 @@ class GenerateEbookCoverService {
         maxFontSize: entry.maxFontSize,
         minFontSize: coverWidth * 0.03,
         styleBuilder: (fs) => TextStyle(
-          color: textColor.withValues(alpha: 0.94),
+          color: entry.textColor,
           fontSize: fs,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.7,
@@ -659,7 +651,7 @@ class GenerateEbookCoverService {
         y: entry.y - 10,
         w: maxW,
         h: painter.height + 20,
-        color: scrimColor,
+        color: entry.boxColor,
         radius: 14,
       );
       painter.paint(canvas, Offset((coverWidth - painter.width) / 2, entry.y));

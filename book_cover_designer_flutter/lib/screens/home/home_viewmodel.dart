@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:book_cover_designer_flutter/app/app.locator.dart';
@@ -47,6 +46,31 @@ class HomeViewModel extends BaseViewModel {
   double get seriesTitleTopOffset => _seriesTitleTopOffset;
   double _editionLineTopOffset = 0;
   double get editionLineTopOffset => _editionLineTopOffset;
+  double _titleTopOffset = 0;
+  double get titleTopOffset => _titleTopOffset;
+  double _authorTopOffset = 0;
+  double get authorTopOffset => _authorTopOffset;
+  double _subtitleTopOffset = 0;
+  double get subtitleTopOffset => _subtitleTopOffset;
+  double _titleTopAuthorBottomTopOffset = 0;
+  double get titleTopAuthorBottomTopOffset => _titleTopAuthorBottomTopOffset;
+  double _authorTopTitleCenterTopOffset = 0;
+  double get authorTopTitleCenterTopOffset => _authorTopTitleCenterTopOffset;
+  Color backgroundColor = const Color(0xFF1E293B);
+  Color titleTextColor = Colors.white;
+  Color subtitleTextColor = Colors.white70;
+  Color authorTextColor = Colors.white;
+  Color titleBoxColor = const Color(0x66000000);
+  Color authorBoxColor = const Color(0x66000000);
+  Color subtitleBoxColor = const Color(0x66000000);
+  Color taglineTextColor = Colors.white;
+  Color taglineBoxColor = const Color(0x66000000);
+  Color seriesTitleTextColor = Colors.white;
+  Color seriesTitleBoxColor = const Color(0x66000000);
+  Color editionLineTextColor = Colors.white;
+  Color editionLineBoxColor = const Color(0x66000000);
+  Color cornerBadgeTextColor = Colors.white;
+  Color cornerBadgeColor = const Color(0xAA000000);
 
   HomeViewModel() {
     // Keep VM state in sync with controllers and recompute validity on every edit
@@ -100,6 +124,93 @@ class HomeViewModel extends BaseViewModel {
     _scheduleCoverUpdate();
   }
 
+  void setTitleTopOffset(double value) {
+    if (_titleTopOffset == value) return;
+    _titleTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setAuthorTopOffset(double value) {
+    if (_authorTopOffset == value) return;
+    _authorTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setSubtitleTopOffset(double value) {
+    if (_subtitleTopOffset == value) return;
+    _subtitleTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setTitleTopAuthorBottomTopOffset(double value) {
+    if (_titleTopAuthorBottomTopOffset == value) return;
+    _titleTopAuthorBottomTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setAuthorTopTitleCenterTopOffset(double value) {
+    if (_authorTopTitleCenterTopOffset == value) return;
+    _authorTopTitleCenterTopOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setCoverColor(String key, Color color) {
+    switch (key) {
+      case 'background':
+        backgroundColor = color;
+        break;
+      case 'titleText':
+        titleTextColor = color;
+        break;
+      case 'subtitleText':
+        subtitleTextColor = color;
+        break;
+      case 'authorText':
+        authorTextColor = color;
+        break;
+      case 'titleBox':
+        titleBoxColor = color;
+        break;
+      case 'authorBox':
+        authorBoxColor = color;
+        break;
+      case 'subtitleBox':
+        subtitleBoxColor = color;
+        break;
+      case 'taglineText':
+        taglineTextColor = color;
+        break;
+      case 'taglineBox':
+        taglineBoxColor = color;
+        break;
+      case 'seriesTitleText':
+        seriesTitleTextColor = color;
+        break;
+      case 'seriesTitleBox':
+        seriesTitleBoxColor = color;
+        break;
+      case 'editionLineText':
+        editionLineTextColor = color;
+        break;
+      case 'editionLineBox':
+        editionLineBoxColor = color;
+        break;
+      case 'cornerBadgeText':
+        cornerBadgeTextColor = color;
+        break;
+      case 'cornerBadge':
+        cornerBadgeColor = color;
+        break;
+    }
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
   void _onFieldsChanged() {
     ebookTitle = ebookTitleController.text;
     authorName = authorNameController.text;
@@ -143,8 +254,6 @@ class HomeViewModel extends BaseViewModel {
       final result = await _coverService.generateImage(
         coverWidth: coverWidth,
         coverHeight: coverHeight,
-        numColors: 8,
-        random: Random(),
         title: ebookTitleController.text,
         author: authorNameController.text,
         subtitle: _optionalText(subtitleController.text),
@@ -154,9 +263,29 @@ class HomeViewModel extends BaseViewModel {
         taglineTopOffset: taglineTopOffset,
         seriesTitleTopOffset: seriesTitleTopOffset,
         editionLineTopOffset: editionLineTopOffset,
+        titleTopOffset: titleTopOffset,
+        authorTopOffset: authorTopOffset,
+        subtitleTopOffset: subtitleTopOffset,
+        titleTopAuthorBottomTopOffset: titleTopAuthorBottomTopOffset,
+        authorTopTitleCenterTopOffset: authorTopTitleCenterTopOffset,
         cornerBadgeText: _optionalText(cornerBadgeTextController.text),
         cornerBadgePosition: selectedCornerBadgePosition,
         layout: selectedLayout,
+        backgroundColor: backgroundColor,
+        titleTextColor: titleTextColor,
+        subtitleTextColor: subtitleTextColor,
+        authorTextColor: authorTextColor,
+        titleBoxColor: titleBoxColor,
+        authorBoxColor: authorBoxColor,
+        subtitleBoxColor: subtitleBoxColor,
+        taglineTextColor: taglineTextColor,
+        taglineBoxColor: taglineBoxColor,
+        seriesTitleTextColor: seriesTitleTextColor,
+        seriesTitleBoxColor: seriesTitleBoxColor,
+        editionLineTextColor: editionLineTextColor,
+        editionLineBoxColor: editionLineBoxColor,
+        cornerBadgeTextColor: cornerBadgeTextColor,
+        cornerBadgeColor: cornerBadgeColor,
       );
 
       result.fold(
@@ -211,6 +340,11 @@ class HomeViewModel extends BaseViewModel {
     _taglineTopOffset = 0;
     _seriesTitleTopOffset = 0;
     _editionLineTopOffset = 0;
+    _titleTopOffset = 0;
+    _authorTopOffset = 0;
+    _subtitleTopOffset = 0;
+    _titleTopAuthorBottomTopOffset = 0;
+    _authorTopTitleCenterTopOffset = 0;
     _coverUpdateDebounce?.cancel();
     _hasPendingCoverUpdate = false;
     notifyListeners();

@@ -2,6 +2,7 @@ import 'package:book_cover_designer_flutter/screens/home/home_viewmodel.dart';
 import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_text_styles.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_tokens.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -28,74 +29,164 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 'Ebook Details',
                 style: AppTextStyles.h1(context),
               ),
-
-              TextFormField(
-                controller: viewModel.ebookTitleController,
-                decoration: const InputDecoration(
-                  labelText: 'Ebook Title',
-                  border: OutlineInputBorder(),
+              Text(
+                'Cover Colors',
+                style: AppTextStyles.h3(context),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _ColorButton(
+                  label: 'Background Color',
+                  color: viewModel.backgroundColor,
+                  onColorSelected: (color) => viewModel.setCoverColor('background', color),
                 ),
-                validator: viewModel.validateEbookTitle,
-                // onChanged not required now, controllers listeners handle it
               ),
 
-              TextFormField(
-                controller: viewModel.authorNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Author Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: viewModel.validateAuthorName,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.ebookTitleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Ebook Title',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: viewModel.validateEbookTitle,
+                      // onChanged not required now, controllers listeners handle it
+                    ),
+                  ),
+                  _ColorButton(label: 'Title Text Color', color: viewModel.titleTextColor, onColorSelected: (color) => viewModel.setCoverColor('titleText', color)),
+                  _ColorButton(label: 'Title Box Color', color: viewModel.titleBoxColor, onColorSelected: (color) => viewModel.setCoverColor('titleBox', color)),
+                ],
               ),
-              TextFormField(
-                controller: viewModel.subtitleController,
-                decoration: const InputDecoration(
-                  labelText: 'Subtitle',
-                  border: OutlineInputBorder(),
-                ),
+              _TopOffsetSlider(
+                label: 'Title Top Offset',
+                value: viewModel.titleTopOffset,
+                onChanged: viewModel.setTitleTopOffset,
               ),
-              TextFormField(
-                controller: viewModel.taglineController,
-                decoration: const InputDecoration(
-                  labelText: 'Tagline',
-                  border: OutlineInputBorder(),
-                ),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.authorNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Author Name',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: viewModel.validateAuthorName,
+                    ),
+                  ),
+                  _ColorButton(label: 'Author Text Color', color: viewModel.authorTextColor, onColorSelected: (color) => viewModel.setCoverColor('authorText', color)),
+                  _ColorButton(label: 'Author Box Color', color: viewModel.authorBoxColor, onColorSelected: (color) => viewModel.setCoverColor('authorBox', color)),
+                ],
+              ),
+              _TopOffsetSlider(
+                label: 'Author Top Offset',
+                value: viewModel.authorTopOffset,
+                onChanged: viewModel.setAuthorTopOffset,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.subtitleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Subtitle',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  _ColorButton(label: 'Subtitle Text Color', color: viewModel.subtitleTextColor, onColorSelected: (color) => viewModel.setCoverColor('subtitleText', color)),
+                  _ColorButton(label: 'Subtitle Box Color', color: viewModel.subtitleBoxColor, onColorSelected: (color) => viewModel.setCoverColor('subtitleBox', color)),
+                ],
+              ),
+              _TopOffsetSlider(
+                label: 'Subtitle Top Offset',
+                value: viewModel.subtitleTopOffset,
+                onChanged: viewModel.setSubtitleTopOffset,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.taglineController,
+                      decoration: const InputDecoration(
+                        labelText: 'Tagline',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  _ColorButton(label: 'Tagline Text Color', color: viewModel.taglineTextColor, onColorSelected: (color) => viewModel.setCoverColor('taglineText', color)),
+                  _ColorButton(label: 'Tagline Box Color', color: viewModel.taglineBoxColor, onColorSelected: (color) => viewModel.setCoverColor('taglineBox', color)),
+                ],
               ),
               _TopOffsetSlider(
                 label: 'Tagline Top Offset',
                 value: viewModel.taglineTopOffset,
                 onChanged: viewModel.setTaglineTopOffset,
               ),
-              TextFormField(
-                controller: viewModel.seriesTitleController,
-                decoration: const InputDecoration(
-                  labelText: 'Series Title',
-                  border: OutlineInputBorder(),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.seriesTitleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Series Title',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  _ColorButton(label: 'Series Title Text Color', color: viewModel.seriesTitleTextColor, onColorSelected: (color) => viewModel.setCoverColor('seriesTitleText', color)),
+                  _ColorButton(label: 'Series Title Box Color', color: viewModel.seriesTitleBoxColor, onColorSelected: (color) => viewModel.setCoverColor('seriesTitleBox', color)),
+                ],
               ),
               _TopOffsetSlider(
                 label: 'Series Title Top Offset',
                 value: viewModel.seriesTitleTopOffset,
                 onChanged: viewModel.setSeriesTitleTopOffset,
               ),
-              TextFormField(
-                controller: viewModel.editionLineController,
-                decoration: const InputDecoration(
-                  labelText: 'Edition Line',
-                  border: OutlineInputBorder(),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.editionLineController,
+                      decoration: const InputDecoration(
+                        labelText: 'Edition Line',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  _ColorButton(label: 'Edition Line Text Color', color: viewModel.editionLineTextColor, onColorSelected: (color) => viewModel.setCoverColor('editionLineText', color)),
+                  _ColorButton(label: 'Edition Line Box Color', color: viewModel.editionLineBoxColor, onColorSelected: (color) => viewModel.setCoverColor('editionLineBox', color)),
+                ],
               ),
               _TopOffsetSlider(
                 label: 'Edition Line Top Offset',
                 value: viewModel.editionLineTopOffset,
                 onChanged: viewModel.setEditionLineTopOffset,
               ),
-              TextFormField(
-                controller: viewModel.cornerBadgeTextController,
-                decoration: const InputDecoration(
-                  labelText: 'Corner Badge',
-                  border: OutlineInputBorder(),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: viewModel.cornerBadgeTextController,
+                      decoration: const InputDecoration(
+                        labelText: 'Corner Badge',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  _ColorButton(label: 'Badge Text Color', color: viewModel.cornerBadgeTextColor, onColorSelected: (color) => viewModel.setCoverColor('cornerBadgeText', color)),
+                  _ColorButton(label: 'Badge Color', color: viewModel.cornerBadgeColor, onColorSelected: (color) => viewModel.setCoverColor('cornerBadge', color)),
+                ],
               ),
               SegmentedButton<CornerBadgePosition>(
                 showSelectedIcon: false,
@@ -134,11 +225,6 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 style: AppTextStyles.h3(context),
               ),
 
-              Text(
-                'Cover Layout',
-                style: AppTextStyles.h3(context),
-              ),
-
               SegmentedButton<CoverLayout>(
                 showSelectedIcon: false, // cleaner look
                 segments: const <ButtonSegment<CoverLayout>>[
@@ -169,6 +255,18 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                   }
                 },
               ),
+              if (viewModel.selectedLayout == CoverLayout.titleTopAuthorBottom)
+                _TopOffsetSlider(
+                  label: 'Top / Bottom Top Offset',
+                  value: viewModel.titleTopAuthorBottomTopOffset,
+                  onChanged: viewModel.setTitleTopAuthorBottomTopOffset,
+                ),
+              if (viewModel.selectedLayout == CoverLayout.authorTopTitleCenter)
+                _TopOffsetSlider(
+                  label: 'Top / Center Top Offset',
+                  value: viewModel.authorTopTitleCenterTopOffset,
+                  onChanged: viewModel.setAuthorTopTitleCenterTopOffset,
+                ),
 
               FilledButton(
                 onPressed: canSubmit ? () {
@@ -178,7 +276,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                   }
                 }  : null,
                 child: Text(
-                  'Generate Random Cover',
+                  'Generate Cover',
                   style: AppTextStyles.button(context),
                 ),
               ),
@@ -234,6 +332,67 @@ class _TopOffsetSlider extends StatelessWidget {
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+}
+
+class _ColorButton extends StatelessWidget {
+  const _ColorButton({
+    required this.label,
+    required this.color,
+    required this.onColorSelected,
+  });
+
+  final String label;
+  final Color color;
+  final ValueChanged<Color> onColorSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: IconButton(
+        onPressed: () async {
+          var selected = color;
+          final confirmed = await ColorPicker(
+            color: selected,
+            onColorChanged: (newColor) => selected = newColor,
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            spacing: 8,
+            runSpacing: 8,
+            heading: Text(label),
+            subheading: const Text('Select shade'),
+            showMaterialName: true,
+            showColorName: true,
+            showColorCode: true,
+            pickersEnabled: const {
+              ColorPickerType.both: true,
+              ColorPickerType.primary: true,
+              ColorPickerType.accent: true,
+              ColorPickerType.bw: true,
+              ColorPickerType.custom: true,
+              ColorPickerType.wheel: true,
+            },
+          ).showPickerDialog(
+            context,
+          );
+
+          if (confirmed) {
+            onColorSelected(selected);
+          }
+        },
+        icon: Container(
+          width: 22,
+          height: 22,
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+      ),
     );
   }
 }
