@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:book_cover_designer_flutter/app/app.locator.dart';
 import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -71,6 +72,14 @@ class HomeViewModel extends BaseViewModel {
   Color editionLineBoxColor = const Color(0x66000000);
   Color cornerBadgeTextColor = Colors.white;
   Color cornerBadgeColor = const Color(0xAA000000);
+  Uint8List? backgroundImageBytes;
+  String? backgroundImageName;
+  BackgroundImageMode backgroundImageMode = BackgroundImageMode.cover;
+  Alignment backgroundImageAlignment = Alignment.center;
+  double backgroundImageScaleX = 1;
+  double backgroundImageScaleY = 1;
+  BlendMode backgroundBlendMode = BlendMode.srcOver;
+  double backgroundImageOpacity = 1;
 
   HomeViewModel() {
     // Keep VM state in sync with controllers and recompute validity on every edit
@@ -99,6 +108,68 @@ class HomeViewModel extends BaseViewModel {
   void setSelectedCornerBadgePosition(CornerBadgePosition value) {
     if (_selectedCornerBadgePosition == value) return;
     _selectedCornerBadgePosition = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  Future<void> pickBackgroundImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    final file = result?.files.single;
+    if (file == null || file.bytes == null) return;
+    backgroundImageBytes = file.bytes;
+    backgroundImageName = file.name;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void clearBackgroundImage() {
+    backgroundImageBytes = null;
+    backgroundImageName = null;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setBackgroundImageMode(BackgroundImageMode value) {
+    if (backgroundImageMode == value) return;
+    backgroundImageMode = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setBackgroundImageAlignment(Alignment value) {
+    if (backgroundImageAlignment == value) return;
+    backgroundImageAlignment = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setBackgroundImageScaleX(double value) {
+    if (backgroundImageScaleX == value) return;
+    backgroundImageScaleX = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setBackgroundImageScaleY(double value) {
+    if (backgroundImageScaleY == value) return;
+    backgroundImageScaleY = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setBackgroundBlendMode(BlendMode value) {
+    if (backgroundBlendMode == value) return;
+    backgroundBlendMode = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setBackgroundImageOpacity(double value) {
+    if (backgroundImageOpacity == value) return;
+    backgroundImageOpacity = value;
     notifyListeners();
     _scheduleCoverUpdate();
   }
@@ -271,6 +342,13 @@ class HomeViewModel extends BaseViewModel {
         cornerBadgeText: _optionalText(cornerBadgeTextController.text),
         cornerBadgePosition: selectedCornerBadgePosition,
         layout: selectedLayout,
+        backgroundImageBytes: backgroundImageBytes,
+        backgroundImageMode: backgroundImageMode,
+        backgroundImageAlignment: backgroundImageAlignment,
+        backgroundImageScaleX: backgroundImageScaleX,
+        backgroundImageScaleY: backgroundImageScaleY,
+        backgroundBlendMode: backgroundBlendMode,
+        backgroundImageOpacity: backgroundImageOpacity,
         backgroundColor: backgroundColor,
         titleTextColor: titleTextColor,
         subtitleTextColor: subtitleTextColor,
@@ -345,6 +423,14 @@ class HomeViewModel extends BaseViewModel {
     _subtitleTopOffset = 0;
     _titleTopAuthorBottomTopOffset = 0;
     _authorTopTitleCenterTopOffset = 0;
+    backgroundImageBytes = null;
+    backgroundImageName = null;
+    backgroundImageMode = BackgroundImageMode.cover;
+    backgroundImageAlignment = Alignment.center;
+    backgroundImageScaleX = 1;
+    backgroundImageScaleY = 1;
+    backgroundBlendMode = BlendMode.srcOver;
+    backgroundImageOpacity = 1;
     _coverUpdateDebounce?.cancel();
     _hasPendingCoverUpdate = false;
     notifyListeners();

@@ -30,7 +30,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 style: AppTextStyles.h1(context),
               ),
               Text(
-                'Cover Colors',
+                'Background Color and Image',
                 style: AppTextStyles.h3(context),
               ),
               Align(
@@ -40,6 +40,80 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                   color: viewModel.backgroundColor,
                   onColorSelected: (color) => viewModel.setCoverColor('background', color),
                 ),
+              ),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  FilledButton.icon(
+                    onPressed: viewModel.pickBackgroundImage,
+                    icon: const Icon(Icons.image),
+                    label: const Text('Choose Background Image'),
+                  ),
+                  if (viewModel.backgroundImageBytes != null)
+                    OutlinedButton.icon(
+                      onPressed: viewModel.clearBackgroundImage,
+                      icon: const Icon(Icons.clear),
+                      label: const Text('Clear Image'),
+                    ),
+                  if (viewModel.backgroundImageName != null)
+                    Text(viewModel.backgroundImageName!),
+                ],
+              ),
+              DropdownButtonFormField<BackgroundImageMode>(
+                value: viewModel.backgroundImageMode,
+                decoration: const InputDecoration(labelText: 'Background Image Mode', border: OutlineInputBorder()),
+                items: BackgroundImageMode.values
+                    .map((mode) => DropdownMenuItem(value: mode, child: Text(_backgroundImageModeLabel(mode))))
+                    .toList(),
+                onChanged: (mode) {
+                  if (mode != null) viewModel.setBackgroundImageMode(mode);
+                },
+              ),
+              DropdownButtonFormField<Alignment>(
+                value: viewModel.backgroundImageAlignment,
+                decoration: const InputDecoration(labelText: 'Background Image Alignment', border: OutlineInputBorder()),
+                items: _backgroundAlignments.entries
+                    .map((entry) => DropdownMenuItem(value: entry.value, child: Text(entry.key)))
+                    .toList(),
+                onChanged: (alignment) {
+                  if (alignment != null) viewModel.setBackgroundImageAlignment(alignment);
+                },
+              ),
+              _TopOffsetSlider(
+                label: 'Background Image Scale X',
+                value: viewModel.backgroundImageScaleX,
+                min: 0.1,
+                max: 4,
+                divisions: 39,
+                onChanged: viewModel.setBackgroundImageScaleX,
+              ),
+              _TopOffsetSlider(
+                label: 'Background Image Scale Y',
+                value: viewModel.backgroundImageScaleY,
+                min: 0.1,
+                max: 4,
+                divisions: 39,
+                onChanged: viewModel.setBackgroundImageScaleY,
+              ),
+              DropdownButtonFormField<BlendMode>(
+                value: viewModel.backgroundBlendMode,
+                decoration: const InputDecoration(labelText: 'Background Mix Mode', border: OutlineInputBorder()),
+                items: _backgroundBlendModes.entries
+                    .map((entry) => DropdownMenuItem(value: entry.value, child: Text(entry.key)))
+                    .toList(),
+                onChanged: (blendMode) {
+                  if (blendMode != null) viewModel.setBackgroundBlendMode(blendMode);
+                },
+              ),
+              _TopOffsetSlider(
+                label: 'Background Image Opacity',
+                value: viewModel.backgroundImageOpacity,
+                min: 0,
+                max: 1,
+                divisions: 20,
+                onChanged: viewModel.setBackgroundImageOpacity,
               ),
 
               Row(
@@ -311,11 +385,17 @@ class _TopOffsetSlider extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
+    this.min = -0.25,
+    this.max = 0.25,
+    this.divisions = 100,
   });
 
   final String label;
   final double value;
   final ValueChanged<double> onChanged;
+  final double min;
+  final double max;
+  final int divisions;
 
   @override
   Widget build(BuildContext context) {
@@ -325,9 +405,9 @@ class _TopOffsetSlider extends StatelessWidget {
         Text('$label: ${(value * 100).round()}%'),
         Slider(
           value: value,
-          min: -0.25,
-          max: 0.25,
-          divisions: 100,
+          min: min,
+          max: max,
+          divisions: divisions,
           label: '${(value * 100).round()}%',
           onChanged: onChanged,
         ),
@@ -335,6 +415,56 @@ class _TopOffsetSlider extends StatelessWidget {
     );
   }
 }
+
+String _backgroundImageModeLabel(BackgroundImageMode mode) {
+  switch (mode) {
+    case BackgroundImageMode.cover:
+      return 'Cover';
+    case BackgroundImageMode.contain:
+      return 'Fit';
+    case BackgroundImageMode.stretch:
+      return 'Stretch';
+    case BackgroundImageMode.center:
+      return 'Center';
+    case BackgroundImageMode.tile:
+      return 'Tile X and Y';
+    case BackgroundImageMode.tileX:
+      return 'Tile X';
+    case BackgroundImageMode.tileY:
+      return 'Tile Y';
+  }
+}
+
+const _backgroundAlignments = {
+  'Top Left': Alignment.topLeft,
+  'Top Center': Alignment.topCenter,
+  'Top Right': Alignment.topRight,
+  'Center Left': Alignment.centerLeft,
+  'Center': Alignment.center,
+  'Center Right': Alignment.centerRight,
+  'Bottom Left': Alignment.bottomLeft,
+  'Bottom Center': Alignment.bottomCenter,
+  'Bottom Right': Alignment.bottomRight,
+};
+
+const _backgroundBlendModes = {
+  'Normal': BlendMode.srcOver,
+  'Multiply': BlendMode.multiply,
+  'Screen': BlendMode.screen,
+  'Overlay': BlendMode.overlay,
+  'Darken': BlendMode.darken,
+  'Lighten': BlendMode.lighten,
+  'Color Dodge': BlendMode.colorDodge,
+  'Color Burn': BlendMode.colorBurn,
+  'Hard Light': BlendMode.hardLight,
+  'Soft Light': BlendMode.softLight,
+  'Difference': BlendMode.difference,
+  'Exclusion': BlendMode.exclusion,
+  'Hue': BlendMode.hue,
+  'Saturation': BlendMode.saturation,
+  'Color': BlendMode.color,
+  'Luminosity': BlendMode.luminosity,
+};
 
 class _ColorButton extends StatelessWidget {
   const _ColorButton({
@@ -367,6 +497,7 @@ class _ColorButton extends StatelessWidget {
             showMaterialName: true,
             showColorName: true,
             showColorCode: true,
+            enableOpacity: true,
             pickersEnabled: const {
               ColorPickerType.both: true,
               ColorPickerType.primary: true,

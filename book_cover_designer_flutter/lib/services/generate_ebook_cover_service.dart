@@ -40,6 +40,16 @@ enum CornerBadgePosition {
   bottomRight,
 }
 
+enum BackgroundImageMode {
+  cover,
+  contain,
+  stretch,
+  center,
+  tile,
+  tileX,
+  tileY,
+}
+
 class GenerateEbookCoverService {
   Future<Either<String, ByteData>> generateImage({
     required double coverWidth,
@@ -69,6 +79,12 @@ class GenerateEbookCoverService {
 
     /// Background image bytes (PNG/JPG/etc). If null/empty, fallbackColor is used.
     Uint8List? backgroundImageBytes,
+    BackgroundImageMode backgroundImageMode = BackgroundImageMode.cover,
+    Alignment backgroundImageAlignment = Alignment.center,
+    double backgroundImageScaleX = 1,
+    double backgroundImageScaleY = 1,
+    BlendMode backgroundBlendMode = BlendMode.srcOver,
+    double backgroundImageOpacity = 1,
 
     /// Fallback background color when no image is provided.
     required Color backgroundColor,
@@ -97,24 +113,22 @@ class GenerateEbookCoverService {
       ui.Image? bgImage;
 
       // 1) Paint background
+      canvas.drawRect(dstRect, Paint()..color = backgroundColor);
+
       if (backgroundImageBytes != null && backgroundImageBytes.isNotEmpty) {
         bgImage = await _decodeToUiImage(backgroundImageBytes);
 
-        final srcRect = _srcRectForCoverFit(
-          srcW: bgImage.width.toDouble(),
-          srcH: bgImage.height.toDouble(),
-          dstW: coverWidth,
-          dstH: coverHeight,
+        _drawBackgroundImage(
+          canvas: canvas,
+          image: bgImage,
+          dstRect: dstRect,
+          mode: backgroundImageMode,
+          alignment: backgroundImageAlignment,
+          scaleX: backgroundImageScaleX,
+          scaleY: backgroundImageScaleY,
+          blendMode: backgroundBlendMode,
+          opacity: backgroundImageOpacity,
         );
-
-        canvas.drawImageRect(
-          bgImage,
-          srcRect,
-          dstRect,
-          Paint()..filterQuality = FilterQuality.high,
-        );
-      } else {
-        canvas.drawRect(dstRect, Paint()..color = backgroundColor);
       }
 
       // 2) Dynamic contrast detection (image preferred, else fallback color)
@@ -726,6 +740,77 @@ class GenerateEbookCoverService {
     final codec = await ui.instantiateImageCodec(bytes);
     final frame = await codec.getNextFrame();
     return frame.image;
+  }
+
+  void _drawBackgroundImage({
+    required Canvas canvas,
+    required ui.Image image,
+    required Rect dstRect,
+    required BackgroundImageMode mode,
+    required Alignment alignment,
+    required double scaleX,
+    required double scaleY,
+    required BlendMode blendMode,
+    required double opacity,
+  }) {
+    final paint = Paint()
+      ..filterQuality = FilterQuality.high
+      ..blendMode = blendMode
+      ..color = Colors.white.withValues(alpha: opacity.clamp(0, 1).toDouble());
+
+    final safeScaleX = max(0.05, scaleX.abs());
+    final safeScaleY = max(0.05, scaleY.abs());
+    final srcRect = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+
+    Rect alignedRect(Size size) {
+      final x = dstRect.left + (dstRect.width - size.width) * ((alignment.x + 1) / 2);
+      final y = dstRect.top + (dstRect.height - size.height) * ((alignment.y + 1) / 2);
+      return Rect.fromLTWH(x, y, size.width, size.height);
+    }
+
+    Size imageSizeForMode() {
+      final imageW = image.width.toDouble();
+      final imageH = image.height.toDouble();
+      switch (mode) {
+        case BackgroundImageMode.cover:
+          final factor = max(dstRect.width / imageW, dstRect.height / imageH);
+          return Size(imageW * factor * safeScaleX, imageH * factor * safeScaleY);
+        case BackgroundImageMode.contain:
+          final factor = min(dstRect.width / imageW, dstRect.height / imageH);
+          return Size(imageW * factor * safeScaleX, imageH * factor * safeScaleY);
+        case BackgroundImageMode.stretch:
+          return Size(dstRect.width * safeScaleX, dstRect.height * safeScaleY);
+        case BackgroundImageMode.center:
+        case BackgroundImageMode.tile:
+        case BackgroundImageMode.tileX:
+        case BackgroundImageMode.tileY:
+          return Size(imageW * safeScaleX, imageH * safeScaleY);
+      }
+    }
+
+    final imageSize = imageSizeForMode();
+
+    if (mode == BackgroundImageMode.tile || mode == BackgroundImageMode.tileX || mode == BackgroundImageMode.tileY) {
+      canvas.save();
+      canvas.clipRect(dstRect);
+      final startRect = alignedRect(imageSize);
+      final startX = mode == BackgroundImageMode.tileY ? startRect.left : dstRect.left - imageSize.width;
+      final endX = mode == BackgroundImageMode.tileY ? startRect.left : dstRect.right + imageSize.width;
+      final startY = mode == BackgroundImageMode.tileX ? startRect.top : dstRect.top - imageSize.height;
+      final endY = mode == BackgroundImageMode.tileX ? startRect.top : dstRect.bottom + imageSize.height;
+
+      for (double y = startY; y <= endY; y += imageSize.height) {
+        for (double x = startX; x <= endX; x += imageSize.width) {
+          canvas.drawImageRect(image, srcRect, Rect.fromLTWH(x, y, imageSize.width, imageSize.height), paint);
+          if (mode == BackgroundImageMode.tileY) break;
+        }
+        if (mode == BackgroundImageMode.tileX) break;
+      }
+      canvas.restore();
+      return;
+    }
+
+    canvas.drawImageRect(image, srcRect, alignedRect(imageSize), paint);
   }
 
   Rect _srcRectForCoverFit({
