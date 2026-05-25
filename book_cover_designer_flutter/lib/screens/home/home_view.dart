@@ -1,4 +1,3 @@
-
 import 'package:book_cover_designer_flutter/app/logging/logger.dart';
 import 'package:book_cover_designer_flutter/screens/home/widgets/ebook_cover_image.dart';
 import 'package:book_cover_designer_flutter/screens/home/widgets/ebook_info_form.dart';
@@ -25,10 +24,13 @@ class HomeView extends StackedView<HomeViewModel> {
               separatorColor: Colors.blue, // optional
               separatorSize: 10, // optional
               percentages: const [0.5, 0.5], // optional
-              onResized: (infoList) => // optional
-              log.d(infoList
-                  .map((x) => '(${x.size}, ${x.percentage}%)')
-                  .join(", ")),
+              onResized:
+                  (infoList) => // optional
+                  log.d(
+                    infoList
+                        .map((x) => '(${x.size}, ${x.percentage}%)')
+                        .join(", "),
+                  ),
               children: [
                 EbookInfoForm(),
                 const EbookCoverImage(),
@@ -45,6 +47,8 @@ class HomeView extends StackedView<HomeViewModel> {
 
   @override
   void onViewModelReady(HomeViewModel viewModel) async {
+    await viewModel.loadCoverSizePresets();
+    await viewModel.loadAuthors();
     await viewModel.fetchCover();
   }
 }

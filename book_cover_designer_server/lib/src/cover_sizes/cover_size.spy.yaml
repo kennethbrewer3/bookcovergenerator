@@ -1,0 +1,8 @@
+class: CoverSize
+table: cover_size
+fields:
+  label: String
+  width: int
+  height: int
+  sortOrder: int
+  isActive: bool

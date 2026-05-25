@@ -13,7 +13,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
 
   @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
-    final canSubmit = !viewModel.isBusy && viewModel.canPreviewCover;
+    final canSubmit = !viewModel.isBusy;
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(
@@ -104,16 +104,37 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   Widget _buildBackgroundSection(HomeViewModel viewModel) {
     return _sectionColumn([
       Row(
+        spacing: AppSpacing.md,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: _ColorButton(
-              label: 'Background Color',
-              color: viewModel.backgroundColor,
-              width: 80,
-              height: 40,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('background', color),
+          _ColorButton(
+            label: 'Background Color',
+            color: viewModel.backgroundColor,
+            width: 80,
+            height: 50,
+            onColorSelected: (color) =>
+                viewModel.setCoverColor('background', color),
+          ),
+          Expanded(
+            child: DropdownButtonFormField<CoverSizePreset>(
+              value: viewModel.selectedCoverSizePreset,
+              decoration: const InputDecoration(
+                labelText: 'Cover Size',
+                border: OutlineInputBorder(),
+              ),
+              items: viewModel.coverSizePresets
+                  .map(
+                    (preset) => DropdownMenuItem(
+                      value: preset,
+                      child: Text(preset.label),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (preset) {
+                if (preset != null) {
+                  viewModel.setCoverSizePreset(preset);
+                }
+              },
             ),
           ),
         ],
@@ -252,13 +273,51 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         onChanged: viewModel.setTitleTopOffset,
       ),
       _textRow(
-        field: TextFormField(
-          controller: viewModel.authorNameController,
-          decoration: const InputDecoration(
-            labelText: 'Author Name',
-            border: OutlineInputBorder(),
-          ),
-          validator: viewModel.validateAuthorName,
+        field: RawAutocomplete<SavedAuthor>(
+          textEditingController: viewModel.authorNameController,
+          focusNode: viewModel.authorFocusNode,
+          displayStringForOption: (author) => author.name,
+          optionsBuilder: (textEditingValue) =>
+              viewModel.authorSuggestions(textEditingValue.text),
+          onSelected: viewModel.addAuthorToAuthorField,
+          fieldViewBuilder:
+              (context, textEditingController, focusNode, onFieldSubmitted) {
+                return TextFormField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Author Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: viewModel.setAuthorAutocompleteText,
+                  validator: viewModel.validateAuthorName,
+                );
+              },
+          optionsViewBuilder: (context, onSelected, options) {
+            if (options.isEmpty) return const SizedBox.shrink();
+
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 240),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final author = options.elementAt(index);
+                      return ListTile(
+                        title: Text(author.name),
+                        onTap: () => onSelected(author),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         buttons: [
           _ColorButton(
@@ -274,6 +333,40 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 viewModel.setCoverColor('authorBox', color),
           ),
         ],
+      ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            FilledButton.icon(
+              onPressed: viewModel.canAddCurrentAuthor
+                  ? viewModel.addCurrentAuthorToDatabase
+                  : null,
+              icon: viewModel.isSavingAuthor
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.person_add),
+              label: const Text('Add New Author'),
+            ),
+            OutlinedButton.icon(
+              onPressed:
+                  viewModel.isClearingAuthors ? null : viewModel.clearAuthors,
+              icon: viewModel.isClearingAuthors
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.clear),
+              label: const Text('Clear Authors'),
+            ),
+          ],
+        ),
       ),
       _TopOffsetSlider(
         label: 'Author Top Offset',
@@ -483,9 +576,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   ) {
     return _sectionColumn([
       FilledButton(
-        onPressed: canSubmit
-            ? viewModel.fetchCover
-            : null,
+        onPressed: canSubmit ? viewModel.fetchCover : null,
         child: Text(
           'Generate Cover',
           style: AppTextStyles.button(context),
@@ -502,7 +593,8 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
       ),
       OutlinedButton(
-        onPressed: (viewModel.cover != null &&
+        onPressed:
+            (viewModel.cover != null &&
                 !viewModel.isBusy &&
                 viewModel.isFormValid)
             ? viewModel.saveCover

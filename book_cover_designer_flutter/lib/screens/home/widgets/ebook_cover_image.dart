@@ -31,7 +31,7 @@ class EbookCoverImage extends ViewModelWidget<HomeViewModel> {
               maxHeight: constraints.maxHeight,
             ),
             child: AspectRatio(
-              aspectRatio: HomeViewModel.coverWidth / HomeViewModel.coverHeight,
+              aspectRatio: viewModel.coverWidth / viewModel.coverHeight,
               child: Image.memory(
                 bytes,
                 gaplessPlayback: true,

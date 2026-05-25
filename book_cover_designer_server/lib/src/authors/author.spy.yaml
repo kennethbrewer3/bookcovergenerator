@@ -1,0 +1,7 @@
+class: Author
+table: author
+fields:
+  name: String
+  sortName: String
+  createdAt: DateTime
+  isActive: bool

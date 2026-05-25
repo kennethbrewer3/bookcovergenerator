@@ -330,13 +330,14 @@ class GenerateEbookCoverService {
     final authorPainter = _fitText(
       text: author.trim(),
       maxWidth: maxW,
-      maxLines: 1,
+      maxLines: 3,
       maxFontSize: coverWidth * 0.055,
-      minFontSize: coverWidth * 0.04,
+      minFontSize: coverWidth * 0.032,
       styleBuilder: (fs) => TextStyle(
         color: authorTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w800,
+        height: 1.15,
         letterSpacing: 0.8,
         shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
       ),
@@ -379,13 +380,14 @@ class GenerateEbookCoverService {
     final authorPainter = _fitText(
       text: author.trim(),
       maxWidth: maxW,
-      maxLines: 1,
+      maxLines: 3,
       maxFontSize: coverWidth * 0.055,
-      minFontSize: coverWidth * 0.04,
+      minFontSize: coverWidth * 0.032,
       styleBuilder: (fs) => TextStyle(
         color: authorTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w800,
+        height: 1.15,
         letterSpacing: 1.0,
         shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
       ),
@@ -495,20 +497,21 @@ class GenerateEbookCoverService {
     final authorPainter = _fitText(
       text: author.trim(),
       maxWidth: maxW,
-      maxLines: 1,
+      maxLines: 3,
       maxFontSize: coverWidth * 0.05,
-      minFontSize: coverWidth * 0.038,
+      minFontSize: coverWidth * 0.03,
       styleBuilder: (fs) => TextStyle(
         color: authorTextColor,
         fontSize: fs,
         fontWeight: FontWeight.w800,
+        height: 1.15,
         letterSpacing: 1.1,
         shadows: [Shadow(blurRadius: 10, offset: const Offset(0, 4), color: shadowColor)],
       ),
       textAlign: TextAlign.center,
     );
-    final gap1 = coverHeight * 0.02;
-    final gap2 = coverHeight * 0.03;
+    final gap1 = coverHeight * 0.04;
+    final gap2 = coverHeight * 0.05;
     final blockH = titlePainter.height + (subtitlePainter != null ? (gap1 + subtitlePainter.height) : 0) + gap2 + authorPainter.height;
     final topY = centerY - blockH / 2;
     final titleY = topY + (coverHeight * titleTopOffset);

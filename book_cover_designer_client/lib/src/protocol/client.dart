@@ -16,9 +16,13 @@ import 'package:serverpod_client/serverpod_client.dart' as _i2;
 import 'dart:async' as _i3;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:book_cover_designer_client/src/protocol/greetings/greeting.dart'
+import 'package:book_cover_designer_client/src/protocol/authors/author.dart'
     as _i5;
-import 'protocol.dart' as _i6;
+import 'package:book_cover_designer_client/src/protocol/cover_sizes/cover_size.dart'
+    as _i6;
+import 'package:book_cover_designer_client/src/protocol/greetings/greeting.dart'
+    as _i7;
+import 'protocol.dart' as _i8;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -241,6 +245,49 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   );
 }
 
+/// {@category Endpoint}
+class EndpointAuthor extends _i2.EndpointRef {
+  EndpointAuthor(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'author';
+
+  _i3.Future<List<_i5.Author>> list() =>
+      caller.callServerEndpoint<List<_i5.Author>>(
+        'author',
+        'list',
+        {},
+      );
+
+  _i3.Future<_i5.Author> create(String name) =>
+      caller.callServerEndpoint<_i5.Author>(
+        'author',
+        'create',
+        {'name': name},
+      );
+
+  _i3.Future<void> clear() => caller.callServerEndpoint<void>(
+    'author',
+    'clear',
+    {},
+  );
+}
+
+/// {@category Endpoint}
+class EndpointCoverSize extends _i2.EndpointRef {
+  EndpointCoverSize(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'coverSize';
+
+  _i3.Future<List<_i6.CoverSize>> list() =>
+      caller.callServerEndpoint<List<_i6.CoverSize>>(
+        'coverSize',
+        'list',
+        {},
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through
 /// its [hello] method.
 /// {@category Endpoint}
@@ -251,8 +298,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i3.Future<_i7.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i7.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -290,7 +337,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i6.Protocol(),
+         _i8.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -301,6 +348,8 @@ class Client extends _i2.ServerpodClientShared {
        ) {
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    author = EndpointAuthor(this);
+    coverSize = EndpointCoverSize(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
@@ -308,6 +357,10 @@ class Client extends _i2.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointAuthor author;
+
+  late final EndpointCoverSize coverSize;
 
   late final EndpointGreeting greeting;
 
@@ -317,6 +370,8 @@ class Client extends _i2.ServerpodClientShared {
   Map<String, _i2.EndpointRef> get endpointRefLookup => {
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'author': author,
+    'coverSize': coverSize,
     'greeting': greeting,
   };
 
