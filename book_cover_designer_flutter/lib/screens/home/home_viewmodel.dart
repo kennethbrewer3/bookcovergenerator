@@ -8,8 +8,15 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
+enum HomeFormSection {
+  background,
+  ebookDetails,
+  layout,
+  actions,
+}
+
 class HomeViewModel extends BaseViewModel {
-  static const coverWidth = 400.0;
+  static const coverWidth = 600.0;
   static const coverHeight = 800.0;
 
   // ---- validation rules ----
@@ -72,6 +79,7 @@ class HomeViewModel extends BaseViewModel {
   Color editionLineBoxColor = const Color(0x66000000);
   Color cornerBadgeTextColor = Colors.white;
   Color cornerBadgeColor = const Color(0xAA000000);
+  bool _hasSelectedBackgroundColor = false;
   Uint8List? backgroundImageBytes;
   String? backgroundImageName;
   BackgroundImageMode backgroundImageMode = BackgroundImageMode.cover;
@@ -80,6 +88,12 @@ class HomeViewModel extends BaseViewModel {
   double backgroundImageScaleY = 1;
   BlendMode backgroundBlendMode = BlendMode.srcOver;
   double backgroundImageOpacity = 1;
+  final Set<HomeFormSection> _expandedFormSections = {
+    HomeFormSection.background,
+    HomeFormSection.ebookDetails,
+    HomeFormSection.layout,
+    HomeFormSection.actions,
+  };
 
   HomeViewModel() {
     // Keep VM state in sync with controllers and recompute validity on every edit
@@ -97,6 +111,18 @@ class HomeViewModel extends BaseViewModel {
   Set<CornerBadgePosition> get selectedCornerBadgePositionSet => {
     _selectedCornerBadgePosition,
   };
+
+  bool isFormSectionExpanded(HomeFormSection section) =>
+      _expandedFormSections.contains(section);
+
+  void setFormSectionExpanded(HomeFormSection section, bool isExpanded) {
+    if (isExpanded) {
+      _expandedFormSections.add(section);
+    } else {
+      _expandedFormSections.remove(section);
+    }
+    notifyListeners();
+  }
 
   void setSelectedLayout(CoverLayout value) {
     if (_selectedLayout == value) return;
@@ -234,6 +260,7 @@ class HomeViewModel extends BaseViewModel {
     switch (key) {
       case 'background':
         backgroundColor = color;
+        _hasSelectedBackgroundColor = true;
         break;
       case 'titleText':
         titleTextColor = color;
@@ -313,8 +340,14 @@ class HomeViewModel extends BaseViewModel {
       validateEbookTitle(ebookTitleController.text) == null &&
           validateAuthorName(authorNameController.text) == null;
 
+  bool get canPreviewCover =>
+      _hasSelectedBackgroundColor ||
+          backgroundImageBytes != null ||
+          ebookTitleController.text.trim().isNotEmpty ||
+          authorNameController.text.trim().isNotEmpty;
+
   Future<void> fetchCover() async {
-    if (!isFormValid) return;
+    if (!canPreviewCover) return;
     if (isBusy) {
       _hasPendingCoverUpdate = true;
       return;
@@ -325,8 +358,8 @@ class HomeViewModel extends BaseViewModel {
       final result = await _coverService.generateImage(
         coverWidth: coverWidth,
         coverHeight: coverHeight,
-        title: ebookTitleController.text,
-        author: authorNameController.text,
+        title: ebookTitleController.text.trim(),
+        author: authorNameController.text.trim(),
         subtitle: _optionalText(subtitleController.text),
         tagline: _optionalText(taglineController.text),
         seriesTitle: _optionalText(seriesTitleController.text),
@@ -375,7 +408,7 @@ class HomeViewModel extends BaseViewModel {
       debugPrint('fetchCover exception: $e\n$st');
     } finally {
       setBusy(false);
-      if (_hasPendingCoverUpdate && isFormValid) {
+      if (_hasPendingCoverUpdate && canPreviewCover) {
         _scheduleCoverUpdate();
       }
     }
@@ -383,6 +416,7 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> saveCover() async {
     if (isBusy) return;
+    if (!isFormValid) return;
     setBusy(true);
     try {
       if (_cover == null) {
@@ -423,6 +457,7 @@ class HomeViewModel extends BaseViewModel {
     _subtitleTopOffset = 0;
     _titleTopAuthorBottomTopOffset = 0;
     _authorTopTitleCenterTopOffset = 0;
+    _hasSelectedBackgroundColor = false;
     backgroundImageBytes = null;
     backgroundImageName = null;
     backgroundImageMode = BackgroundImageMode.cover;
@@ -438,7 +473,7 @@ class HomeViewModel extends BaseViewModel {
 
   void _scheduleCoverUpdate() {
     _coverUpdateDebounce?.cancel();
-    if (!isFormValid) return;
+    if (!canPreviewCover) return;
     _coverUpdateDebounce = Timer(
       const Duration(milliseconds: 350),
       fetchCover,
