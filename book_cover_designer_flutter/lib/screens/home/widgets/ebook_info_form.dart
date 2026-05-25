@@ -1,3 +1,4 @@
+import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/screens/home/home_viewmodel.dart';
 import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_text_styles.dart';
@@ -422,26 +423,105 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           onChanged: viewModel.setTaglineTopOffset,
         ),
       ),
-      _optionalTextSection(
-        controller: viewModel.seriesTitleController,
-        label: 'Series Title',
-        textButton: _ColorButton(
-          label: 'Series Title Text Color',
-          color: viewModel.seriesTitleTextColor,
-          onColorSelected: (color) =>
-              viewModel.setCoverColor('seriesTitleText', color),
+      _textRow(
+        field: RawAutocomplete<SavedSeriesTitle>(
+          textEditingController: viewModel.seriesTitleController,
+          focusNode: viewModel.seriesTitleFocusNode,
+          displayStringForOption: (seriesTitle) => seriesTitle.name,
+          optionsBuilder: (textEditingValue) =>
+              viewModel.seriesTitleSuggestions(textEditingValue.text),
+          onSelected: viewModel.setSeriesTitleFromAutocomplete,
+          fieldViewBuilder:
+              (context, textEditingController, focusNode, onFieldSubmitted) {
+                return TextFormField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Series Title',
+                    border: OutlineInputBorder(),
+                  ),
+                );
+              },
+          optionsViewBuilder: (context, onSelected, options) {
+            if (options.isEmpty) return const SizedBox.shrink();
+
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 240),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final seriesTitle = options.elementAt(index);
+                      return ListTile(
+                        title: Text(seriesTitle.name),
+                        onTap: () => onSelected(seriesTitle),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
         ),
-        boxButton: _ColorButton(
-          label: 'Series Title Box Color',
-          color: viewModel.seriesTitleBoxColor,
-          onColorSelected: (color) =>
-              viewModel.setCoverColor('seriesTitleBox', color),
+        buttons: [
+          _ColorButton(
+            label: 'Series Title Text Color',
+            color: viewModel.seriesTitleTextColor,
+            onColorSelected: (color) =>
+                viewModel.setCoverColor('seriesTitleText', color),
+          ),
+          _ColorButton(
+            label: 'Series Title Box Color',
+            color: viewModel.seriesTitleBoxColor,
+            onColorSelected: (color) =>
+                viewModel.setCoverColor('seriesTitleBox', color),
+          ),
+        ],
+      ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            FilledButton.icon(
+              onPressed: viewModel.canAddCurrentSeriesTitle
+                  ? viewModel.addCurrentSeriesTitleToDatabase
+                  : null,
+              icon: viewModel.isSavingSeriesTitle
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.playlist_add),
+              label: const Text('Add New Series'),
+            ),
+            OutlinedButton.icon(
+              onPressed: viewModel.isClearingSeriesTitles
+                  ? null
+                  : viewModel.clearSeriesTitles,
+              icon: viewModel.isClearingSeriesTitles
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.clear),
+              label: const Text('Clear Series'),
+            ),
+          ],
         ),
-        slider: _TopOffsetSlider(
-          label: 'Series Title Top Offset',
-          value: viewModel.seriesTitleTopOffset,
-          onChanged: viewModel.setSeriesTitleTopOffset,
-        ),
+      ),
+      _TopOffsetSlider(
+        label: 'Series Title Top Offset',
+        value: viewModel.seriesTitleTopOffset,
+        onChanged: viewModel.setSeriesTitleTopOffset,
       ),
       _optionalTextSection(
         controller: viewModel.editionLineController,

@@ -22,7 +22,9 @@ import 'package:book_cover_designer_client/src/protocol/cover_sizes/cover_size.d
     as _i6;
 import 'package:book_cover_designer_client/src/protocol/greetings/greeting.dart'
     as _i7;
-import 'protocol.dart' as _i8;
+import 'package:book_cover_designer_client/src/protocol/series_titles/series_title.dart'
+    as _i8;
+import 'protocol.dart' as _i9;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -306,6 +308,34 @@ class EndpointGreeting extends _i2.EndpointRef {
       );
 }
 
+/// {@category Endpoint}
+class EndpointSeriesTitle extends _i2.EndpointRef {
+  EndpointSeriesTitle(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'seriesTitle';
+
+  _i3.Future<List<_i8.SeriesTitle>> list() =>
+      caller.callServerEndpoint<List<_i8.SeriesTitle>>(
+        'seriesTitle',
+        'list',
+        {},
+      );
+
+  _i3.Future<_i8.SeriesTitle> create(String name) =>
+      caller.callServerEndpoint<_i8.SeriesTitle>(
+        'seriesTitle',
+        'create',
+        {'name': name},
+      );
+
+  _i3.Future<void> clear() => caller.callServerEndpoint<void>(
+    'seriesTitle',
+    'clear',
+    {},
+  );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _i1.Caller(client);
@@ -337,7 +367,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i8.Protocol(),
+         _i9.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -351,6 +381,7 @@ class Client extends _i2.ServerpodClientShared {
     author = EndpointAuthor(this);
     coverSize = EndpointCoverSize(this);
     greeting = EndpointGreeting(this);
+    seriesTitle = EndpointSeriesTitle(this);
     modules = Modules(this);
   }
 
@@ -364,6 +395,8 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointGreeting greeting;
 
+  late final EndpointSeriesTitle seriesTitle;
+
   late final Modules modules;
 
   @override
@@ -373,6 +406,7 @@ class Client extends _i2.ServerpodClientShared {
     'author': author,
     'coverSize': coverSize,
     'greeting': greeting,
+    'seriesTitle': seriesTitle,
   };
 
   @override

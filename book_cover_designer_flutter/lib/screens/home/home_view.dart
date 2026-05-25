@@ -49,6 +49,7 @@ class HomeView extends StackedView<HomeViewModel> {
   void onViewModelReady(HomeViewModel viewModel) async {
     await viewModel.loadCoverSizePresets();
     await viewModel.loadAuthors();
+    await viewModel.loadSeriesTitles();
     await viewModel.fetchCover();
   }
 }

@@ -1,140 +1,54 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:book_cover_designer_flutter/models/ebook_cover_settings.dart';
+import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:either_dart/either.dart';
 import 'package:flutter/services.dart';
 import 'package:file_saver/file_saver.dart';
 
-/*
-Common professional layout patterns:
 
-Option A — Title top, Author bottom
 
-Most common for fiction.
 
-Option B — Author top, Title center
-
-Common in non-fiction / branding books.
-
-Option C — Big center title, small author top or bottom
-
-Modern minimal style.
- */
-enum CoverLayout {
-  /// Option A: Title near top, author near bottom
-  titleTopAuthorBottom,
-
-  /// Option B: Author near top, title centered
-  authorTopTitleCenter,
-
-  /// Option C: Big title centered, author/subtitle smaller (modern)
-  bigCenterTitle,
-}
-
-enum CornerBadgePosition {
-  topLeft,
-  topRight,
-  bottomLeft,
-  bottomRight,
-}
-
-enum BackgroundImageMode {
-  cover,
-  contain,
-  stretch,
-  center,
-  tile,
-  tileX,
-  tileY,
-}
 
 class GenerateEbookCoverService {
   Future<Either<String, ByteData>> generateImage({
-    required double coverWidth,
-    required double coverHeight,
-    required String title,
-    required String author,
-
-    /// Optional subtitle line under the title
-    String? subtitle,
-
-    String? tagline,
-    String? seriesTitle,
-    String? editionLine,
-    double taglineTopOffset = 0,
-    double seriesTitleTopOffset = 0,
-    double editionLineTopOffset = 0,
-    double titleTopOffset = 0,
-    double authorTopOffset = 0,
-    double subtitleTopOffset = 0,
-    double titleTopAuthorBottomTopOffset = 0,
-    double authorTopTitleCenterTopOffset = 0,
-    String? cornerBadgeText,
-    CornerBadgePosition cornerBadgePosition = CornerBadgePosition.topRight,
-
-    /// Layout selector (Option A/B/C)
-    CoverLayout layout = CoverLayout.bigCenterTitle,
-
-    /// Background image bytes (PNG/JPG/etc). If null/empty, fallbackColor is used.
-    Uint8List? backgroundImageBytes,
-    BackgroundImageMode backgroundImageMode = BackgroundImageMode.cover,
-    Alignment backgroundImageAlignment = Alignment.center,
-    double backgroundImageScaleX = 1,
-    double backgroundImageScaleY = 1,
-    BlendMode backgroundBlendMode = BlendMode.srcOver,
-    double backgroundImageOpacity = 1,
-
-    /// Fallback background color when no image is provided.
-    required Color backgroundColor,
-    required Color titleTextColor,
-    required Color subtitleTextColor,
-    required Color authorTextColor,
-    required Color titleBoxColor,
-    required Color authorBoxColor,
-    required Color subtitleBoxColor,
-    required Color taglineTextColor,
-    required Color taglineBoxColor,
-    required Color seriesTitleTextColor,
-    required Color seriesTitleBoxColor,
-    required Color editionLineTextColor,
-    required Color editionLineBoxColor,
-    required Color cornerBadgeTextColor,
-    required Color cornerBadgeColor,
+    required EbookCoverSettings settings,
   }) async {
     final sw = Stopwatch()..start();
 
     try {
       final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, coverWidth, coverHeight));
-      final dstRect = Rect.fromLTWH(0, 0, coverWidth, coverHeight);
+      final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, settings.coverWidth, settings.coverHeight));
+      final dstRect = Rect.fromLTWH(0, 0, settings.coverWidth, settings.coverHeight);
 
       ui.Image? bgImage;
 
       // 1) Paint background
-      canvas.drawRect(dstRect, Paint()..color = backgroundColor);
+      canvas.drawRect(dstRect, Paint()..color = settings.backgroundColor);
 
-      if (backgroundImageBytes != null && backgroundImageBytes.isNotEmpty) {
-        bgImage = await _decodeToUiImage(backgroundImageBytes);
+      if (settings.backgroundImageBytes != null && settings.backgroundImageBytes!.isNotEmpty) {
+        bgImage = await _decodeToUiImage(settings!.backgroundImageBytes!);
 
         _drawBackgroundImage(
           canvas: canvas,
           image: bgImage,
           dstRect: dstRect,
-          mode: backgroundImageMode,
-          alignment: backgroundImageAlignment,
-          scaleX: backgroundImageScaleX,
-          scaleY: backgroundImageScaleY,
-          blendMode: backgroundBlendMode,
-          opacity: backgroundImageOpacity,
+          mode: settings.backgroundImageMode,
+          alignment: settings.backgroundImageAlignment,
+          scaleX: settings.backgroundImageScaleX,
+          scaleY: settings.backgroundImageScaleY,
+          blendMode: settings.backgroundBlendMode,
+          opacity: settings.backgroundImageOpacity,
         );
       }
 
       // 2) Dynamic contrast detection (image preferred, else fallback color)
       final bgLuminance = bgImage != null
           ? await _estimateImageLuminance(bgImage)
-          : _luminanceOfColor(backgroundColor);
+          : _luminanceOfColor(settings.backgroundColor);
 
       final useDarkText = bgLuminance > 0.55;
 
@@ -151,108 +65,108 @@ class GenerateEbookCoverService {
           ..strokeWidth = 2,
       );
 
-      if (cornerBadgeText != null && cornerBadgeText.trim().isNotEmpty) {
+      if (settings.cornerBadgeText != null && settings.cornerBadgeText!.trim().isNotEmpty) {
         _drawCornerBadge(
           canvas: canvas,
-          coverWidth: coverWidth,
-          coverHeight: coverHeight,
-          text: cornerBadgeText.trim(),
-          position: cornerBadgePosition,
-          textColor: cornerBadgeTextColor,
-          backgroundColor: cornerBadgeColor,
+          coverWidth: settings.coverWidth,
+          coverHeight: settings.coverHeight,
+          text: settings.cornerBadgeText!.trim(),
+          position: settings.cornerBadgePosition,
+          textColor: settings.cornerBadgeTextColor,
+          backgroundColor: settings.cornerBadgeColor,
         );
       }
 
       _drawOptionalMetadata(
         canvas: canvas,
-        coverWidth: coverWidth,
-        coverHeight: coverHeight,
-        tagline: tagline,
-        seriesTitle: seriesTitle,
-        editionLine: editionLine,
-        taglineTopOffset: taglineTopOffset,
-        seriesTitleTopOffset: seriesTitleTopOffset,
-        editionLineTopOffset: editionLineTopOffset,
-        taglineTextColor: taglineTextColor,
-        taglineBoxColor: taglineBoxColor,
-        seriesTitleTextColor: seriesTitleTextColor,
-        seriesTitleBoxColor: seriesTitleBoxColor,
-        editionLineTextColor: editionLineTextColor,
-        editionLineBoxColor: editionLineBoxColor,
+        coverWidth: settings.coverWidth,
+        coverHeight: settings.coverHeight,
+        tagline: settings.tagline,
+        seriesTitle: settings.seriesTitle,
+        editionLine: settings.editionLine,
+        taglineTopOffset: settings.taglineTopOffset,
+        seriesTitleTopOffset: settings.seriesTitleTopOffset,
+        editionLineTopOffset: settings.editionLineTopOffset,
+        taglineTextColor: settings.taglineTextColor,
+        taglineBoxColor: settings.taglineBoxColor,
+        seriesTitleTextColor: settings.seriesTitleTextColor,
+        seriesTitleBoxColor: settings.seriesTitleBoxColor,
+        editionLineTextColor: settings.editionLineTextColor,
+        editionLineBoxColor: settings.editionLineBoxColor,
         shadowColor: shadowColor,
       );
 
       // 5) Draw typography by selected layout
-      switch (layout) {
+      switch (settings.layout) {
         case CoverLayout.titleTopAuthorBottom:
           _drawLayoutA(
             canvas: canvas,
-            coverWidth: coverWidth,
-            coverHeight: coverHeight,
-            title: title,
-            subtitle: subtitle,
-            author: author,
-            titleTextColor: titleTextColor,
-            subtitleTextColor: subtitleTextColor,
-            authorTextColor: authorTextColor,
-            titleBoxColor: titleBoxColor,
-            authorBoxColor: authorBoxColor,
-            subtitleBoxColor: subtitleBoxColor,
+            coverWidth: settings.coverWidth,
+            coverHeight: settings.coverHeight,
+            title: settings.title,
+            subtitle: settings.subtitle,
+            author: settings.author,
+            titleTextColor: settings.titleTextColor,
+            subtitleTextColor: settings.subtitleTextColor,
+            authorTextColor: settings.authorTextColor,
+            titleBoxColor: settings.titleBoxColor,
+            authorBoxColor: settings.authorBoxColor,
+            subtitleBoxColor: settings.subtitleBoxColor,
             shadowColor: shadowColor,
-            topOffset: titleTopAuthorBottomTopOffset,
-            titleTopOffset: titleTopOffset,
-            authorTopOffset: authorTopOffset,
-            subtitleTopOffset: subtitleTopOffset,
+            topOffset: settings.titleTopAuthorBottomTopOffset,
+            titleTopOffset: settings.titleTopOffset,
+            authorTopOffset: settings.authorTopOffset,
+            subtitleTopOffset: settings.subtitleTopOffset,
           );
           break;
 
         case CoverLayout.authorTopTitleCenter:
           _drawLayoutB(
             canvas: canvas,
-            coverWidth: coverWidth,
-            coverHeight: coverHeight,
-            title: title,
-            subtitle: subtitle,
-            author: author,
-            titleTextColor: titleTextColor,
-            subtitleTextColor: subtitleTextColor,
-            authorTextColor: authorTextColor,
-            titleBoxColor: titleBoxColor,
-            authorBoxColor: authorBoxColor,
-            subtitleBoxColor: subtitleBoxColor,
+            coverWidth: settings.coverWidth,
+            coverHeight: settings.coverHeight,
+            title: settings.title,
+            subtitle: settings.subtitle,
+            author: settings.author,
+            titleTextColor: settings.titleTextColor,
+            subtitleTextColor: settings.subtitleTextColor,
+            authorTextColor: settings.authorTextColor,
+            titleBoxColor: settings.titleBoxColor,
+            authorBoxColor: settings.authorBoxColor,
+            subtitleBoxColor: settings.subtitleBoxColor,
             shadowColor: shadowColor,
-            topOffset: authorTopTitleCenterTopOffset,
-            titleTopOffset: titleTopOffset,
-            authorTopOffset: authorTopOffset,
-            subtitleTopOffset: subtitleTopOffset,
+            topOffset: settings.authorTopTitleCenterTopOffset,
+            titleTopOffset: settings.titleTopOffset,
+            authorTopOffset: settings.authorTopOffset,
+            subtitleTopOffset: settings.subtitleTopOffset,
           );
           break;
 
         case CoverLayout.bigCenterTitle:
           _drawLayoutC(
             canvas: canvas,
-            coverWidth: coverWidth,
-            coverHeight: coverHeight,
-            title: title,
-            subtitle: subtitle,
-            author: author,
-            titleTextColor: titleTextColor,
-            subtitleTextColor: subtitleTextColor,
-            authorTextColor: authorTextColor,
-            titleBoxColor: titleBoxColor,
-            authorBoxColor: authorBoxColor,
-            subtitleBoxColor: subtitleBoxColor,
+            coverWidth: settings.coverWidth,
+            coverHeight: settings.coverHeight,
+            title: settings.title,
+            subtitle: settings.subtitle,
+            author: settings.author,
+            titleTextColor: settings.titleTextColor,
+            subtitleTextColor: settings.subtitleTextColor,
+            authorTextColor: settings.authorTextColor,
+            titleBoxColor: settings.titleBoxColor,
+            authorBoxColor: settings.authorBoxColor,
+            subtitleBoxColor: settings.subtitleBoxColor,
             shadowColor: shadowColor,
-            titleTopOffset: titleTopOffset,
-            authorTopOffset: authorTopOffset,
-            subtitleTopOffset: subtitleTopOffset,
+            titleTopOffset: settings.titleTopOffset,
+            authorTopOffset: settings.authorTopOffset,
+            subtitleTopOffset: settings.subtitleTopOffset,
           );
           break;
       }
 
       // 6) Export PNG
       final picture = recorder.endRecording();
-      final img = await picture.toImage(coverWidth.round(), coverHeight.round());
+      final img = await picture.toImage(settings.coverWidth.round(), settings.coverHeight.round());
       final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
 
       if (pngBytes == null) return const Left("Failed to generate image");

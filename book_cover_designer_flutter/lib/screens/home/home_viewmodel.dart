@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:book_cover_designer_flutter/app/app.locator.dart';
 import 'package:book_cover_designer_flutter/main.dart' as app;
+import 'package:book_cover_designer_flutter/models/ebook_cover_settings.dart';
+import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -30,6 +32,16 @@ class CoverSizePreset {
 
 class SavedAuthor {
   const SavedAuthor({
+    required this.id,
+    required this.name,
+  });
+
+  final int id;
+  final String name;
+}
+
+class SavedSeriesTitle {
+  const SavedSeriesTitle({
     required this.id,
     required this.name,
   });
@@ -78,6 +90,7 @@ class HomeViewModel extends BaseViewModel {
   final editionLineController = TextEditingController();
   final cornerBadgeTextController = TextEditingController();
   final authorFocusNode = FocusNode();
+  final seriesTitleFocusNode = FocusNode();
 
   ByteData? _cover;
   ByteData? get cover => _cover;
@@ -94,6 +107,23 @@ class HomeViewModel extends BaseViewModel {
   bool _isClearingAuthors = false;
   bool get isClearingAuthors => _isClearingAuthors;
   String _authorAutocompleteText = '';
+  List<SavedSeriesTitle> _seriesTitles = [];
+  List<SavedSeriesTitle> get seriesTitles => _seriesTitles;
+  bool _isSavingSeriesTitle = false;
+  bool get isSavingSeriesTitle => _isSavingSeriesTitle;
+  bool _isClearingSeriesTitles = false;
+  bool get isClearingSeriesTitles => _isClearingSeriesTitles;
+  String? get newSeriesTitleName {
+    final candidate = seriesTitleController.text.trim();
+    if (candidate.isEmpty) return null;
+    final normalizedCandidate = candidate.toLowerCase();
+    final isExistingSeriesTitle = _seriesTitles.any(
+      (seriesTitle) => seriesTitle.name.toLowerCase() == normalizedCandidate,
+    );
+    return isExistingSeriesTitle ? null : candidate;
+  }
+  bool get canAddCurrentSeriesTitle =>
+      newSeriesTitleName != null && !_isSavingSeriesTitle;
   String? get newAuthorName {
     final candidate = _currentAuthorToken();
     if (candidate.isEmpty) return null;
@@ -213,12 +243,12 @@ class HomeViewModel extends BaseViewModel {
             ),
           )
           .toList();
-      _selectedCoverSizePreset = _coverSizePresets.first;
+      _selectedCoverSizePreset = _coverSizePresets.last;
       notifyListeners();
       _scheduleCoverUpdate();
     } catch (_) {
       _coverSizePresets = fallbackCoverSizePresets;
-      _selectedCoverSizePreset = fallbackCoverSizePresets.first;
+      _selectedCoverSizePreset = fallbackCoverSizePresets.last;
       notifyListeners();
     }
   }
@@ -233,6 +263,25 @@ class HomeViewModel extends BaseViewModel {
       notifyListeners();
     } catch (_) {
       _authors = [];
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadSeriesTitles() async {
+    try {
+      final seriesTitles = await app.client.seriesTitle.list();
+      _seriesTitles = seriesTitles
+          .where((seriesTitle) => seriesTitle.id != null)
+          .map(
+            (seriesTitle) => SavedSeriesTitle(
+              id: seriesTitle.id!,
+              name: seriesTitle.name,
+            ),
+          )
+          .toList();
+      notifyListeners();
+    } catch (_) {
+      _seriesTitles = [];
       notifyListeners();
     }
   }
@@ -261,6 +310,38 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
+  Future<void> addCurrentSeriesTitleToDatabase() async {
+    final name = newSeriesTitleName;
+    if (name == null) return;
+
+    _isSavingSeriesTitle = true;
+    notifyListeners();
+
+    try {
+      final seriesTitle = await app.client.seriesTitle.create(name);
+      if (seriesTitle.id != null) {
+        final savedSeriesTitle = SavedSeriesTitle(
+          id: seriesTitle.id!,
+          name: seriesTitle.name,
+        );
+        _seriesTitles = [
+          savedSeriesTitle,
+          ..._seriesTitles.where(
+            (existing) => existing.id != savedSeriesTitle.id,
+          ),
+        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        seriesTitleController.text = savedSeriesTitle.name;
+        seriesTitleController.selection = TextSelection.collapsed(
+          offset: seriesTitleController.text.length,
+        );
+      }
+    } finally {
+      _isSavingSeriesTitle = false;
+      notifyListeners();
+      _scheduleCoverUpdate();
+    }
+  }
+
   Iterable<SavedAuthor> authorSuggestions(String query) {
     if (_isClearingAuthors) return const Iterable<SavedAuthor>.empty();
 
@@ -272,8 +353,30 @@ class HomeViewModel extends BaseViewModel {
     );
   }
 
+  Iterable<SavedSeriesTitle> seriesTitleSuggestions(String query) {
+    if (_isClearingSeriesTitles) {
+      return const Iterable<SavedSeriesTitle>.empty();
+    }
+
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) return _seriesTitles;
+
+    return _seriesTitles.where(
+      (seriesTitle) => seriesTitle.name.toLowerCase().contains(normalizedQuery),
+    );
+  }
+
   void addAuthorToAuthorField(SavedAuthor author) {
     _replaceCurrentAuthorToken(author.name, sourceText: _authorAutocompleteText);
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setSeriesTitleFromAutocomplete(SavedSeriesTitle seriesTitle) {
+    seriesTitleController.text = seriesTitle.name;
+    seriesTitleController.selection = TextSelection.collapsed(
+      offset: seriesTitleController.text.length,
+    );
     notifyListeners();
     _scheduleCoverUpdate();
   }
@@ -294,6 +397,22 @@ class HomeViewModel extends BaseViewModel {
       await app.client.author.clear();
     } finally {
       _isClearingAuthors = false;
+      notifyListeners();
+      _scheduleCoverUpdate();
+    }
+  }
+
+  Future<void> clearSeriesTitles() async {
+    _isClearingSeriesTitles = true;
+    _seriesTitles = [];
+    seriesTitleController.clear();
+    seriesTitleFocusNode.unfocus();
+    notifyListeners();
+
+    try {
+      await app.client.seriesTitle.clear();
+    } finally {
+      _isClearingSeriesTitles = false;
       notifyListeners();
       _scheduleCoverUpdate();
     }
@@ -553,47 +672,49 @@ class HomeViewModel extends BaseViewModel {
     try {
       _hasPendingCoverUpdate = false;
       final result = await _coverService.generateImage(
-        coverWidth: coverWidth,
-        coverHeight: coverHeight,
-        title: ebookTitleController.text.trim(),
-        author: authorNameController.text.trim(),
-        subtitle: _optionalText(subtitleController.text),
-        tagline: _optionalText(taglineController.text),
-        seriesTitle: _optionalText(seriesTitleController.text),
-        editionLine: _optionalText(editionLineController.text),
-        taglineTopOffset: taglineTopOffset,
-        seriesTitleTopOffset: seriesTitleTopOffset,
-        editionLineTopOffset: editionLineTopOffset,
-        titleTopOffset: titleTopOffset,
-        authorTopOffset: authorTopOffset,
-        subtitleTopOffset: subtitleTopOffset,
-        titleTopAuthorBottomTopOffset: titleTopAuthorBottomTopOffset,
-        authorTopTitleCenterTopOffset: authorTopTitleCenterTopOffset,
-        cornerBadgeText: _optionalText(cornerBadgeTextController.text),
-        cornerBadgePosition: selectedCornerBadgePosition,
-        layout: selectedLayout,
-        backgroundImageBytes: backgroundImageBytes,
-        backgroundImageMode: backgroundImageMode,
-        backgroundImageAlignment: backgroundImageAlignment,
-        backgroundImageScaleX: backgroundImageScaleX,
-        backgroundImageScaleY: backgroundImageScaleY,
-        backgroundBlendMode: backgroundBlendMode,
-        backgroundImageOpacity: backgroundImageOpacity,
-        backgroundColor: backgroundColor,
-        titleTextColor: titleTextColor,
-        subtitleTextColor: subtitleTextColor,
-        authorTextColor: authorTextColor,
-        titleBoxColor: titleBoxColor,
-        authorBoxColor: authorBoxColor,
-        subtitleBoxColor: subtitleBoxColor,
-        taglineTextColor: taglineTextColor,
-        taglineBoxColor: taglineBoxColor,
-        seriesTitleTextColor: seriesTitleTextColor,
-        seriesTitleBoxColor: seriesTitleBoxColor,
-        editionLineTextColor: editionLineTextColor,
-        editionLineBoxColor: editionLineBoxColor,
-        cornerBadgeTextColor: cornerBadgeTextColor,
-        cornerBadgeColor: cornerBadgeColor,
+        settings: EbookCoverSettings(
+          coverWidth: coverWidth,
+          coverHeight: coverHeight,
+          title: ebookTitleController.text.trim(),
+          author: authorNameController.text.trim(),
+          subtitle: _optionalText(subtitleController.text),
+          tagline: _optionalText(taglineController.text),
+          seriesTitle: _optionalText(seriesTitleController.text),
+          editionLine: _optionalText(editionLineController.text),
+          taglineTopOffset: taglineTopOffset,
+          seriesTitleTopOffset: seriesTitleTopOffset,
+          editionLineTopOffset: editionLineTopOffset,
+          titleTopOffset: titleTopOffset,
+          authorTopOffset: authorTopOffset,
+          subtitleTopOffset: subtitleTopOffset,
+          titleTopAuthorBottomTopOffset: titleTopAuthorBottomTopOffset,
+          authorTopTitleCenterTopOffset: authorTopTitleCenterTopOffset,
+          cornerBadgeText: _optionalText(cornerBadgeTextController.text),
+          cornerBadgePosition: selectedCornerBadgePosition,
+          layout: selectedLayout,
+          backgroundImageBytes: backgroundImageBytes,
+          backgroundImageMode: backgroundImageMode,
+          backgroundImageAlignment: backgroundImageAlignment,
+          backgroundImageScaleX: backgroundImageScaleX,
+          backgroundImageScaleY: backgroundImageScaleY,
+          backgroundBlendMode: backgroundBlendMode,
+          backgroundImageOpacity: backgroundImageOpacity,
+          backgroundColor: backgroundColor,
+          titleTextColor: titleTextColor,
+          subtitleTextColor: subtitleTextColor,
+          authorTextColor: authorTextColor,
+          titleBoxColor: titleBoxColor,
+          authorBoxColor: authorBoxColor,
+          subtitleBoxColor: subtitleBoxColor,
+          taglineTextColor: taglineTextColor,
+          taglineBoxColor: taglineBoxColor,
+          seriesTitleTextColor: seriesTitleTextColor,
+          seriesTitleBoxColor: seriesTitleBoxColor,
+          editionLineTextColor: editionLineTextColor,
+          editionLineBoxColor: editionLineBoxColor,
+          cornerBadgeTextColor: cornerBadgeTextColor,
+          cornerBadgeColor: cornerBadgeColor,
+        ),
       );
 
       result.fold(
@@ -712,6 +833,7 @@ class HomeViewModel extends BaseViewModel {
     editionLineController.dispose();
     cornerBadgeTextController.dispose();
     authorFocusNode.dispose();
+    seriesTitleFocusNode.dispose();
     super.dispose();
   }
 }

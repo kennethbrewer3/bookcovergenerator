@@ -1,0 +1,7 @@
+class: SeriesTitle
+table: series_title
+fields:
+  name: String
+  sortName: String
+  createdAt: DateTime
+  isActive: bool
