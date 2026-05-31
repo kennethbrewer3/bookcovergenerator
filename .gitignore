@@ -83,3 +83,7 @@ book_cover_designer_server/web/app/
 *.temp
 *.swp
 *.swo
+
+# Freezed generated files
+*.freezed.dart
+*.g.dart

@@ -1,4 +1,0 @@
-type: server
-
-client_package_path: ../book_cover_designer_client
-server_test_tools_path: test/integration/test_tools

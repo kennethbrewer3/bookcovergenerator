@@ -1,6 +1,6 @@
+import 'package:book_cover_designer_flutter/models/cover_size_preset.dart';
 import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/screens/home/home_viewmodel.dart';
-import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_text_styles.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_tokens.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
@@ -273,52 +273,19 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         value: viewModel.titleTopOffset,
         onChanged: viewModel.setTitleTopOffset,
       ),
+      _LeftOffsetSlider(
+        label: 'Title Horizontal Offset',
+        value: viewModel.titleHorizontalOffset,
+        onChanged: viewModel.setTitleHorizontalOffset,
+      ),
       _textRow(
-        field: RawAutocomplete<SavedAuthor>(
-          textEditingController: viewModel.authorNameController,
-          focusNode: viewModel.authorFocusNode,
-          displayStringForOption: (author) => author.name,
-          optionsBuilder: (textEditingValue) =>
-              viewModel.authorSuggestions(textEditingValue.text),
-          onSelected: viewModel.addAuthorToAuthorField,
-          fieldViewBuilder:
-              (context, textEditingController, focusNode, onFieldSubmitted) {
-                return TextFormField(
-                  controller: textEditingController,
-                  focusNode: focusNode,
-                  decoration: const InputDecoration(
-                    labelText: 'Author Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: viewModel.setAuthorAutocompleteText,
-                  validator: viewModel.validateAuthorName,
-                );
-              },
-          optionsViewBuilder: (context, onSelected, options) {
-            if (options.isEmpty) return const SizedBox.shrink();
-
-            return Align(
-              alignment: Alignment.topLeft,
-              child: Material(
-                elevation: 4,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 240),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (context, index) {
-                      final author = options.elementAt(index);
-                      return ListTile(
-                        title: Text(author.name),
-                        onTap: () => onSelected(author),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
+        field: TextFormField(
+          controller: viewModel.authorNameController,
+          decoration: const InputDecoration(
+            labelText: 'Author Name',
+            border: OutlineInputBorder(),
+          ),
+          validator: viewModel.validateAuthorName,
         ),
         buttons: [
           _ColorButton(
@@ -335,44 +302,15 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ),
         ],
       ),
-      Align(
-        alignment: Alignment.centerLeft,
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            FilledButton.icon(
-              onPressed: viewModel.canAddCurrentAuthor
-                  ? viewModel.addCurrentAuthorToDatabase
-                  : null,
-              icon: viewModel.isSavingAuthor
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.person_add),
-              label: const Text('Add New Author'),
-            ),
-            OutlinedButton.icon(
-              onPressed:
-                  viewModel.isClearingAuthors ? null : viewModel.clearAuthors,
-              icon: viewModel.isClearingAuthors
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.clear),
-              label: const Text('Clear Authors'),
-            ),
-          ],
-        ),
-      ),
       _TopOffsetSlider(
         label: 'Author Top Offset',
         value: viewModel.authorTopOffset,
         onChanged: viewModel.setAuthorTopOffset,
+      ),
+      _LeftOffsetSlider(
+        label: 'Author Left Offset',
+        value: viewModel.authorHorizontalOffset,
+        onChanged: viewModel.setAuthorHorizontalOffset,
       ),
       _textRow(
         field: TextFormField(
@@ -402,6 +340,11 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         value: viewModel.subtitleTopOffset,
         onChanged: viewModel.setSubtitleTopOffset,
       ),
+      _LeftOffsetSlider(
+        label: 'Subtitle Left Offset',
+        value: viewModel.subtitleHorizontalOffset,
+        onChanged: viewModel.setSubtitleHorizontalOffset,
+      ),
       _optionalTextSection(
         controller: viewModel.taglineController,
         label: 'Tagline',
@@ -417,56 +360,24 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           onColorSelected: (color) =>
               viewModel.setCoverColor('taglineBox', color),
         ),
-        slider: _TopOffsetSlider(
+        verticalSlider: _TopOffsetSlider(
           label: 'Tagline Top Offset',
           value: viewModel.taglineTopOffset,
           onChanged: viewModel.setTaglineTopOffset,
         ),
+        horizontalSlider: _LeftOffsetSlider(
+          label: 'Tagline Left Offset',
+          value: viewModel.taglineHorizontalOffset,
+          onChanged: viewModel.setTaglineHorizontalOffset,
+        ),
       ),
       _textRow(
-        field: RawAutocomplete<SavedSeriesTitle>(
-          textEditingController: viewModel.seriesTitleController,
-          focusNode: viewModel.seriesTitleFocusNode,
-          displayStringForOption: (seriesTitle) => seriesTitle.name,
-          optionsBuilder: (textEditingValue) =>
-              viewModel.seriesTitleSuggestions(textEditingValue.text),
-          onSelected: viewModel.setSeriesTitleFromAutocomplete,
-          fieldViewBuilder:
-              (context, textEditingController, focusNode, onFieldSubmitted) {
-                return TextFormField(
-                  controller: textEditingController,
-                  focusNode: focusNode,
-                  decoration: const InputDecoration(
-                    labelText: 'Series Title',
-                    border: OutlineInputBorder(),
-                  ),
-                );
-              },
-          optionsViewBuilder: (context, onSelected, options) {
-            if (options.isEmpty) return const SizedBox.shrink();
-
-            return Align(
-              alignment: Alignment.topLeft,
-              child: Material(
-                elevation: 4,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 240),
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (context, index) {
-                      final seriesTitle = options.elementAt(index);
-                      return ListTile(
-                        title: Text(seriesTitle.name),
-                        onTap: () => onSelected(seriesTitle),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
+        field: TextFormField(
+          controller: viewModel.seriesTitleController,
+          decoration: const InputDecoration(
+            labelText: 'Series Title',
+            border: OutlineInputBorder(),
+          ),
         ),
         buttons: [
           _ColorButton(
@@ -483,45 +394,15 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ),
         ],
       ),
-      Align(
-        alignment: Alignment.centerLeft,
-        child: Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            FilledButton.icon(
-              onPressed: viewModel.canAddCurrentSeriesTitle
-                  ? viewModel.addCurrentSeriesTitleToDatabase
-                  : null,
-              icon: viewModel.isSavingSeriesTitle
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.playlist_add),
-              label: const Text('Add New Series'),
-            ),
-            OutlinedButton.icon(
-              onPressed: viewModel.isClearingSeriesTitles
-                  ? null
-                  : viewModel.clearSeriesTitles,
-              icon: viewModel.isClearingSeriesTitles
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.clear),
-              label: const Text('Clear Series'),
-            ),
-          ],
-        ),
-      ),
       _TopOffsetSlider(
         label: 'Series Title Top Offset',
         value: viewModel.seriesTitleTopOffset,
         onChanged: viewModel.setSeriesTitleTopOffset,
+      ),
+      _LeftOffsetSlider(
+        label: 'Series Title Left Offset',
+        value: viewModel.seriesTitleHorizontalOffset,
+        onChanged: viewModel.setSeriesTitleHorizontalOffset,
       ),
       _optionalTextSection(
         controller: viewModel.editionLineController,
@@ -538,10 +419,15 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           onColorSelected: (color) =>
               viewModel.setCoverColor('editionLineBox', color),
         ),
-        slider: _TopOffsetSlider(
+        verticalSlider: _TopOffsetSlider(
           label: 'Edition Line Top Offset',
           value: viewModel.editionLineTopOffset,
           onChanged: viewModel.setEditionLineTopOffset,
+        ),
+        horizontalSlider: _LeftOffsetSlider(
+          label: 'Edition Line Left Offset',
+          value: viewModel.editionLineHorizontalOffset,
+          onChanged: viewModel.setEditionLineHorizontalOffset,
         ),
       ),
       _textRow(
@@ -608,6 +494,12 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         showSelectedIcon: false,
         segments: const <ButtonSegment<CoverLayout>>[
           ButtonSegment(
+            value: CoverLayout.bigCenterTitle,
+            icon: Icon(Icons.crop_7_5),
+            label: Text('Modern'),
+            tooltip: 'Big centered title layout',
+          ),
+          ButtonSegment(
             value: CoverLayout.titleTopAuthorBottom,
             icon: Icon(Icons.vertical_align_top),
             label: Text('Top / Bottom'),
@@ -618,12 +510,6 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
             icon: Icon(Icons.vertical_align_center),
             label: Text('Top / Center'),
             tooltip: 'Author near top, title centered',
-          ),
-          ButtonSegment(
-            value: CoverLayout.bigCenterTitle,
-            icon: Icon(Icons.crop_7_5),
-            label: Text('Modern'),
-            tooltip: 'Big centered title layout',
           ),
         ],
         selected: viewModel.selectedLayoutSet,
@@ -705,7 +591,8 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     required String label,
     required Widget textButton,
     required Widget boxButton,
-    required Widget slider,
+    required Widget verticalSlider,
+    required Widget horizontalSlider,
   }) {
     return _sectionColumn([
       _textRow(
@@ -718,7 +605,8 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
         buttons: [textButton, boxButton],
       ),
-      slider,
+      verticalSlider,
+      horizontalSlider,
     ]);
   }
 }
@@ -752,6 +640,39 @@ class _TopOffsetSlider extends StatelessWidget {
           max: max,
           divisions: divisions,
           label: '${(value * 100).round()}%',
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _LeftOffsetSlider extends StatelessWidget {
+  const _LeftOffsetSlider({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.min = -0.25,
+    this.max = 0.25,
+  });
+
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+  final double min;
+  final double max;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('$label: ${(value * 100).toStringAsFixed(1)}%'),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          label: '${(value * 100).toStringAsFixed(1)}%',
           onChanged: onChanged,
         ),
       ],

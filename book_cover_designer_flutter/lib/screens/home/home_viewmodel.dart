@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:book_cover_designer_flutter/app/app.locator.dart';
-import 'package:book_cover_designer_flutter/main.dart' as app;
+import 'package:book_cover_designer_flutter/models/cover_size_preset.dart';
 import 'package:book_cover_designer_flutter/models/ebook_cover_settings.dart';
 import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -18,39 +17,8 @@ enum HomeFormSection {
   actions,
 }
 
-class CoverSizePreset {
-  const CoverSizePreset({
-    required this.label,
-    required this.width,
-    required this.height,
-  });
-
-  final String label;
-  final double width;
-  final double height;
-}
-
-class SavedAuthor {
-  const SavedAuthor({
-    required this.id,
-    required this.name,
-  });
-
-  final int id;
-  final String name;
-}
-
-class SavedSeriesTitle {
-  const SavedSeriesTitle({
-    required this.id,
-    required this.name,
-  });
-
-  final int id;
-  final String name;
-}
-
 class HomeViewModel extends BaseViewModel {
+
   static const fallbackCoverSizePresets = [
     CoverSizePreset(
       label: 'Amazon KDP Max — 6250 x 10000',
@@ -79,8 +47,6 @@ class HomeViewModel extends BaseViewModel {
   static const int minAuthorLength = 2;
 
   final _coverService = locator<GenerateEbookCoverService>();
-  final _dialogService = locator<DialogService>();
-  final _bottomSheetService = locator<BottomSheetService>();
 
   final ebookTitleController = TextEditingController();
   final authorNameController = TextEditingController();
@@ -94,46 +60,13 @@ class HomeViewModel extends BaseViewModel {
 
   ByteData? _cover;
   ByteData? get cover => _cover;
-  List<CoverSizePreset> _coverSizePresets = fallbackCoverSizePresets;
+  final List<CoverSizePreset> _coverSizePresets = fallbackCoverSizePresets;
   List<CoverSizePreset> get coverSizePresets => _coverSizePresets;
   CoverSizePreset _selectedCoverSizePreset = fallbackCoverSizePresets.last;
   CoverSizePreset get selectedCoverSizePreset => _selectedCoverSizePreset;
   double get coverWidth => _selectedCoverSizePreset.width;
   double get coverHeight => _selectedCoverSizePreset.height;
-  List<SavedAuthor> _authors = [];
-  List<SavedAuthor> get authors => _authors;
-  bool _isSavingAuthor = false;
-  bool get isSavingAuthor => _isSavingAuthor;
-  bool _isClearingAuthors = false;
-  bool get isClearingAuthors => _isClearingAuthors;
-  String _authorAutocompleteText = '';
-  List<SavedSeriesTitle> _seriesTitles = [];
-  List<SavedSeriesTitle> get seriesTitles => _seriesTitles;
-  bool _isSavingSeriesTitle = false;
-  bool get isSavingSeriesTitle => _isSavingSeriesTitle;
-  bool _isClearingSeriesTitles = false;
-  bool get isClearingSeriesTitles => _isClearingSeriesTitles;
-  String? get newSeriesTitleName {
-    final candidate = seriesTitleController.text.trim();
-    if (candidate.isEmpty) return null;
-    final normalizedCandidate = candidate.toLowerCase();
-    final isExistingSeriesTitle = _seriesTitles.any(
-      (seriesTitle) => seriesTitle.name.toLowerCase() == normalizedCandidate,
-    );
-    return isExistingSeriesTitle ? null : candidate;
-  }
-  bool get canAddCurrentSeriesTitle =>
-      newSeriesTitleName != null && !_isSavingSeriesTitle;
-  String? get newAuthorName {
-    final candidate = _currentAuthorToken();
-    if (candidate.isEmpty) return null;
-    final normalizedCandidate = candidate.toLowerCase();
-    final isExistingAuthor = _authors.any(
-      (author) => author.name.toLowerCase() == normalizedCandidate,
-    );
-    return isExistingAuthor ? null : candidate;
-  }
-  bool get canAddCurrentAuthor => newAuthorName != null && !_isSavingAuthor;
+
   CoverLayout _selectedLayout = CoverLayout.bigCenterTitle;
   CoverLayout get selectedLayout => _selectedLayout;
   CornerBadgePosition _selectedCornerBadgePosition =
@@ -186,6 +119,25 @@ class HomeViewModel extends BaseViewModel {
   double backgroundImageScaleY = 1;
   BlendMode backgroundBlendMode = BlendMode.srcOver;
   double backgroundImageOpacity = 1;
+
+  double _titleHorizontalOffset = 0;
+  double get titleHorizontalOffset => _titleHorizontalOffset;
+
+  double _authorHorizontalOffset = 0;
+  double get authorHorizontalOffset => _authorHorizontalOffset;
+
+  double _subtitleHorizontalOffset = 0;
+  double get subtitleHorizontalOffset => _subtitleHorizontalOffset;
+
+  double _taglineHorizontalOffset = 0;
+  double get taglineHorizontalOffset => _taglineHorizontalOffset;
+
+  double _seriesTitleHorizontalOffset = 0;
+  double get seriesTitleHorizontalOffset => _seriesTitleHorizontalOffset;
+
+  double _editionLineHorizontalOffset = 0;
+  double get editionLineHorizontalOffset => _editionLineHorizontalOffset;
+
   final Set<HomeFormSection> _expandedFormSections = {
     HomeFormSection.background,
     HomeFormSection.ebookDetails,
@@ -229,222 +181,46 @@ class HomeViewModel extends BaseViewModel {
     _scheduleCoverUpdate();
   }
 
-  Future<void> loadCoverSizePresets() async {
-    try {
-      final sizes = await app.client.coverSize.list();
-      if (sizes.isEmpty) return;
-
-      _coverSizePresets = sizes
-          .map(
-            (size) => CoverSizePreset(
-              label: size.label,
-              width: size.width.toDouble(),
-              height: size.height.toDouble(),
-            ),
-          )
-          .toList();
-      _selectedCoverSizePreset = _coverSizePresets.last;
-      notifyListeners();
-      _scheduleCoverUpdate();
-    } catch (_) {
-      _coverSizePresets = fallbackCoverSizePresets;
-      _selectedCoverSizePreset = fallbackCoverSizePresets.last;
-      notifyListeners();
-    }
-  }
-
-  Future<void> loadAuthors() async {
-    try {
-      final authors = await app.client.author.list();
-      _authors = authors
-          .where((author) => author.id != null)
-          .map((author) => SavedAuthor(id: author.id!, name: author.name))
-          .toList();
-      notifyListeners();
-    } catch (_) {
-      _authors = [];
-      notifyListeners();
-    }
-  }
-
-  Future<void> loadSeriesTitles() async {
-    try {
-      final seriesTitles = await app.client.seriesTitle.list();
-      _seriesTitles = seriesTitles
-          .where((seriesTitle) => seriesTitle.id != null)
-          .map(
-            (seriesTitle) => SavedSeriesTitle(
-              id: seriesTitle.id!,
-              name: seriesTitle.name,
-            ),
-          )
-          .toList();
-      notifyListeners();
-    } catch (_) {
-      _seriesTitles = [];
-      notifyListeners();
-    }
-  }
-
-  Future<void> addCurrentAuthorToDatabase() async {
-    final name = newAuthorName;
-    if (name == null) return;
-
-    _isSavingAuthor = true;
-    notifyListeners();
-
-    try {
-      final author = await app.client.author.create(name);
-      if (author.id != null) {
-        final savedAuthor = SavedAuthor(id: author.id!, name: author.name);
-        _authors = [
-          savedAuthor,
-          ..._authors.where((existing) => existing.id != savedAuthor.id),
-        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        _replaceCurrentAuthorToken(savedAuthor.name);
-      }
-    } finally {
-      _isSavingAuthor = false;
-      notifyListeners();
-      _scheduleCoverUpdate();
-    }
-  }
-
-  Future<void> addCurrentSeriesTitleToDatabase() async {
-    final name = newSeriesTitleName;
-    if (name == null) return;
-
-    _isSavingSeriesTitle = true;
-    notifyListeners();
-
-    try {
-      final seriesTitle = await app.client.seriesTitle.create(name);
-      if (seriesTitle.id != null) {
-        final savedSeriesTitle = SavedSeriesTitle(
-          id: seriesTitle.id!,
-          name: seriesTitle.name,
-        );
-        _seriesTitles = [
-          savedSeriesTitle,
-          ..._seriesTitles.where(
-            (existing) => existing.id != savedSeriesTitle.id,
-          ),
-        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        seriesTitleController.text = savedSeriesTitle.name;
-        seriesTitleController.selection = TextSelection.collapsed(
-          offset: seriesTitleController.text.length,
-        );
-      }
-    } finally {
-      _isSavingSeriesTitle = false;
-      notifyListeners();
-      _scheduleCoverUpdate();
-    }
-  }
-
-  Iterable<SavedAuthor> authorSuggestions(String query) {
-    if (_isClearingAuthors) return const Iterable<SavedAuthor>.empty();
-
-    final normalizedQuery = _currentAuthorToken(query).toLowerCase();
-    if (normalizedQuery.isEmpty) return _authors;
-
-    return _authors.where(
-      (author) => author.name.toLowerCase().contains(normalizedQuery),
-    );
-  }
-
-  Iterable<SavedSeriesTitle> seriesTitleSuggestions(String query) {
-    if (_isClearingSeriesTitles) {
-      return const Iterable<SavedSeriesTitle>.empty();
-    }
-
-    final normalizedQuery = query.trim().toLowerCase();
-    if (normalizedQuery.isEmpty) return _seriesTitles;
-
-    return _seriesTitles.where(
-      (seriesTitle) => seriesTitle.name.toLowerCase().contains(normalizedQuery),
-    );
-  }
-
-  void addAuthorToAuthorField(SavedAuthor author) {
-    _replaceCurrentAuthorToken(author.name, sourceText: _authorAutocompleteText);
+  void setTitleHorizontalOffset(double value) {
+    if (_titleHorizontalOffset == value) return;
+    _titleHorizontalOffset = value;
     notifyListeners();
     _scheduleCoverUpdate();
   }
 
-  void setSeriesTitleFromAutocomplete(SavedSeriesTitle seriesTitle) {
-    seriesTitleController.text = seriesTitle.name;
-    seriesTitleController.selection = TextSelection.collapsed(
-      offset: seriesTitleController.text.length,
-    );
+  void setAuthorHorizontalOffset(double value) {
+    if (_authorHorizontalOffset == value) return;
+    _authorHorizontalOffset = value;
     notifyListeners();
     _scheduleCoverUpdate();
   }
 
-  void setAuthorAutocompleteText(String value) {
-    _authorAutocompleteText = value;
-  }
-
-  Future<void> clearAuthors() async {
-    _isClearingAuthors = true;
-    _authors = [];
-    authorNameController.clear();
-    _authorAutocompleteText = '';
-    authorFocusNode.unfocus();
+  void setSubtitleHorizontalOffset(double value) {
+    if (_subtitleHorizontalOffset == value) return;
+    _subtitleHorizontalOffset = value;
     notifyListeners();
-
-    try {
-      await app.client.author.clear();
-    } finally {
-      _isClearingAuthors = false;
-      notifyListeners();
-      _scheduleCoverUpdate();
-    }
+    _scheduleCoverUpdate();
   }
 
-  Future<void> clearSeriesTitles() async {
-    _isClearingSeriesTitles = true;
-    _seriesTitles = [];
-    seriesTitleController.clear();
-    seriesTitleFocusNode.unfocus();
+  void setTaglineHorizontalOffset(double value) {
+    if (_taglineHorizontalOffset == value) return;
+    _taglineHorizontalOffset = value;
     notifyListeners();
-
-    try {
-      await app.client.seriesTitle.clear();
-    } finally {
-      _isClearingSeriesTitles = false;
-      notifyListeners();
-      _scheduleCoverUpdate();
-    }
+    _scheduleCoverUpdate();
   }
 
-  String _currentAuthorToken([String? value]) {
-    final text = value ?? authorNameController.text;
-    final tokenStart = _lastAuthorSeparatorEnd(text);
-    return text.substring(tokenStart).trim();
+  void setSeriesTitleHorizontalOffset(double value) {
+    if (_seriesTitleHorizontalOffset == value) return;
+    _seriesTitleHorizontalOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
   }
 
-  void _replaceCurrentAuthorToken(String authorName, {String? sourceText}) {
-    final text = sourceText ?? authorNameController.text;
-    final tokenStart = _lastAuthorSeparatorEnd(text);
-    final prefix = text.substring(0, tokenStart);
-    final separatorPrefix = prefix.isEmpty
-        ? ''
-        : prefix.endsWith(' ')
-        ? prefix
-        : '$prefix ';
-    authorNameController.text = '$separatorPrefix$authorName';
-    _authorAutocompleteText = authorNameController.text;
-
-    authorNameController.selection = TextSelection.collapsed(
-      offset: authorNameController.text.length,
-    );
-  }
-
-  int _lastAuthorSeparatorEnd(String text) {
-    final matches = RegExp(r'[,/&]').allMatches(text).toList();
-    if (matches.isEmpty) return 0;
-    return matches.last.end;
+  void setEditionLineHorizontalOffset(double value) {
+    if (_editionLineHorizontalOffset == value) return;
+    _editionLineHorizontalOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
   }
 
   void setSelectedLayout(CoverLayout value) {
@@ -475,8 +251,19 @@ class HomeViewModel extends BaseViewModel {
   }
 
   void clearBackgroundImage() {
+    // Clear current image bytes and name
     backgroundImageBytes = null;
     backgroundImageName = null;
+
+    // Reset all background image properties to default
+    backgroundImageMode = BackgroundImageMode.cover;
+    backgroundImageAlignment = Alignment.center;
+    backgroundImageScaleX = 1;
+    backgroundImageScaleY = 1;
+    backgroundBlendMode = BlendMode.srcOver;
+    backgroundImageOpacity = 1;
+
+    // Notify listeners and schedule cover update
     notifyListeners();
     _scheduleCoverUpdate();
   }
@@ -714,6 +501,12 @@ class HomeViewModel extends BaseViewModel {
           editionLineBoxColor: editionLineBoxColor,
           cornerBadgeTextColor: cornerBadgeTextColor,
           cornerBadgeColor: cornerBadgeColor,
+          titleHorizontalOffset: _titleHorizontalOffset,
+          authorHorizontalOffset: _authorHorizontalOffset,
+          subtitleHorizontalOffset: _subtitleHorizontalOffset,
+          taglineHorizontalOffset: _taglineHorizontalOffset,
+          seriesTitleHorizontalOffset: _seriesTitleHorizontalOffset,
+          editionLineHorizontalOffset: _editionLineHorizontalOffset,
         ),
       );
 
@@ -762,7 +555,6 @@ class HomeViewModel extends BaseViewModel {
   void clearFields() {
     ebookTitleController.clear();
     authorNameController.clear();
-    _authorAutocompleteText = '';
     subtitleController.clear();
     taglineController.clear();
     seriesTitleController.clear();

@@ -12,7 +12,7 @@ part 'ebook_cover_settings.freezed.dart';
 part 'ebook_cover_settings.g.dart';
 
 @freezed
-class EbookCoverSettings with _$EbookCoverSettings {
+abstract class EbookCoverSettings with _$EbookCoverSettings {
   const factory EbookCoverSettings({
     @Default(1600) double coverWidth,
     @Default(2560) double coverHeight,
@@ -98,6 +98,13 @@ class EbookCoverSettings with _$EbookCoverSettings {
     @Default(0) double titleTopAuthorBottomTopOffset,
     @Default(0) double authorTopTitleCenterTopOffset,
 
+    @Default(0) double titleHorizontalOffset,
+    @Default(0) double authorHorizontalOffset,
+    @Default(0) double subtitleHorizontalOffset,
+    @Default(0) double taglineHorizontalOffset,
+    @Default(0) double seriesTitleHorizontalOffset,
+    @Default(0) double editionLineHorizontalOffset,
+
     @Default(CornerBadgePosition.topRight)
     CornerBadgePosition cornerBadgePosition,
 
@@ -119,6 +126,7 @@ class EbookCoverSettings with _$EbookCoverSettings {
     BlendMode backgroundBlendMode,
 
     @Default(1) double backgroundImageOpacity,
+
   }) = _EbookCoverSettings;
 
   factory EbookCoverSettings.fromJson(Map<String, dynamic> json) =>

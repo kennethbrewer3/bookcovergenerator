@@ -5,8 +5,6 @@ environment:
   sdk: '^3.8.0'
 
 workspace:
-  - book_cover_designer_client
-  - book_cover_designer_server
   - book_cover_designer_flutter
 dependency_overrides:
   flutter_secure_storage: ^10.0.0
