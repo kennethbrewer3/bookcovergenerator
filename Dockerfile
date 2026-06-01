@@ -8,9 +8,10 @@ WORKDIR /app/book_cover_designer_flutter
 
 RUN flutter pub get
 
+RUN dart run build_runner build
+
 RUN flutter build web \
     --base-href / \
-    --wasm \
     --release
 
 FROM nginx:1.27-alpine
