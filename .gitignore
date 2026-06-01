@@ -18,8 +18,15 @@ Desktop.ini
 .pub-cache/
 .pub/
 build/
+**/build/
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Keep Flutter web release output for Docker static hosting
+!book_cover_designer_flutter/
+!book_cover_designer_flutter/build/
+!book_cover_designer_flutter/build/web/
+!book_cover_designer_flutter/build/web/**
 
 # Flutter web and desktop ephemeral files
 **/Flutter/ephemeral/
@@ -83,7 +90,3 @@ book_cover_designer_server/web/app/
 *.temp
 *.swp
 *.swo
-
-# Freezed generated files
-*.freezed.dart
-*.g.dart
