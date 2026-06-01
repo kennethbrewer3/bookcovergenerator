@@ -47,12 +47,24 @@ abstract class EbookCoverSettings with _$EbookCoverSettings {
     Color titleBoxColor,
 
     @ColorJsonConverter()
+    @Default(Colors.white)
+    Color titleBorderColor,
+
+    @ColorJsonConverter()
     @Default(Colors.white70)
     Color authorBoxColor,
 
     @ColorJsonConverter()
+    @Default(Colors.white)
+    Color authorBorderColor,
+
+    @ColorJsonConverter()
     @Default(Colors.white70)
     Color subtitleBoxColor,
+
+    @ColorJsonConverter()
+    @Default(Colors.white)
+    Color subtitleBorderColor,
 
     @ColorJsonConverter()
     @Default(Colors.white70)
@@ -63,12 +75,20 @@ abstract class EbookCoverSettings with _$EbookCoverSettings {
     Color taglineBoxColor,
 
     @ColorJsonConverter()
+    @Default(Colors.white)
+    Color taglineBorderColor,
+
+    @ColorJsonConverter()
     @Default(Colors.white70)
     Color seriesTitleTextColor,
 
     @ColorJsonConverter()
     @Default(Colors.white70)
     Color seriesTitleBoxColor,
+
+    @ColorJsonConverter()
+    @Default(Colors.white)
+    Color seriesTitleBorderColor,
 
     @ColorJsonConverter()
     @Default(Colors.white70)
@@ -79,12 +99,20 @@ abstract class EbookCoverSettings with _$EbookCoverSettings {
     Color editionLineBoxColor,
 
     @ColorJsonConverter()
+    @Default(Colors.white)
+    Color editionLineBorderColor,
+
+    @ColorJsonConverter()
     @Default(Colors.white70)
     Color cornerBadgeTextColor,
 
     @ColorJsonConverter()
     @Default(Colors.white70)
     Color cornerBadgeColor,
+
+    @ColorJsonConverter()
+    @Default(Colors.white)
+    Color cornerBadgeBorderColor,
 
     @Default(CoverLayout.bigCenterTitle)
     CoverLayout layout,
@@ -104,6 +132,14 @@ abstract class EbookCoverSettings with _$EbookCoverSettings {
     @Default(0) double taglineHorizontalOffset,
     @Default(0) double seriesTitleHorizontalOffset,
     @Default(0) double editionLineHorizontalOffset,
+
+    @Default(TextAlign.center) TextAlign titleTextAlign,
+    @Default(TextAlign.center) TextAlign authorTextAlign,
+    @Default(TextAlign.center) TextAlign subtitleTextAlign,
+    @Default(TextAlign.center) TextAlign taglineTextAlign,
+    @Default(TextAlign.center) TextAlign seriesTitleTextAlign,
+    @Default(TextAlign.center) TextAlign editionLineTextAlign,
+    @Default(TextAlign.center) TextAlign cornerBadgeTextAlign,
 
     @Default(CornerBadgePosition.topRight)
     CornerBadgePosition cornerBadgePosition,

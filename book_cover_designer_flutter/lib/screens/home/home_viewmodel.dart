@@ -12,7 +12,13 @@ import 'package:stacked/stacked.dart';
 
 enum HomeFormSection {
   background,
-  ebookDetails,
+  title,
+  author,
+  subtitle,
+  tagline,
+  series,
+  edition,
+  badge,
   layout,
   actions,
 }
@@ -100,16 +106,23 @@ class HomeViewModel extends BaseViewModel {
   Color subtitleTextColor = Colors.white70;
   Color authorTextColor = Colors.white;
   Color titleBoxColor = const Color(0x66000000);
+  Color titleBorderColor = Colors.white;
   Color authorBoxColor = const Color(0x66000000);
+  Color authorBorderColor = Colors.white;
   Color subtitleBoxColor = const Color(0x66000000);
+  Color subtitleBorderColor = Colors.white;
   Color taglineTextColor = Colors.white;
   Color taglineBoxColor = const Color(0x66000000);
+  Color taglineBorderColor = Colors.white;
   Color seriesTitleTextColor = Colors.white;
   Color seriesTitleBoxColor = const Color(0x66000000);
+  Color seriesTitleBorderColor = Colors.white;
   Color editionLineTextColor = Colors.white;
   Color editionLineBoxColor = const Color(0x66000000);
+  Color editionLineBorderColor = Colors.white;
   Color cornerBadgeTextColor = Colors.white;
   Color cornerBadgeColor = const Color(0xAA000000);
+  Color cornerBadgeBorderColor = Colors.white;
   bool _hasSelectedBackgroundColor = false;
   Uint8List? backgroundImageBytes;
   String? backgroundImageName;
@@ -138,11 +151,24 @@ class HomeViewModel extends BaseViewModel {
   double _editionLineHorizontalOffset = 0;
   double get editionLineHorizontalOffset => _editionLineHorizontalOffset;
 
+  TextAlign _titleTextAlign = TextAlign.center;
+  TextAlign get titleTextAlign => _titleTextAlign;
+  TextAlign _authorTextAlign = TextAlign.center;
+  TextAlign get authorTextAlign => _authorTextAlign;
+  TextAlign _subtitleTextAlign = TextAlign.center;
+  TextAlign get subtitleTextAlign => _subtitleTextAlign;
+  TextAlign _taglineTextAlign = TextAlign.center;
+  TextAlign get taglineTextAlign => _taglineTextAlign;
+  TextAlign _seriesTitleTextAlign = TextAlign.center;
+  TextAlign get seriesTitleTextAlign => _seriesTitleTextAlign;
+  TextAlign _editionLineTextAlign = TextAlign.center;
+  TextAlign get editionLineTextAlign => _editionLineTextAlign;
+  TextAlign _cornerBadgeTextAlign = TextAlign.center;
+  TextAlign get cornerBadgeTextAlign => _cornerBadgeTextAlign;
+
   final Set<HomeFormSection> _expandedFormSections = {
-    HomeFormSection.background,
-    HomeFormSection.ebookDetails,
-    HomeFormSection.layout,
-    HomeFormSection.actions,
+    HomeFormSection.title,
+    HomeFormSection.author,
   };
 
   HomeViewModel() {
@@ -219,6 +245,59 @@ class HomeViewModel extends BaseViewModel {
   void setEditionLineHorizontalOffset(double value) {
     if (_editionLineHorizontalOffset == value) return;
     _editionLineHorizontalOffset = value;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void setTitleTextAlign(TextAlign value) => _setTextAlign(
+    current: _titleTextAlign,
+    value: value,
+    setter: () => _titleTextAlign = value,
+  );
+
+  void setAuthorTextAlign(TextAlign value) => _setTextAlign(
+    current: _authorTextAlign,
+    value: value,
+    setter: () => _authorTextAlign = value,
+  );
+
+  void setSubtitleTextAlign(TextAlign value) => _setTextAlign(
+    current: _subtitleTextAlign,
+    value: value,
+    setter: () => _subtitleTextAlign = value,
+  );
+
+  void setTaglineTextAlign(TextAlign value) => _setTextAlign(
+    current: _taglineTextAlign,
+    value: value,
+    setter: () => _taglineTextAlign = value,
+  );
+
+  void setSeriesTitleTextAlign(TextAlign value) => _setTextAlign(
+    current: _seriesTitleTextAlign,
+    value: value,
+    setter: () => _seriesTitleTextAlign = value,
+  );
+
+  void setEditionLineTextAlign(TextAlign value) => _setTextAlign(
+    current: _editionLineTextAlign,
+    value: value,
+    setter: () => _editionLineTextAlign = value,
+  );
+
+  void setCornerBadgeTextAlign(TextAlign value) => _setTextAlign(
+    current: _cornerBadgeTextAlign,
+    value: value,
+    setter: () => _cornerBadgeTextAlign = value,
+  );
+
+  void _setTextAlign({
+    required TextAlign current,
+    required TextAlign value,
+    required VoidCallback setter,
+  }) {
+    if (current == value) return;
+    setter();
     notifyListeners();
     _scheduleCoverUpdate();
   }
@@ -384,11 +463,20 @@ class HomeViewModel extends BaseViewModel {
       case 'titleBox':
         titleBoxColor = color;
         break;
+      case 'titleBorder':
+        titleBorderColor = color;
+        break;
       case 'authorBox':
         authorBoxColor = color;
         break;
+      case 'authorBorder':
+        authorBorderColor = color;
+        break;
       case 'subtitleBox':
         subtitleBoxColor = color;
+        break;
+      case 'subtitleBorder':
+        subtitleBorderColor = color;
         break;
       case 'taglineText':
         taglineTextColor = color;
@@ -396,11 +484,17 @@ class HomeViewModel extends BaseViewModel {
       case 'taglineBox':
         taglineBoxColor = color;
         break;
+      case 'taglineBorder':
+        taglineBorderColor = color;
+        break;
       case 'seriesTitleText':
         seriesTitleTextColor = color;
         break;
       case 'seriesTitleBox':
         seriesTitleBoxColor = color;
+        break;
+      case 'seriesTitleBorder':
+        seriesTitleBorderColor = color;
         break;
       case 'editionLineText':
         editionLineTextColor = color;
@@ -408,11 +502,17 @@ class HomeViewModel extends BaseViewModel {
       case 'editionLineBox':
         editionLineBoxColor = color;
         break;
+      case 'editionLineBorder':
+        editionLineBorderColor = color;
+        break;
       case 'cornerBadgeText':
         cornerBadgeTextColor = color;
         break;
       case 'cornerBadge':
         cornerBadgeColor = color;
+        break;
+      case 'cornerBadgeBorder':
+        cornerBadgeBorderColor = color;
         break;
     }
     notifyListeners();
@@ -491,22 +591,36 @@ class HomeViewModel extends BaseViewModel {
           subtitleTextColor: subtitleTextColor,
           authorTextColor: authorTextColor,
           titleBoxColor: titleBoxColor,
+          titleBorderColor: titleBorderColor,
           authorBoxColor: authorBoxColor,
+          authorBorderColor: authorBorderColor,
           subtitleBoxColor: subtitleBoxColor,
+          subtitleBorderColor: subtitleBorderColor,
           taglineTextColor: taglineTextColor,
           taglineBoxColor: taglineBoxColor,
+          taglineBorderColor: taglineBorderColor,
           seriesTitleTextColor: seriesTitleTextColor,
           seriesTitleBoxColor: seriesTitleBoxColor,
+          seriesTitleBorderColor: seriesTitleBorderColor,
           editionLineTextColor: editionLineTextColor,
           editionLineBoxColor: editionLineBoxColor,
+          editionLineBorderColor: editionLineBorderColor,
           cornerBadgeTextColor: cornerBadgeTextColor,
           cornerBadgeColor: cornerBadgeColor,
+          cornerBadgeBorderColor: cornerBadgeBorderColor,
           titleHorizontalOffset: _titleHorizontalOffset,
           authorHorizontalOffset: _authorHorizontalOffset,
           subtitleHorizontalOffset: _subtitleHorizontalOffset,
           taglineHorizontalOffset: _taglineHorizontalOffset,
           seriesTitleHorizontalOffset: _seriesTitleHorizontalOffset,
           editionLineHorizontalOffset: _editionLineHorizontalOffset,
+          titleTextAlign: _titleTextAlign,
+          authorTextAlign: _authorTextAlign,
+          subtitleTextAlign: _subtitleTextAlign,
+          taglineTextAlign: _taglineTextAlign,
+          seriesTitleTextAlign: _seriesTitleTextAlign,
+          editionLineTextAlign: _editionLineTextAlign,
+          cornerBadgeTextAlign: _cornerBadgeTextAlign,
         ),
       );
 
@@ -568,6 +682,13 @@ class HomeViewModel extends BaseViewModel {
     _subtitleTopOffset = 0;
     _titleTopAuthorBottomTopOffset = 0;
     _authorTopTitleCenterTopOffset = 0;
+    _titleTextAlign = TextAlign.center;
+    _authorTextAlign = TextAlign.center;
+    _subtitleTextAlign = TextAlign.center;
+    _taglineTextAlign = TextAlign.center;
+    _seriesTitleTextAlign = TextAlign.center;
+    _editionLineTextAlign = TextAlign.center;
+    _cornerBadgeTextAlign = TextAlign.center;
     _hasSelectedBackgroundColor = false;
     backgroundImageBytes = null;
     backgroundImageName = null;

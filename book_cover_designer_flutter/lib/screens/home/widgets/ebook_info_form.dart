@@ -43,9 +43,51 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
-                  section: HomeFormSection.ebookDetails,
-                  title: 'Ebook Details',
-                  body: _buildEbookDetailsSection(viewModel),
+                  section: HomeFormSection.title,
+                  title: 'Title',
+                  body: _buildEbookTitleSection(viewModel),
+                ),
+                _buildPanel(
+                  context: context,
+                  viewModel: viewModel,
+                  section: HomeFormSection.author,
+                  title: 'Author',
+                  body: _buildEbookAuthorSection(viewModel),
+                ),
+                _buildPanel(
+                  context: context,
+                  viewModel: viewModel,
+                  section: HomeFormSection.subtitle,
+                  title: 'Subtitle',
+                  body: _buildEbookSubtitleSection(viewModel),
+                ),
+                _buildPanel(
+                  context: context,
+                  viewModel: viewModel,
+                  section: HomeFormSection.tagline,
+                  title: 'Tagline',
+                  body: _buildEbookTaglineSection(viewModel),
+                ),
+                _buildPanel(
+                  context: context,
+                  viewModel: viewModel,
+                  section: HomeFormSection.series,
+                  title: 'Series Title',
+                  body: _buildEbookSeriesTitleSection(viewModel),
+                ),
+                _buildPanel(
+                  context: context,
+                  viewModel: viewModel,
+                  section: HomeFormSection.edition,
+                  title: 'Edition',
+                  body: _buildEbookEditionSection(viewModel),
+                ),
+                _buildPanel(
+                  context: context,
+                  viewModel: viewModel,
+                  section: HomeFormSection.badge,
+                  title: 'Corner  Badge',
+                  body: _buildEbookBadgeSection(viewModel),
                 ),
                 _buildPanel(
                   context: context,
@@ -94,445 +136,562 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _sectionColumn(List<Widget> children) {
-    return Column(
-      spacing: AppSpacing.md,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
+  Widget _buildBackgroundSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        Row(
+          spacing: AppSpacing.md,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _ColorButton(
+              label: 'Background Color',
+              color: viewModel.backgroundColor,
+              width: 80,
+              height: 50,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('background', color),
+            ),
+            Expanded(
+              child: DropdownButtonFormField<CoverSizePreset>(
+                value: viewModel.selectedCoverSizePreset,
+                decoration: const InputDecoration(
+                  labelText: 'Cover Size',
+                  border: OutlineInputBorder(),
+                ),
+                items: viewModel.coverSizePresets
+                    .map(
+                      (preset) => DropdownMenuItem(
+                        value: preset,
+                        child: Text(preset.label),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (preset) {
+                  if (preset != null) {
+                    viewModel.setCoverSizePreset(preset);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            FilledButton.icon(
+              onPressed: viewModel.pickBackgroundImage,
+              icon: const Icon(Icons.image),
+              label: const Text('Choose Background Image'),
+            ),
+            if (viewModel.backgroundImageBytes != null)
+              OutlinedButton.icon(
+                onPressed: viewModel.clearBackgroundImage,
+                icon: const Icon(Icons.clear),
+                label: const Text('Clear Image'),
+              ),
+            if (viewModel.backgroundImageName != null)
+              Text(viewModel.backgroundImageName!),
+          ],
+        ),
+        DropdownButtonFormField<BackgroundImageMode>(
+          value: viewModel.backgroundImageMode,
+          decoration: const InputDecoration(
+            labelText: 'Background Image Mode',
+            border: OutlineInputBorder(),
+          ),
+          items: BackgroundImageMode.values
+              .map(
+                (mode) => DropdownMenuItem(
+                  value: mode,
+                  child: Text(_backgroundImageModeLabel(mode)),
+                ),
+              )
+              .toList(),
+          onChanged: (mode) {
+            if (mode != null) viewModel.setBackgroundImageMode(mode);
+          },
+        ),
+        DropdownButtonFormField<Alignment>(
+          value: viewModel.backgroundImageAlignment,
+          decoration: const InputDecoration(
+            labelText: 'Background Image Alignment',
+            border: OutlineInputBorder(),
+          ),
+          items: _backgroundAlignments.entries
+              .map(
+                (entry) => DropdownMenuItem(
+                  value: entry.value,
+                  child: Text(entry.key),
+                ),
+              )
+              .toList(),
+          onChanged: (alignment) {
+            if (alignment != null)
+              viewModel.setBackgroundImageAlignment(alignment);
+          },
+        ),
+        _TopOffsetSlider(
+          label: 'Background Image Scale X',
+          value: viewModel.backgroundImageScaleX,
+          min: 0.1,
+          max: 4,
+          divisions: 39,
+          onChanged: viewModel.setBackgroundImageScaleX,
+        ),
+        _TopOffsetSlider(
+          label: 'Background Image Scale Y',
+          value: viewModel.backgroundImageScaleY,
+          min: 0.1,
+          max: 4,
+          divisions: 39,
+          onChanged: viewModel.setBackgroundImageScaleY,
+        ),
+        DropdownButtonFormField<BlendMode>(
+          value: viewModel.backgroundBlendMode,
+          decoration: const InputDecoration(
+            labelText: 'Background Mix Mode',
+            border: OutlineInputBorder(),
+          ),
+          items: _backgroundBlendModes.entries
+              .map(
+                (entry) => DropdownMenuItem(
+                  value: entry.value,
+                  child: Text(entry.key),
+                ),
+              )
+              .toList(),
+          onChanged: (blendMode) {
+            if (blendMode != null) viewModel.setBackgroundBlendMode(blendMode);
+          },
+        ),
+        _TopOffsetSlider(
+          label: 'Background Image Opacity',
+          value: viewModel.backgroundImageOpacity,
+          min: 0,
+          max: 1,
+          divisions: 20,
+          onChanged: viewModel.setBackgroundImageOpacity,
+        ),
+      ],
     );
   }
 
-  Widget _buildBackgroundSection(HomeViewModel viewModel) {
-    return _sectionColumn([
-      Row(
-        spacing: AppSpacing.md,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _ColorButton(
-            label: 'Background Color',
-            color: viewModel.backgroundColor,
-            width: 80,
-            height: 50,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('background', color),
-          ),
-          Expanded(
-            child: DropdownButtonFormField<CoverSizePreset>(
-              value: viewModel.selectedCoverSizePreset,
-              decoration: const InputDecoration(
-                labelText: 'Cover Size',
-                border: OutlineInputBorder(),
-              ),
-              items: viewModel.coverSizePresets
-                  .map(
-                    (preset) => DropdownMenuItem(
-                      value: preset,
-                      child: Text(preset.label),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (preset) {
-                if (preset != null) {
-                  viewModel.setCoverSizePreset(preset);
-                }
-              },
+  Widget _buildEbookTitleSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        TextRow(
+          field: TextFormField(
+            controller: viewModel.ebookTitleController,
+            decoration: const InputDecoration(
+              labelText: 'Ebook Title',
+              border: OutlineInputBorder(),
             ),
+            validator: viewModel.validateEbookTitle,
           ),
-        ],
-      ),
-      Wrap(
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          FilledButton.icon(
-            onPressed: viewModel.pickBackgroundImage,
-            icon: const Icon(Icons.image),
-            label: const Text('Choose Background Image'),
-          ),
-          if (viewModel.backgroundImageBytes != null)
-            OutlinedButton.icon(
-              onPressed: viewModel.clearBackgroundImage,
-              icon: const Icon(Icons.clear),
-              label: const Text('Clear Image'),
+          buttons: [
+            _ColorButton(
+              label: 'Title Text Color',
+              color: viewModel.titleTextColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('titleText', color),
             ),
-          if (viewModel.backgroundImageName != null)
-            Text(viewModel.backgroundImageName!),
-        ],
-      ),
-      DropdownButtonFormField<BackgroundImageMode>(
-        value: viewModel.backgroundImageMode,
-        decoration: const InputDecoration(
-          labelText: 'Background Image Mode',
-          border: OutlineInputBorder(),
+            _ColorButton(
+              label: 'Title Box Color',
+              color: viewModel.titleBoxColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('titleBox', color),
+            ),
+            _ColorButton(
+              label: 'Title Border Color',
+              color: viewModel.titleBorderColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('titleBorder', color),
+            ),
+          ],
         ),
-        items: BackgroundImageMode.values
-            .map(
-              (mode) => DropdownMenuItem(
-                value: mode,
-                child: Text(_backgroundImageModeLabel(mode)),
-              ),
-            )
-            .toList(),
-        onChanged: (mode) {
-          if (mode != null) viewModel.setBackgroundImageMode(mode);
-        },
-      ),
-      DropdownButtonFormField<Alignment>(
-        value: viewModel.backgroundImageAlignment,
-        decoration: const InputDecoration(
-          labelText: 'Background Image Alignment',
-          border: OutlineInputBorder(),
+        _TopOffsetSlider(
+          label: 'Title Top Offset',
+          value: viewModel.titleTopOffset,
+          onChanged: viewModel.setTitleTopOffset,
         ),
-        items: _backgroundAlignments.entries
-            .map(
-              (entry) => DropdownMenuItem(
-                value: entry.value,
-                child: Text(entry.key),
-              ),
-            )
-            .toList(),
-        onChanged: (alignment) {
-          if (alignment != null)
-            viewModel.setBackgroundImageAlignment(alignment);
-        },
-      ),
-      _TopOffsetSlider(
-        label: 'Background Image Scale X',
-        value: viewModel.backgroundImageScaleX,
-        min: 0.1,
-        max: 4,
-        divisions: 39,
-        onChanged: viewModel.setBackgroundImageScaleX,
-      ),
-      _TopOffsetSlider(
-        label: 'Background Image Scale Y',
-        value: viewModel.backgroundImageScaleY,
-        min: 0.1,
-        max: 4,
-        divisions: 39,
-        onChanged: viewModel.setBackgroundImageScaleY,
-      ),
-      DropdownButtonFormField<BlendMode>(
-        value: viewModel.backgroundBlendMode,
-        decoration: const InputDecoration(
-          labelText: 'Background Mix Mode',
-          border: OutlineInputBorder(),
+        _LeftOffsetSlider(
+          label: 'Title Horizontal Offset',
+          value: viewModel.titleHorizontalOffset,
+          onChanged: viewModel.setTitleHorizontalOffset,
         ),
-        items: _backgroundBlendModes.entries
-            .map(
-              (entry) => DropdownMenuItem(
-                value: entry.value,
-                child: Text(entry.key),
-              ),
-            )
-            .toList(),
-        onChanged: (blendMode) {
-          if (blendMode != null) viewModel.setBackgroundBlendMode(blendMode);
-        },
-      ),
-      _TopOffsetSlider(
-        label: 'Background Image Opacity',
-        value: viewModel.backgroundImageOpacity,
-        min: 0,
-        max: 1,
-        divisions: 20,
-        onChanged: viewModel.setBackgroundImageOpacity,
-      ),
-    ]);
+        _TextAlignSelector(
+          label: 'Title Justification',
+          value: viewModel.titleTextAlign,
+          onChanged: viewModel.setTitleTextAlign,
+        ),
+      ],
+    );
   }
 
-  Widget _buildEbookDetailsSection(HomeViewModel viewModel) {
-    return _sectionColumn([
-      _textRow(
-        field: TextFormField(
-          controller: viewModel.ebookTitleController,
-          decoration: const InputDecoration(
-            labelText: 'Ebook Title',
-            border: OutlineInputBorder(),
+  Widget _buildEbookAuthorSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        TextRow(
+          field: TextFormField(
+            controller: viewModel.authorNameController,
+            decoration: const InputDecoration(
+              labelText: 'Author Name',
+              border: OutlineInputBorder(),
+            ),
+            validator: viewModel.validateAuthorName,
           ),
-          validator: viewModel.validateEbookTitle,
+          buttons: [
+            _ColorButton(
+              label: 'Author Text Color',
+              color: viewModel.authorTextColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('authorText', color),
+            ),
+            _ColorButton(
+              label: 'Author Box Color',
+              color: viewModel.authorBoxColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('authorBox', color),
+            ),
+            _ColorButton(
+              label: 'Author Border Color',
+              color: viewModel.authorBorderColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('authorBorder', color),
+            ),
+          ],
         ),
-        buttons: [
-          _ColorButton(
-            label: 'Title Text Color',
-            color: viewModel.titleTextColor,
+        _TopOffsetSlider(
+          label: 'Author Top Offset',
+          value: viewModel.authorTopOffset,
+          onChanged: viewModel.setAuthorTopOffset,
+        ),
+        _LeftOffsetSlider(
+          label: 'Author Left Offset',
+          value: viewModel.authorHorizontalOffset,
+          onChanged: viewModel.setAuthorHorizontalOffset,
+        ),
+        _TextAlignSelector(
+          label: 'Author Justification',
+          value: viewModel.authorTextAlign,
+          onChanged: viewModel.setAuthorTextAlign,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEbookSubtitleSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        TextRow(
+          field: TextFormField(
+            controller: viewModel.subtitleController,
+            decoration: const InputDecoration(
+              labelText: 'Subtitle',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          buttons: [
+            _ColorButton(
+              label: 'Subtitle Text Color',
+              color: viewModel.subtitleTextColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('subtitleText', color),
+            ),
+            _ColorButton(
+              label: 'Subtitle Box Color',
+              color: viewModel.subtitleBoxColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('subtitleBox', color),
+            ),
+            _ColorButton(
+              label: 'Subtitle Border Color',
+              color: viewModel.subtitleBorderColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('subtitleBorder', color),
+            ),
+          ],
+        ),
+        _TopOffsetSlider(
+          label: 'Subtitle Top Offset',
+          value: viewModel.subtitleTopOffset,
+          onChanged: viewModel.setSubtitleTopOffset,
+        ),
+        _LeftOffsetSlider(
+          label: 'Subtitle Left Offset',
+          value: viewModel.subtitleHorizontalOffset,
+          onChanged: viewModel.setSubtitleHorizontalOffset,
+        ),
+        _TextAlignSelector(
+          label: 'Subtitle Justification',
+          value: viewModel.subtitleTextAlign,
+          onChanged: viewModel.setSubtitleTextAlign,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEbookTaglineSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        OptionalTextSection(
+          controller: viewModel.taglineController,
+          label: 'Tagline',
+          textButton: _ColorButton(
+            label: 'Tagline Text Color',
+            color: viewModel.taglineTextColor,
             onColorSelected: (color) =>
-                viewModel.setCoverColor('titleText', color),
+                viewModel.setCoverColor('taglineText', color),
           ),
-          _ColorButton(
-            label: 'Title Box Color',
-            color: viewModel.titleBoxColor,
+          boxButton: _ColorButton(
+            label: 'Tagline Box Color',
+            color: viewModel.taglineBoxColor,
             onColorSelected: (color) =>
-                viewModel.setCoverColor('titleBox', color),
+                viewModel.setCoverColor('taglineBox', color),
           ),
-        ],
-      ),
-      _TopOffsetSlider(
-        label: 'Title Top Offset',
-        value: viewModel.titleTopOffset,
-        onChanged: viewModel.setTitleTopOffset,
-      ),
-      _LeftOffsetSlider(
-        label: 'Title Horizontal Offset',
-        value: viewModel.titleHorizontalOffset,
-        onChanged: viewModel.setTitleHorizontalOffset,
-      ),
-      _textRow(
-        field: TextFormField(
-          controller: viewModel.authorNameController,
-          decoration: const InputDecoration(
-            labelText: 'Author Name',
-            border: OutlineInputBorder(),
-          ),
-          validator: viewModel.validateAuthorName,
-        ),
-        buttons: [
-          _ColorButton(
-            label: 'Author Text Color',
-            color: viewModel.authorTextColor,
+          borderButton: _ColorButton(
+            label: 'Tagline Border Color',
+            color: viewModel.taglineBorderColor,
             onColorSelected: (color) =>
-                viewModel.setCoverColor('authorText', color),
+                viewModel.setCoverColor('taglineBorder', color),
           ),
-          _ColorButton(
-            label: 'Author Box Color',
-            color: viewModel.authorBoxColor,
+          verticalSlider: _TopOffsetSlider(
+            label: 'Tagline Top Offset',
+            value: viewModel.taglineTopOffset,
+            onChanged: viewModel.setTaglineTopOffset,
+          ),
+          horizontalSlider: _LeftOffsetSlider(
+            label: 'Tagline Left Offset',
+            value: viewModel.taglineHorizontalOffset,
+            onChanged: viewModel.setTaglineHorizontalOffset,
+          ),
+          alignSelector: _TextAlignSelector(
+            label: 'Tagline Justification',
+            value: viewModel.taglineTextAlign,
+            onChanged: viewModel.setTaglineTextAlign,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEbookSeriesTitleSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        TextRow(
+          field: TextFormField(
+            controller: viewModel.seriesTitleController,
+            decoration: const InputDecoration(
+              labelText: 'Series Title',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          buttons: [
+            _ColorButton(
+              label: 'Series Title Text Color',
+              color: viewModel.seriesTitleTextColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('seriesTitleText', color),
+            ),
+            _ColorButton(
+              label: 'Series Title Box Color',
+              color: viewModel.seriesTitleBoxColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('seriesTitleBox', color),
+            ),
+            _ColorButton(
+              label: 'Series Title Border Color',
+              color: viewModel.seriesTitleBorderColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('seriesTitleBorder', color),
+            ),
+          ],
+        ),
+        _TopOffsetSlider(
+          label: 'Series Title Top Offset',
+          value: viewModel.seriesTitleTopOffset,
+          onChanged: viewModel.setSeriesTitleTopOffset,
+        ),
+        _LeftOffsetSlider(
+          label: 'Series Title Left Offset',
+          value: viewModel.seriesTitleHorizontalOffset,
+          onChanged: viewModel.setSeriesTitleHorizontalOffset,
+        ),
+        _TextAlignSelector(
+          label: 'Series Title Justification',
+          value: viewModel.seriesTitleTextAlign,
+          onChanged: viewModel.setSeriesTitleTextAlign,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEbookEditionSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        OptionalTextSection(
+          controller: viewModel.editionLineController,
+          label: 'Edition Line',
+          textButton: _ColorButton(
+            label: 'Edition Line Text Color',
+            color: viewModel.editionLineTextColor,
             onColorSelected: (color) =>
-                viewModel.setCoverColor('authorBox', color),
+                viewModel.setCoverColor('editionLineText', color),
           ),
-        ],
-      ),
-      _TopOffsetSlider(
-        label: 'Author Top Offset',
-        value: viewModel.authorTopOffset,
-        onChanged: viewModel.setAuthorTopOffset,
-      ),
-      _LeftOffsetSlider(
-        label: 'Author Left Offset',
-        value: viewModel.authorHorizontalOffset,
-        onChanged: viewModel.setAuthorHorizontalOffset,
-      ),
-      _textRow(
-        field: TextFormField(
-          controller: viewModel.subtitleController,
-          decoration: const InputDecoration(
-            labelText: 'Subtitle',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        buttons: [
-          _ColorButton(
-            label: 'Subtitle Text Color',
-            color: viewModel.subtitleTextColor,
+          boxButton: _ColorButton(
+            label: 'Edition Line Box Color',
+            color: viewModel.editionLineBoxColor,
             onColorSelected: (color) =>
-                viewModel.setCoverColor('subtitleText', color),
+                viewModel.setCoverColor('editionLineBox', color),
           ),
-          _ColorButton(
-            label: 'Subtitle Box Color',
-            color: viewModel.subtitleBoxColor,
+          borderButton: _ColorButton(
+            label: 'Edition Line Border Color',
+            color: viewModel.editionLineBorderColor,
             onColorSelected: (color) =>
-                viewModel.setCoverColor('subtitleBox', color),
+                viewModel.setCoverColor('editionLineBorder', color),
           ),
-        ],
-      ),
-      _TopOffsetSlider(
-        label: 'Subtitle Top Offset',
-        value: viewModel.subtitleTopOffset,
-        onChanged: viewModel.setSubtitleTopOffset,
-      ),
-      _LeftOffsetSlider(
-        label: 'Subtitle Left Offset',
-        value: viewModel.subtitleHorizontalOffset,
-        onChanged: viewModel.setSubtitleHorizontalOffset,
-      ),
-      _optionalTextSection(
-        controller: viewModel.taglineController,
-        label: 'Tagline',
-        textButton: _ColorButton(
-          label: 'Tagline Text Color',
-          color: viewModel.taglineTextColor,
-          onColorSelected: (color) =>
-              viewModel.setCoverColor('taglineText', color),
-        ),
-        boxButton: _ColorButton(
-          label: 'Tagline Box Color',
-          color: viewModel.taglineBoxColor,
-          onColorSelected: (color) =>
-              viewModel.setCoverColor('taglineBox', color),
-        ),
-        verticalSlider: _TopOffsetSlider(
-          label: 'Tagline Top Offset',
-          value: viewModel.taglineTopOffset,
-          onChanged: viewModel.setTaglineTopOffset,
-        ),
-        horizontalSlider: _LeftOffsetSlider(
-          label: 'Tagline Left Offset',
-          value: viewModel.taglineHorizontalOffset,
-          onChanged: viewModel.setTaglineHorizontalOffset,
-        ),
-      ),
-      _textRow(
-        field: TextFormField(
-          controller: viewModel.seriesTitleController,
-          decoration: const InputDecoration(
-            labelText: 'Series Title',
-            border: OutlineInputBorder(),
+          verticalSlider: _TopOffsetSlider(
+            label: 'Edition Line Top Offset',
+            value: viewModel.editionLineTopOffset,
+            onChanged: viewModel.setEditionLineTopOffset,
+          ),
+          horizontalSlider: _LeftOffsetSlider(
+            label: 'Edition Line Left Offset',
+            value: viewModel.editionLineHorizontalOffset,
+            onChanged: viewModel.setEditionLineHorizontalOffset,
+          ),
+          alignSelector: _TextAlignSelector(
+            label: 'Edition Line Justification',
+            value: viewModel.editionLineTextAlign,
+            onChanged: viewModel.setEditionLineTextAlign,
           ),
         ),
-        buttons: [
-          _ColorButton(
-            label: 'Series Title Text Color',
-            color: viewModel.seriesTitleTextColor,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('seriesTitleText', color),
+      ],
+    );
+  }
+
+  Widget _buildEbookBadgeSection(HomeViewModel viewModel) {
+    return SectionColumn(
+      children: [
+        TextRow(
+          field: TextFormField(
+            controller: viewModel.cornerBadgeTextController,
+            decoration: const InputDecoration(
+              labelText: 'Corner Badge',
+              border: OutlineInputBorder(),
+            ),
           ),
-          _ColorButton(
-            label: 'Series Title Box Color',
-            color: viewModel.seriesTitleBoxColor,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('seriesTitleBox', color),
-          ),
-        ],
-      ),
-      _TopOffsetSlider(
-        label: 'Series Title Top Offset',
-        value: viewModel.seriesTitleTopOffset,
-        onChanged: viewModel.setSeriesTitleTopOffset,
-      ),
-      _LeftOffsetSlider(
-        label: 'Series Title Left Offset',
-        value: viewModel.seriesTitleHorizontalOffset,
-        onChanged: viewModel.setSeriesTitleHorizontalOffset,
-      ),
-      _optionalTextSection(
-        controller: viewModel.editionLineController,
-        label: 'Edition Line',
-        textButton: _ColorButton(
-          label: 'Edition Line Text Color',
-          color: viewModel.editionLineTextColor,
-          onColorSelected: (color) =>
-              viewModel.setCoverColor('editionLineText', color),
+          buttons: [
+            _ColorButton(
+              label: 'Badge Text Color',
+              color: viewModel.cornerBadgeTextColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('cornerBadgeText', color),
+            ),
+            _ColorButton(
+              label: 'Badge Color',
+              color: viewModel.cornerBadgeColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('cornerBadge', color),
+            ),
+            _ColorButton(
+              label: 'Badge Border Color',
+              color: viewModel.cornerBadgeBorderColor,
+              onColorSelected: (color) =>
+                  viewModel.setCoverColor('cornerBadgeBorder', color),
+            ),
+          ],
         ),
-        boxButton: _ColorButton(
-          label: 'Edition Line Box Color',
-          color: viewModel.editionLineBoxColor,
-          onColorSelected: (color) =>
-              viewModel.setCoverColor('editionLineBox', color),
+        _TextAlignSelector(
+          label: 'Badge Justification',
+          value: viewModel.cornerBadgeTextAlign,
+          onChanged: viewModel.setCornerBadgeTextAlign,
         ),
-        verticalSlider: _TopOffsetSlider(
-          label: 'Edition Line Top Offset',
-          value: viewModel.editionLineTopOffset,
-          onChanged: viewModel.setEditionLineTopOffset,
+        SegmentedButton<CornerBadgePosition>(
+          showSelectedIcon: false,
+          segments: const <ButtonSegment<CornerBadgePosition>>[
+            ButtonSegment(
+              value: CornerBadgePosition.topLeft,
+              icon: Icon(Icons.north_west),
+              label: Text('Top Left'),
+            ),
+            ButtonSegment(
+              value: CornerBadgePosition.topRight,
+              icon: Icon(Icons.north_east),
+              label: Text('Top Right'),
+            ),
+            ButtonSegment(
+              value: CornerBadgePosition.bottomLeft,
+              icon: Icon(Icons.south_west),
+              label: Text('Bottom Left'),
+            ),
+            ButtonSegment(
+              value: CornerBadgePosition.bottomRight,
+              icon: Icon(Icons.south_east),
+              label: Text('Bottom Right'),
+            ),
+          ],
+          selected: viewModel.selectedCornerBadgePositionSet,
+          onSelectionChanged: (selection) {
+            viewModel.setSelectedCornerBadgePosition(selection.first);
+            if (_formKey.currentState!.validate()) {
+              viewModel.fetchCover();
+            }
+          },
         ),
-        horizontalSlider: _LeftOffsetSlider(
-          label: 'Edition Line Left Offset',
-          value: viewModel.editionLineHorizontalOffset,
-          onChanged: viewModel.setEditionLineHorizontalOffset,
-        ),
-      ),
-      _textRow(
-        field: TextFormField(
-          controller: viewModel.cornerBadgeTextController,
-          decoration: const InputDecoration(
-            labelText: 'Corner Badge',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        buttons: [
-          _ColorButton(
-            label: 'Badge Text Color',
-            color: viewModel.cornerBadgeTextColor,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('cornerBadgeText', color),
-          ),
-          _ColorButton(
-            label: 'Badge Color',
-            color: viewModel.cornerBadgeColor,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('cornerBadge', color),
-          ),
-        ],
-      ),
-      SegmentedButton<CornerBadgePosition>(
-        showSelectedIcon: false,
-        segments: const <ButtonSegment<CornerBadgePosition>>[
-          ButtonSegment(
-            value: CornerBadgePosition.topLeft,
-            icon: Icon(Icons.north_west),
-            label: Text('Top Left'),
-          ),
-          ButtonSegment(
-            value: CornerBadgePosition.topRight,
-            icon: Icon(Icons.north_east),
-            label: Text('Top Right'),
-          ),
-          ButtonSegment(
-            value: CornerBadgePosition.bottomLeft,
-            icon: Icon(Icons.south_west),
-            label: Text('Bottom Left'),
-          ),
-          ButtonSegment(
-            value: CornerBadgePosition.bottomRight,
-            icon: Icon(Icons.south_east),
-            label: Text('Bottom Right'),
-          ),
-        ],
-        selected: viewModel.selectedCornerBadgePositionSet,
-        onSelectionChanged: (selection) {
-          viewModel.setSelectedCornerBadgePosition(selection.first);
-          if (_formKey.currentState!.validate()) {
-            viewModel.fetchCover();
-          }
-        },
-      ),
-    ]);
+      ],
+    );
   }
 
   Widget _buildLayoutSection(HomeViewModel viewModel) {
-    return _sectionColumn([
-      SegmentedButton<CoverLayout>(
-        showSelectedIcon: false,
-        segments: const <ButtonSegment<CoverLayout>>[
-          ButtonSegment(
-            value: CoverLayout.bigCenterTitle,
-            icon: Icon(Icons.crop_7_5),
-            label: Text('Modern'),
-            tooltip: 'Big centered title layout',
-          ),
-          ButtonSegment(
-            value: CoverLayout.titleTopAuthorBottom,
-            icon: Icon(Icons.vertical_align_top),
-            label: Text('Top / Bottom'),
-            tooltip: 'Title near top, author near bottom',
-          ),
-          ButtonSegment(
-            value: CoverLayout.authorTopTitleCenter,
-            icon: Icon(Icons.vertical_align_center),
-            label: Text('Top / Center'),
-            tooltip: 'Author near top, title centered',
-          ),
-        ],
-        selected: viewModel.selectedLayoutSet,
-        onSelectionChanged: (selection) {
-          viewModel.setSelectedLayout(selection.first);
-          if (_formKey.currentState!.validate()) {
-            viewModel.fetchCover();
-          }
-        },
-      ),
-      if (viewModel.selectedLayout == CoverLayout.titleTopAuthorBottom)
-        _TopOffsetSlider(
-          label: 'Top / Bottom Top Offset',
-          value: viewModel.titleTopAuthorBottomTopOffset,
-          onChanged: viewModel.setTitleTopAuthorBottomTopOffset,
+    return SectionColumn(
+      children: [
+        SegmentedButton<CoverLayout>(
+          showSelectedIcon: false,
+          segments: const <ButtonSegment<CoverLayout>>[
+            ButtonSegment(
+              value: CoverLayout.bigCenterTitle,
+              icon: Icon(Icons.crop_7_5),
+              label: Text('Modern'),
+              tooltip: 'Big centered title layout',
+            ),
+            ButtonSegment(
+              value: CoverLayout.titleTopAuthorBottom,
+              icon: Icon(Icons.vertical_align_top),
+              label: Text('Top / Bottom'),
+              tooltip: 'Title near top, author near bottom',
+            ),
+            ButtonSegment(
+              value: CoverLayout.authorTopTitleCenter,
+              icon: Icon(Icons.vertical_align_center),
+              label: Text('Top / Center'),
+              tooltip: 'Author near top, title centered',
+            ),
+          ],
+          selected: viewModel.selectedLayoutSet,
+          onSelectionChanged: (selection) {
+            viewModel.setSelectedLayout(selection.first);
+            if (_formKey.currentState!.validate()) {
+              viewModel.fetchCover();
+            }
+          },
         ),
-      if (viewModel.selectedLayout == CoverLayout.authorTopTitleCenter)
-        _TopOffsetSlider(
-          label: 'Top / Center Top Offset',
-          value: viewModel.authorTopTitleCenterTopOffset,
-          onChanged: viewModel.setAuthorTopTitleCenterTopOffset,
-        ),
-    ]);
+        if (viewModel.selectedLayout == CoverLayout.titleTopAuthorBottom)
+          _TopOffsetSlider(
+            label: 'Top / Bottom Top Offset',
+            value: viewModel.titleTopAuthorBottomTopOffset,
+            onChanged: viewModel.setTitleTopAuthorBottomTopOffset,
+          ),
+        if (viewModel.selectedLayout == CoverLayout.authorTopTitleCenter)
+          _TopOffsetSlider(
+            label: 'Top / Center Top Offset',
+            value: viewModel.authorTopTitleCenterTopOffset,
+            onChanged: viewModel.setAuthorTopTitleCenterTopOffset,
+          ),
+      ],
+    );
   }
 
   Widget _buildActionsSection(
@@ -540,74 +699,89 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     HomeViewModel viewModel,
     bool canSubmit,
   ) {
-    return _sectionColumn([
-      FilledButton(
-        onPressed: canSubmit ? viewModel.fetchCover : null,
-        child: Text(
-          'Generate Cover',
-          style: AppTextStyles.button(context),
-        ),
-      ),
-      OutlinedButton(
-        onPressed: () {
-          _formKey.currentState?.reset();
-          viewModel.clearFields();
-        },
-        child: Text(
-          'Clear Fields',
-          style: AppTextStyles.button(context),
-        ),
-      ),
-      OutlinedButton(
-        onPressed:
-            (viewModel.cover != null &&
-                !viewModel.isBusy &&
-                viewModel.isFormValid)
-            ? viewModel.saveCover
-            : null,
-        child: Text(
-          'Save Cover',
-          style: AppTextStyles.button(context),
-        ),
-      ),
-    ]);
-  }
-
-  Widget _textRow({
-    required Widget field,
-    required List<Widget> buttons,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SectionColumn(
       children: [
-        Expanded(child: field),
-        ...buttons,
+        FilledButton(
+          onPressed: canSubmit ? viewModel.fetchCover : null,
+          child: Text(
+            'Generate Cover',
+            style: AppTextStyles.button(context),
+          ),
+        ),
+        OutlinedButton(
+          onPressed: () {
+            _formKey.currentState?.reset();
+            viewModel.clearFields();
+          },
+          child: Text(
+            'Clear Fields',
+            style: AppTextStyles.button(context),
+          ),
+        ),
+        OutlinedButton(
+          onPressed:
+              (viewModel.cover != null &&
+                  !viewModel.isBusy &&
+                  viewModel.isFormValid)
+              ? viewModel.saveCover
+              : null,
+          child: Text(
+            'Save Cover',
+            style: AppTextStyles.button(context),
+          ),
+        ),
       ],
     );
   }
+}
 
-  Widget _optionalTextSection({
-    required TextEditingController controller,
-    required String label,
-    required Widget textButton,
-    required Widget boxButton,
-    required Widget verticalSlider,
-    required Widget horizontalSlider,
-  }) {
-    return _sectionColumn([
-      _textRow(
-        field: TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: label,
-            border: const OutlineInputBorder(),
-          ),
+class _TextAlignSelector extends StatelessWidget {
+  const _TextAlignSelector({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final TextAlign value;
+  final ValueChanged<TextAlign> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.caption(context)),
+        const SizedBox(height: AppSpacing.xs),
+        SegmentedButton<TextAlign>(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(
+              value: TextAlign.left,
+              icon: Icon(Icons.format_align_left),
+              label: Text('Left'),
+            ),
+            ButtonSegment(
+              value: TextAlign.center,
+              icon: Icon(Icons.format_align_center),
+              label: Text('Center'),
+            ),
+            ButtonSegment(
+              value: TextAlign.right,
+              icon: Icon(Icons.format_align_right),
+              label: Text('Right'),
+            ),
+            ButtonSegment(
+              value: TextAlign.justify,
+              icon: Icon(Icons.format_align_justify),
+              label: Text('Justify'),
+            ),
+          ],
+          selected: {value},
+          onSelectionChanged: (selection) => onChanged(selection.first),
         ),
-        buttons: [textButton, boxButton],
-      ),
-      verticalSlider,
-      horizontalSlider,
-    ]);
+      ],
+    );
   }
 }
 
@@ -793,6 +967,81 @@ class _ColorButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class SectionColumn extends StatelessWidget {
+  final List<Widget> children;
+  const SectionColumn({Key? key, required this.children}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    );
+  }
+}
+
+class OptionalTextSection extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final Widget textButton,
+      boxButton,
+      borderButton,
+      verticalSlider,
+      horizontalSlider,
+      alignSelector;
+
+  const OptionalTextSection({
+    Key? key,
+    required this.controller,
+    required this.label,
+    required this.textButton,
+    required this.boxButton,
+    required this.borderButton,
+    required this.verticalSlider,
+    required this.horizontalSlider,
+    required this.alignSelector,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionColumn(
+      children: [
+        TextRow(
+          field: TextFormField(
+            controller: controller,
+            decoration: InputDecoration(
+              labelText: label,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          buttons: [textButton, boxButton, borderButton],
+        ),
+        verticalSlider,
+        horizontalSlider,
+        alignSelector,
+      ],
+    );
+  }
+}
+
+class TextRow extends StatelessWidget {
+  final Widget field;
+  final List<Widget> buttons;
+
+  TextRow({required this.field, required this.buttons});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: field),
+        ...buttons,
+      ],
     );
   }
 }

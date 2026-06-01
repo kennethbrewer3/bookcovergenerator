@@ -150,16 +150,11 @@ class GenerateEbookCoverService {
     required double y,
     required double blockWidth,
     required Color boxColor,
+    required Color borderColor,
     required double radius,
     required double horizontalOffset,
     required double verticalPadding,
   }) {
-    final textX = _centeredTextX(
-      coverWidth: settings.coverWidth,
-      painter: painter,
-      horizontalOffset: horizontalOffset,
-    );
-
     final scrimX = _centeredBlockX(
       coverWidth: settings.coverWidth,
       blockWidth: blockWidth,
@@ -173,10 +168,11 @@ class GenerateEbookCoverService {
       w: blockWidth,
       h: painter.height + verticalPadding * 2,
       color: boxColor,
+      borderColor: borderColor,
       radius: radius,
     );
 
-    painter.paint(canvas, Offset(textX, y));
+    painter.paint(canvas, Offset(scrimX, y));
   }
 
   void _drawLayoutA({
@@ -220,7 +216,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.titleTextAlign,
     );
 
     final subtitlePainter =
@@ -244,7 +240,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.subtitleTextAlign,
     )
         : null;
 
@@ -268,7 +264,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.authorTextAlign,
     );
 
     _drawCenteredTextBlock(
@@ -278,6 +274,7 @@ class GenerateEbookCoverService {
       y: titleTopY,
       blockWidth: maxW,
       boxColor: settings.titleBoxColor,
+      borderColor: settings.titleBorderColor,
       radius: 18,
       horizontalOffset: settings.titleHorizontalOffset,
       verticalPadding: 18,
@@ -295,6 +292,7 @@ class GenerateEbookCoverService {
         y: subtitleY,
         blockWidth: maxW,
         boxColor: settings.subtitleBoxColor,
+        borderColor: settings.subtitleBorderColor,
         radius: 18,
         horizontalOffset: settings.subtitleHorizontalOffset,
         verticalPadding: 14,
@@ -308,6 +306,7 @@ class GenerateEbookCoverService {
       y: authorBottomY - authorPainter.height,
       blockWidth: maxW,
       boxColor: settings.authorBoxColor,
+      borderColor: settings.authorBorderColor,
       radius: 18,
       horizontalOffset: settings.authorHorizontalOffset,
       verticalPadding: 18,
@@ -349,7 +348,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.authorTextAlign,
     );
 
     final titlePainter = _fitText(
@@ -372,7 +371,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.titleTextAlign,
     );
 
     final subtitlePainter =
@@ -396,7 +395,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.subtitleTextAlign,
     )
         : null;
 
@@ -407,6 +406,7 @@ class GenerateEbookCoverService {
       y: authorTopY,
       blockWidth: maxW,
       boxColor: settings.authorBoxColor,
+      borderColor: settings.authorBorderColor,
       radius: 18,
       horizontalOffset: settings.authorHorizontalOffset,
       verticalPadding: 16,
@@ -428,6 +428,7 @@ class GenerateEbookCoverService {
       y: titleY,
       blockWidth: maxW,
       boxColor: settings.titleBoxColor,
+      borderColor: settings.titleBorderColor,
       radius: 18,
       horizontalOffset: settings.titleHorizontalOffset,
       verticalPadding: 18,
@@ -445,6 +446,7 @@ class GenerateEbookCoverService {
         y: subtitleY,
         blockWidth: maxW,
         boxColor: settings.subtitleBoxColor,
+        borderColor: settings.subtitleBorderColor,
         radius: 18,
         horizontalOffset: settings.subtitleHorizontalOffset,
         verticalPadding: 14,
@@ -481,7 +483,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.titleTextAlign,
     );
 
     final subtitlePainter =
@@ -505,7 +507,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.subtitleTextAlign,
     )
         : null;
 
@@ -529,7 +531,7 @@ class GenerateEbookCoverService {
           ),
         ],
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.authorTextAlign,
     );
 
     final gap1 = settings.coverHeight * 0.04;
@@ -550,6 +552,7 @@ class GenerateEbookCoverService {
       y: titleY,
       blockWidth: maxW,
       boxColor: settings.titleBoxColor,
+      borderColor: settings.titleBorderColor,
       radius: 18,
       horizontalOffset: settings.titleHorizontalOffset,
       verticalPadding: 18,
@@ -570,6 +573,7 @@ class GenerateEbookCoverService {
         y: subtitleY,
         blockWidth: maxW,
         boxColor: settings.subtitleBoxColor,
+        borderColor: settings.subtitleBorderColor,
         radius: 18,
         horizontalOffset: settings.subtitleHorizontalOffset,
         verticalPadding: 14,
@@ -587,6 +591,7 @@ class GenerateEbookCoverService {
       y: authorY,
       blockWidth: maxW,
       boxColor: settings.authorBoxColor,
+      borderColor: settings.authorBorderColor,
       radius: 18,
       horizontalOffset: settings.authorHorizontalOffset,
       verticalPadding: 18,
@@ -632,10 +637,18 @@ class GenerateEbookCoverService {
     canvas.translate(center.dx, center.dy);
     canvas.rotate(angle);
     canvas.drawRRect(rrect, Paint()..color = settings.cornerBadgeColor);
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..color = settings.cornerBadgeBorderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = settings.coverWidth * 0.003,
+    );
 
+    final textWidth = bannerW - 24;
     final painter = _fitText(
       text: settings.cornerBadgeText!.trim(),
-      maxWidth: bannerW - 24,
+      maxWidth: textWidth,
       maxLines: 1,
       maxFontSize: bannerH * 0.55,
       minFontSize: bannerH * 0.35,
@@ -645,10 +658,10 @@ class GenerateEbookCoverService {
         fontWeight: FontWeight.w800,
         letterSpacing: 0.8,
       ),
-      textAlign: TextAlign.center,
+      textAlign: settings.cornerBadgeTextAlign,
     );
 
-    final dx = rect.left + (bannerW - painter.width) / 2;
+    final dx = rect.left + 12;
     final dy = rect.top + (bannerH - painter.height) / 2;
 
     painter.paint(canvas, Offset(dx, dy));
@@ -669,7 +682,9 @@ class GenerateEbookCoverService {
     double maxFontSize,
     Color textColor,
     Color boxColor,
+    Color borderColor,
     double horizontalOffset,
+    TextAlign textAlign,
     })>[
       if (settings.seriesTitle != null &&
           settings.seriesTitle!.trim().isNotEmpty)
@@ -679,7 +694,9 @@ class GenerateEbookCoverService {
         maxFontSize: settings.coverWidth * 0.045,
         textColor: settings.seriesTitleTextColor,
         boxColor: settings.seriesTitleBoxColor,
+        borderColor: settings.seriesTitleBorderColor,
         horizontalOffset: settings.seriesTitleHorizontalOffset,
+        textAlign: settings.seriesTitleTextAlign,
         ),
       if (settings.tagline != null && settings.tagline!.trim().isNotEmpty)
         (
@@ -688,7 +705,9 @@ class GenerateEbookCoverService {
         maxFontSize: settings.coverWidth * 0.05,
         textColor: settings.taglineTextColor,
         boxColor: settings.taglineBoxColor,
+        borderColor: settings.taglineBorderColor,
         horizontalOffset: settings.taglineHorizontalOffset,
+        textAlign: settings.taglineTextAlign,
         ),
       if (settings.editionLine != null &&
           settings.editionLine!.trim().isNotEmpty)
@@ -698,7 +717,9 @@ class GenerateEbookCoverService {
         maxFontSize: settings.coverWidth * 0.04,
         textColor: settings.editionLineTextColor,
         boxColor: settings.editionLineBoxColor,
+        borderColor: settings.editionLineBorderColor,
         horizontalOffset: settings.editionLineHorizontalOffset,
+        textAlign: settings.editionLineTextAlign,
         ),
     ];
 
@@ -722,7 +743,7 @@ class GenerateEbookCoverService {
             ),
           ],
         ),
-        textAlign: TextAlign.center,
+        textAlign: entry.textAlign,
       );
 
       _drawCenteredTextBlock(
@@ -732,6 +753,7 @@ class GenerateEbookCoverService {
         y: entry.y,
         blockWidth: maxW,
         boxColor: entry.boxColor,
+        borderColor: entry.borderColor,
         radius: 14,
         horizontalOffset: entry.horizontalOffset,
         verticalPadding: 10,
@@ -746,13 +768,19 @@ class GenerateEbookCoverService {
     required double w,
     required double h,
     required Color color,
+    required Color borderColor,
     required double radius,
   }) {
     final rect = Rect.fromLTWH(x, y, w, h);
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
 
+    canvas.drawRRect(rrect, Paint()..color = color);
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, Radius.circular(radius)),
-      Paint()..color = color,
+      rrect,
+      Paint()
+        ..color = borderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = w * 0.003,
     );
   }
 
@@ -813,7 +841,10 @@ class GenerateEbookCoverService {
       textAlign: textAlign,
       maxLines: maxLines,
       ellipsis: '…',
-    )..layout(maxWidth: maxWidth);
+    )..layout(
+      minWidth: maxWidth,
+      maxWidth: maxWidth,
+    );
 
     return tp;
   }

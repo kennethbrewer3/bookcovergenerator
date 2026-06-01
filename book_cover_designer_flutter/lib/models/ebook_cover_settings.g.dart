@@ -43,15 +43,30 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
       : const ColorJsonConverter().fromJson(
           (json['titleBoxColor'] as num).toInt(),
         ),
+  titleBorderColor: json['titleBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['titleBorderColor'] as num).toInt(),
+        ),
   authorBoxColor: json['authorBoxColor'] == null
       ? Colors.white70
       : const ColorJsonConverter().fromJson(
           (json['authorBoxColor'] as num).toInt(),
         ),
+  authorBorderColor: json['authorBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['authorBorderColor'] as num).toInt(),
+        ),
   subtitleBoxColor: json['subtitleBoxColor'] == null
       ? Colors.white70
       : const ColorJsonConverter().fromJson(
           (json['subtitleBoxColor'] as num).toInt(),
+        ),
+  subtitleBorderColor: json['subtitleBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['subtitleBorderColor'] as num).toInt(),
         ),
   taglineTextColor: json['taglineTextColor'] == null
       ? Colors.white70
@@ -63,6 +78,11 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
       : const ColorJsonConverter().fromJson(
           (json['taglineBoxColor'] as num).toInt(),
         ),
+  taglineBorderColor: json['taglineBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['taglineBorderColor'] as num).toInt(),
+        ),
   seriesTitleTextColor: json['seriesTitleTextColor'] == null
       ? Colors.white70
       : const ColorJsonConverter().fromJson(
@@ -72,6 +92,11 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
       ? Colors.white70
       : const ColorJsonConverter().fromJson(
           (json['seriesTitleBoxColor'] as num).toInt(),
+        ),
+  seriesTitleBorderColor: json['seriesTitleBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['seriesTitleBorderColor'] as num).toInt(),
         ),
   editionLineTextColor: json['editionLineTextColor'] == null
       ? Colors.white70
@@ -83,6 +108,11 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
       : const ColorJsonConverter().fromJson(
           (json['editionLineBoxColor'] as num).toInt(),
         ),
+  editionLineBorderColor: json['editionLineBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['editionLineBorderColor'] as num).toInt(),
+        ),
   cornerBadgeTextColor: json['cornerBadgeTextColor'] == null
       ? Colors.white70
       : const ColorJsonConverter().fromJson(
@@ -92,6 +122,11 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
       ? Colors.white70
       : const ColorJsonConverter().fromJson(
           (json['cornerBadgeColor'] as num).toInt(),
+        ),
+  cornerBadgeBorderColor: json['cornerBadgeBorderColor'] == null
+      ? Colors.white
+      : const ColorJsonConverter().fromJson(
+          (json['cornerBadgeBorderColor'] as num).toInt(),
         ),
   layout:
       $enumDecodeNullable(_$CoverLayoutEnumMap, json['layout']) ??
@@ -118,6 +153,27 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
       (json['seriesTitleHorizontalOffset'] as num?)?.toDouble() ?? 0,
   editionLineHorizontalOffset:
       (json['editionLineHorizontalOffset'] as num?)?.toDouble() ?? 0,
+  titleTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['titleTextAlign']) ??
+      TextAlign.center,
+  authorTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['authorTextAlign']) ??
+      TextAlign.center,
+  subtitleTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['subtitleTextAlign']) ??
+      TextAlign.center,
+  taglineTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['taglineTextAlign']) ??
+      TextAlign.center,
+  seriesTitleTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['seriesTitleTextAlign']) ??
+      TextAlign.center,
+  editionLineTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['editionLineTextAlign']) ??
+      TextAlign.center,
+  cornerBadgeTextAlign:
+      $enumDecodeNullable(_$TextAlignEnumMap, json['cornerBadgeTextAlign']) ??
+      TextAlign.center,
   cornerBadgePosition:
       $enumDecodeNullable(
         _$CornerBadgePositionEnumMap,
@@ -174,9 +230,18 @@ Map<String, dynamic> _$EbookCoverSettingsToJson(
     instance.subtitleTextColor,
   ),
   'titleBoxColor': const ColorJsonConverter().toJson(instance.titleBoxColor),
+  'titleBorderColor': const ColorJsonConverter().toJson(
+    instance.titleBorderColor,
+  ),
   'authorBoxColor': const ColorJsonConverter().toJson(instance.authorBoxColor),
+  'authorBorderColor': const ColorJsonConverter().toJson(
+    instance.authorBorderColor,
+  ),
   'subtitleBoxColor': const ColorJsonConverter().toJson(
     instance.subtitleBoxColor,
+  ),
+  'subtitleBorderColor': const ColorJsonConverter().toJson(
+    instance.subtitleBorderColor,
   ),
   'taglineTextColor': const ColorJsonConverter().toJson(
     instance.taglineTextColor,
@@ -184,11 +249,17 @@ Map<String, dynamic> _$EbookCoverSettingsToJson(
   'taglineBoxColor': const ColorJsonConverter().toJson(
     instance.taglineBoxColor,
   ),
+  'taglineBorderColor': const ColorJsonConverter().toJson(
+    instance.taglineBorderColor,
+  ),
   'seriesTitleTextColor': const ColorJsonConverter().toJson(
     instance.seriesTitleTextColor,
   ),
   'seriesTitleBoxColor': const ColorJsonConverter().toJson(
     instance.seriesTitleBoxColor,
+  ),
+  'seriesTitleBorderColor': const ColorJsonConverter().toJson(
+    instance.seriesTitleBorderColor,
   ),
   'editionLineTextColor': const ColorJsonConverter().toJson(
     instance.editionLineTextColor,
@@ -196,11 +267,17 @@ Map<String, dynamic> _$EbookCoverSettingsToJson(
   'editionLineBoxColor': const ColorJsonConverter().toJson(
     instance.editionLineBoxColor,
   ),
+  'editionLineBorderColor': const ColorJsonConverter().toJson(
+    instance.editionLineBorderColor,
+  ),
   'cornerBadgeTextColor': const ColorJsonConverter().toJson(
     instance.cornerBadgeTextColor,
   ),
   'cornerBadgeColor': const ColorJsonConverter().toJson(
     instance.cornerBadgeColor,
+  ),
+  'cornerBadgeBorderColor': const ColorJsonConverter().toJson(
+    instance.cornerBadgeBorderColor,
   ),
   'layout': _$CoverLayoutEnumMap[instance.layout]!,
   'taglineTopOffset': instance.taglineTopOffset,
@@ -217,6 +294,13 @@ Map<String, dynamic> _$EbookCoverSettingsToJson(
   'taglineHorizontalOffset': instance.taglineHorizontalOffset,
   'seriesTitleHorizontalOffset': instance.seriesTitleHorizontalOffset,
   'editionLineHorizontalOffset': instance.editionLineHorizontalOffset,
+  'titleTextAlign': _$TextAlignEnumMap[instance.titleTextAlign]!,
+  'authorTextAlign': _$TextAlignEnumMap[instance.authorTextAlign]!,
+  'subtitleTextAlign': _$TextAlignEnumMap[instance.subtitleTextAlign]!,
+  'taglineTextAlign': _$TextAlignEnumMap[instance.taglineTextAlign]!,
+  'seriesTitleTextAlign': _$TextAlignEnumMap[instance.seriesTitleTextAlign]!,
+  'editionLineTextAlign': _$TextAlignEnumMap[instance.editionLineTextAlign]!,
+  'cornerBadgeTextAlign': _$TextAlignEnumMap[instance.cornerBadgeTextAlign]!,
   'cornerBadgePosition':
       _$CornerBadgePositionEnumMap[instance.cornerBadgePosition]!,
   'backgroundImageBytes': const Uint8ListBase64Converter().toJson(
@@ -239,6 +323,15 @@ const _$CoverLayoutEnumMap = {
   CoverLayout.titleTopAuthorBottom: 'titleTopAuthorBottom',
   CoverLayout.authorTopTitleCenter: 'authorTopTitleCenter',
   CoverLayout.bigCenterTitle: 'bigCenterTitle',
+};
+
+const _$TextAlignEnumMap = {
+  TextAlign.left: 'left',
+  TextAlign.right: 'right',
+  TextAlign.center: 'center',
+  TextAlign.justify: 'justify',
+  TextAlign.start: 'start',
+  TextAlign.end: 'end',
 };
 
 const _$CornerBadgePositionEnumMap = {
