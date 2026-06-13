@@ -1,3 +1,4 @@
+import 'package:book_cover_designer_flutter/l10n/app_localizations.dart';
 import 'package:book_cover_designer_flutter/models/cover_size_preset.dart';
 import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/screens/home/home_viewmodel.dart';
@@ -16,6 +17,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   @override
   Widget build(BuildContext context, HomeViewModel viewModel) {
     final canSubmit = !viewModel.isBusy;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(
@@ -38,71 +40,71 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.background,
-                  title: 'Background Color and Image',
-                  body: _buildBackgroundSection(viewModel),
+                  title: l10n.sectionBackground,
+                  body: _buildBackgroundSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.title,
-                  title: 'Title',
-                  body: _buildEbookTitleSection(viewModel),
+                  title: l10n.sectionTitle,
+                  body: _buildEbookTitleSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.author,
-                  title: 'Author',
-                  body: _buildEbookAuthorSection(viewModel),
+                  title: l10n.sectionAuthor,
+                  body: _buildEbookAuthorSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.subtitle,
-                  title: 'Subtitle',
-                  body: _buildEbookSubtitleSection(viewModel),
+                  title: l10n.sectionSubtitle,
+                  body: _buildEbookSubtitleSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.tagline,
-                  title: 'Tagline',
-                  body: _buildEbookTaglineSection(viewModel),
+                  title: l10n.sectionTagline,
+                  body: _buildEbookTaglineSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.series,
-                  title: 'Series Title',
-                  body: _buildEbookSeriesTitleSection(viewModel),
+                  title: l10n.sectionSeries,
+                  body: _buildEbookSeriesTitleSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.edition,
-                  title: 'Edition',
-                  body: _buildEbookEditionSection(viewModel),
+                  title: l10n.sectionEdition,
+                  body: _buildEbookEditionSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.badge,
-                  title: 'Corner  Badge',
-                  body: _buildEbookBadgeSection(viewModel),
+                  title: l10n.sectionBadge,
+                  body: _buildEbookBadgeSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.layout,
-                  title: 'Cover Layout',
-                  body: _buildLayoutSection(viewModel),
+                  title: l10n.sectionLayout,
+                  body: _buildLayoutSection(context, viewModel, l10n),
                 ),
                 _buildPanel(
                   context: context,
                   viewModel: viewModel,
                   section: HomeFormSection.actions,
-                  title: 'Actions',
-                  body: _buildActionsSection(context, viewModel, canSubmit),
+                  title: l10n.sectionActions,
+                  body: _buildActionsSection(context, viewModel, canSubmit, l10n),
                 ),
               ],
             ),
@@ -137,7 +139,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildBackgroundSection(HomeViewModel viewModel) {
+  Widget _buildBackgroundSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         Row(
@@ -145,7 +147,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _ColorButton(
-              label: 'Background Color',
+              label: l10n.colorBackground,
               color: viewModel.backgroundColor,
               width: 80,
               height: 50,
@@ -155,9 +157,9 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
             Expanded(
               child: DropdownButtonFormField<CoverSizePreset>(
                 value: viewModel.selectedCoverSizePreset,
-                decoration: const InputDecoration(
-                  labelText: 'Cover Size',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.coverSizeLabel,
+                  border: const OutlineInputBorder(),
                 ),
                 items: viewModel.coverSizePresets
                     .map(
@@ -184,13 +186,13 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
             FilledButton.icon(
               onPressed: viewModel.pickBackgroundImage,
               icon: const Icon(Icons.image),
-              label: const Text('Choose Background Image'),
+              label: Text(l10n.btnChooseBackgroundImage),
             ),
             if (viewModel.backgroundImageBytes != null)
               OutlinedButton.icon(
                 onPressed: viewModel.clearBackgroundImage,
                 icon: const Icon(Icons.clear),
-                label: const Text('Clear Image'),
+                label: Text(l10n.btnClearImage),
               ),
             if (viewModel.backgroundImageName != null)
               Text(viewModel.backgroundImageName!),
@@ -198,15 +200,15 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
         DropdownButtonFormField<BackgroundImageMode>(
           value: viewModel.backgroundImageMode,
-          decoration: const InputDecoration(
-            labelText: 'Background Image Mode',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.backgroundImageMode,
+            border: const OutlineInputBorder(),
           ),
           items: BackgroundImageMode.values
               .map(
                 (mode) => DropdownMenuItem(
                   value: mode,
-                  child: Text(_backgroundImageModeLabel(mode)),
+                  child: Text(_backgroundImageModeLabel(mode, l10n)),
                 ),
               )
               .toList(),
@@ -216,11 +218,11 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
         DropdownButtonFormField<Alignment>(
           value: viewModel.backgroundImageAlignment,
-          decoration: const InputDecoration(
-            labelText: 'Background Image Alignment',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.backgroundImageAlignment,
+            border: const OutlineInputBorder(),
           ),
-          items: _backgroundAlignments.entries
+          items: _backgroundAlignments(l10n).entries
               .map(
                 (entry) => DropdownMenuItem(
                   value: entry.value,
@@ -234,7 +236,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           },
         ),
         _TopOffsetSlider(
-          label: 'Background Image Scale X',
+          label: l10n.backgroundImageScaleX,
           value: viewModel.backgroundImageScaleX,
           min: 0.1,
           max: 4,
@@ -242,7 +244,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           onChanged: viewModel.setBackgroundImageScaleX,
         ),
         _TopOffsetSlider(
-          label: 'Background Image Scale Y',
+          label: l10n.backgroundImageScaleY,
           value: viewModel.backgroundImageScaleY,
           min: 0.1,
           max: 4,
@@ -251,11 +253,11 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
         DropdownButtonFormField<BlendMode>(
           value: viewModel.backgroundBlendMode,
-          decoration: const InputDecoration(
-            labelText: 'Background Mix Mode',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.backgroundMixMode,
+            border: const OutlineInputBorder(),
           ),
-          items: _backgroundBlendModes.entries
+          items: _backgroundBlendModes(l10n).entries
               .map(
                 (entry) => DropdownMenuItem(
                   value: entry.value,
@@ -268,7 +270,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           },
         ),
         _TopOffsetSlider(
-          label: 'Background Image Opacity',
+          label: l10n.backgroundImageOpacity,
           value: viewModel.backgroundImageOpacity,
           min: 0,
           max: 1,
@@ -279,21 +281,24 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookTitleSection(HomeViewModel viewModel) {
+  Widget _buildEbookTitleSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         _QuillTextEntry(
-          label: 'Ebook Title',
+          label: l10n.fieldEbookTitle,
           controller: viewModel.titleQuillController,
-          validator: () =>
-              viewModel.validateEbookTitle(viewModel.ebookTitleController.text),
+          validator: () => viewModel.validateEbookTitle(
+            viewModel.ebookTitleController.text,
+            requiredMsg: l10n.validationTitleRequired,
+            tooShortMsg: l10n.validationTitleTooShort(HomeViewModel.minTitleLength),
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
         Row(
           children: [
             Expanded(
               child: _LabeledColorButton(
-                label: 'Box Color',
+                label: l10n.colorTitleBox,
                 color: viewModel.titleBoxColor,
                 onColorSelected: (color) =>
                     viewModel.setCoverColor('titleBox', color),
@@ -302,7 +307,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: _LabeledColorButton(
-                label: 'Border Color',
+                label: l10n.colorTitleBorder,
                 color: viewModel.titleBorderColor,
                 onColorSelected: (color) =>
                     viewModel.setCoverColor('titleBorder', color),
@@ -311,12 +316,12 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ],
         ),
         _TopOffsetSlider(
-          label: 'Title Top Offset',
+          label: l10n.sliderTitleTopOffset,
           value: viewModel.titleTopOffset,
           onChanged: viewModel.setTitleTopOffset,
         ),
         _LeftOffsetSlider(
-          label: 'Title Horizontal Offset',
+          label: l10n.sliderTitleHorizontalOffset,
           value: viewModel.titleHorizontalOffset,
           onChanged: viewModel.setTitleHorizontalOffset,
         ),
@@ -324,31 +329,34 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookAuthorSection(HomeViewModel viewModel) {
+  Widget _buildEbookAuthorSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         TextRow(
           field: _QuillTextEntry(
-            label: 'Author Name',
+            label: l10n.fieldAuthorName,
             controller: viewModel.authorQuillController,
-            validator: () =>
-                viewModel.validateAuthorName(viewModel.authorNameController.text),
+            validator: () => viewModel.validateAuthorName(
+              viewModel.authorNameController.text,
+              requiredMsg: l10n.validationAuthorRequired,
+              tooShortMsg: l10n.validationAuthorTooShort(HomeViewModel.minAuthorLength),
+            ),
           ),
           buttons: [
             _ColorButton(
-              label: 'Author Text Color',
+              label: l10n.colorAuthorText,
               color: viewModel.authorTextColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('authorText', color),
             ),
             _ColorButton(
-              label: 'Author Box Color',
+              label: l10n.colorAuthorBox,
               color: viewModel.authorBoxColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('authorBox', color),
             ),
             _ColorButton(
-              label: 'Author Border Color',
+              label: l10n.colorAuthorBorder,
               color: viewModel.authorBorderColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('authorBorder', color),
@@ -356,12 +364,12 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ],
         ),
         _TopOffsetSlider(
-          label: 'Author Top Offset',
+          label: l10n.sliderAuthorTopOffset,
           value: viewModel.authorTopOffset,
           onChanged: viewModel.setAuthorTopOffset,
         ),
         _LeftOffsetSlider(
-          label: 'Author Left Offset',
+          label: l10n.sliderAuthorLeftOffset,
           value: viewModel.authorHorizontalOffset,
           onChanged: viewModel.setAuthorHorizontalOffset,
         ),
@@ -369,29 +377,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookSubtitleSection(HomeViewModel viewModel) {
+  Widget _buildEbookSubtitleSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         TextRow(
           field: _QuillTextEntry(
-            label: 'Subtitle',
+            label: l10n.fieldSubtitle,
             controller: viewModel.subtitleQuillController,
           ),
           buttons: [
             _ColorButton(
-              label: 'Subtitle Text Color',
+              label: l10n.colorSubtitleText,
               color: viewModel.subtitleTextColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('subtitleText', color),
             ),
             _ColorButton(
-              label: 'Subtitle Box Color',
+              label: l10n.colorSubtitleBox,
               color: viewModel.subtitleBoxColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('subtitleBox', color),
             ),
             _ColorButton(
-              label: 'Subtitle Border Color',
+              label: l10n.colorSubtitleBorder,
               color: viewModel.subtitleBorderColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('subtitleBorder', color),
@@ -399,12 +407,12 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ],
         ),
         _TopOffsetSlider(
-          label: 'Subtitle Top Offset',
+          label: l10n.sliderSubtitleTopOffset,
           value: viewModel.subtitleTopOffset,
           onChanged: viewModel.setSubtitleTopOffset,
         ),
         _LeftOffsetSlider(
-          label: 'Subtitle Left Offset',
+          label: l10n.sliderSubtitleLeftOffset,
           value: viewModel.subtitleHorizontalOffset,
           onChanged: viewModel.setSubtitleHorizontalOffset,
         ),
@@ -412,37 +420,37 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookTaglineSection(HomeViewModel viewModel) {
+  Widget _buildEbookTaglineSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         OptionalTextSection(
           controller: viewModel.taglineQuillController,
-          label: 'Tagline',
+          label: l10n.fieldTagline,
           textButton: _ColorButton(
-            label: 'Tagline Text Color',
+            label: l10n.colorTaglineText,
             color: viewModel.taglineTextColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('taglineText', color),
           ),
           boxButton: _ColorButton(
-            label: 'Tagline Box Color',
+            label: l10n.colorTaglineBox,
             color: viewModel.taglineBoxColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('taglineBox', color),
           ),
           borderButton: _ColorButton(
-            label: 'Tagline Border Color',
+            label: l10n.colorTaglineBorder,
             color: viewModel.taglineBorderColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('taglineBorder', color),
           ),
           verticalSlider: _TopOffsetSlider(
-            label: 'Tagline Top Offset',
+            label: l10n.sliderTaglineTopOffset,
             value: viewModel.taglineTopOffset,
             onChanged: viewModel.setTaglineTopOffset,
           ),
           horizontalSlider: _LeftOffsetSlider(
-            label: 'Tagline Left Offset',
+            label: l10n.sliderTaglineLeftOffset,
             value: viewModel.taglineHorizontalOffset,
             onChanged: viewModel.setTaglineHorizontalOffset,
           ),
@@ -451,29 +459,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookSeriesTitleSection(HomeViewModel viewModel) {
+  Widget _buildEbookSeriesTitleSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         TextRow(
           field: _QuillTextEntry(
-            label: 'Series Title',
+            label: l10n.fieldSeriesTitle,
             controller: viewModel.seriesTitleQuillController,
           ),
           buttons: [
             _ColorButton(
-              label: 'Series Title Text Color',
+              label: l10n.colorSeriesTitleText,
               color: viewModel.seriesTitleTextColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('seriesTitleText', color),
             ),
             _ColorButton(
-              label: 'Series Title Box Color',
+              label: l10n.colorSeriesTitleBox,
               color: viewModel.seriesTitleBoxColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('seriesTitleBox', color),
             ),
             _ColorButton(
-              label: 'Series Title Border Color',
+              label: l10n.colorSeriesTitleBorder,
               color: viewModel.seriesTitleBorderColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('seriesTitleBorder', color),
@@ -481,12 +489,12 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
           ],
         ),
         _TopOffsetSlider(
-          label: 'Series Title Top Offset',
+          label: l10n.sliderSeriesTitleTopOffset,
           value: viewModel.seriesTitleTopOffset,
           onChanged: viewModel.setSeriesTitleTopOffset,
         ),
         _LeftOffsetSlider(
-          label: 'Series Title Left Offset',
+          label: l10n.sliderSeriesTitleLeftOffset,
           value: viewModel.seriesTitleHorizontalOffset,
           onChanged: viewModel.setSeriesTitleHorizontalOffset,
         ),
@@ -494,37 +502,37 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookEditionSection(HomeViewModel viewModel) {
+  Widget _buildEbookEditionSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         OptionalTextSection(
           controller: viewModel.editionLineQuillController,
-          label: 'Edition Line',
+          label: l10n.fieldEditionLine,
           textButton: _ColorButton(
-            label: 'Edition Line Text Color',
+            label: l10n.colorEditionLineText,
             color: viewModel.editionLineTextColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('editionLineText', color),
           ),
           boxButton: _ColorButton(
-            label: 'Edition Line Box Color',
+            label: l10n.colorEditionLineBox,
             color: viewModel.editionLineBoxColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('editionLineBox', color),
           ),
           borderButton: _ColorButton(
-            label: 'Edition Line Border Color',
+            label: l10n.colorEditionLineBorder,
             color: viewModel.editionLineBorderColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('editionLineBorder', color),
           ),
           verticalSlider: _TopOffsetSlider(
-            label: 'Edition Line Top Offset',
+            label: l10n.sliderEditionLineTopOffset,
             value: viewModel.editionLineTopOffset,
             onChanged: viewModel.setEditionLineTopOffset,
           ),
           horizontalSlider: _LeftOffsetSlider(
-            label: 'Edition Line Left Offset',
+            label: l10n.sliderEditionLineLeftOffset,
             value: viewModel.editionLineHorizontalOffset,
             onChanged: viewModel.setEditionLineHorizontalOffset,
           ),
@@ -533,29 +541,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildEbookBadgeSection(HomeViewModel viewModel) {
+  Widget _buildEbookBadgeSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         TextRow(
           field: _QuillTextEntry(
-            label: 'Corner Badge',
+            label: l10n.fieldCornerBadge,
             controller: viewModel.cornerBadgeQuillController,
           ),
           buttons: [
             _ColorButton(
-              label: 'Badge Text Color',
+              label: l10n.colorBadgeText,
               color: viewModel.cornerBadgeTextColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('cornerBadgeText', color),
             ),
             _ColorButton(
-              label: 'Badge Color',
+              label: l10n.colorBadge,
               color: viewModel.cornerBadgeColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('cornerBadge', color),
             ),
             _ColorButton(
-              label: 'Badge Border Color',
+              label: l10n.colorBadgeBorder,
               color: viewModel.cornerBadgeBorderColor,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('cornerBadgeBorder', color),
@@ -564,26 +572,26 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
         SegmentedButton<CornerBadgePosition>(
           showSelectedIcon: false,
-          segments: const <ButtonSegment<CornerBadgePosition>>[
+          segments: <ButtonSegment<CornerBadgePosition>>[
             ButtonSegment(
               value: CornerBadgePosition.topLeft,
-              icon: Icon(Icons.north_west),
-              label: Text('Top Left'),
+              icon: const Icon(Icons.north_west),
+              label: Text(l10n.badgePositionTopLeft),
             ),
             ButtonSegment(
               value: CornerBadgePosition.topRight,
-              icon: Icon(Icons.north_east),
-              label: Text('Top Right'),
+              icon: const Icon(Icons.north_east),
+              label: Text(l10n.badgePositionTopRight),
             ),
             ButtonSegment(
               value: CornerBadgePosition.bottomLeft,
-              icon: Icon(Icons.south_west),
-              label: Text('Bottom Left'),
+              icon: const Icon(Icons.south_west),
+              label: Text(l10n.badgePositionBottomLeft),
             ),
             ButtonSegment(
               value: CornerBadgePosition.bottomRight,
-              icon: Icon(Icons.south_east),
-              label: Text('Bottom Right'),
+              icon: const Icon(Icons.south_east),
+              label: Text(l10n.badgePositionBottomRight),
             ),
           ],
           selected: viewModel.selectedCornerBadgePositionSet,
@@ -598,29 +606,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     );
   }
 
-  Widget _buildLayoutSection(HomeViewModel viewModel) {
+  Widget _buildLayoutSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
         SegmentedButton<CoverLayout>(
           showSelectedIcon: false,
-          segments: const <ButtonSegment<CoverLayout>>[
+          segments: <ButtonSegment<CoverLayout>>[
             ButtonSegment(
               value: CoverLayout.bigCenterTitle,
-              icon: Icon(Icons.crop_7_5),
-              label: Text('Modern'),
-              tooltip: 'Big centered title layout',
+              icon: const Icon(Icons.crop_7_5),
+              label: Text(l10n.layoutModern),
+              tooltip: l10n.layoutModernTooltip,
             ),
             ButtonSegment(
               value: CoverLayout.titleTopAuthorBottom,
-              icon: Icon(Icons.vertical_align_top),
-              label: Text('Top / Bottom'),
-              tooltip: 'Title near top, author near bottom',
+              icon: const Icon(Icons.vertical_align_top),
+              label: Text(l10n.layoutTopBottom),
+              tooltip: l10n.layoutTopBottomTooltip,
             ),
             ButtonSegment(
               value: CoverLayout.authorTopTitleCenter,
-              icon: Icon(Icons.vertical_align_center),
-              label: Text('Top / Center'),
-              tooltip: 'Author near top, title centered',
+              icon: const Icon(Icons.vertical_align_center),
+              label: Text(l10n.layoutTopCenter),
+              tooltip: l10n.layoutTopCenterTooltip,
             ),
           ],
           selected: viewModel.selectedLayoutSet,
@@ -633,13 +641,13 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         ),
         if (viewModel.selectedLayout == CoverLayout.titleTopAuthorBottom)
           _TopOffsetSlider(
-            label: 'Top / Bottom Top Offset',
+            label: l10n.sliderTopBottomTopOffset,
             value: viewModel.titleTopAuthorBottomTopOffset,
             onChanged: viewModel.setTitleTopAuthorBottomTopOffset,
           ),
         if (viewModel.selectedLayout == CoverLayout.authorTopTitleCenter)
           _TopOffsetSlider(
-            label: 'Top / Center Top Offset',
+            label: l10n.sliderTopCenterTopOffset,
             value: viewModel.authorTopTitleCenterTopOffset,
             onChanged: viewModel.setAuthorTopTitleCenterTopOffset,
           ),
@@ -651,13 +659,14 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     BuildContext context,
     HomeViewModel viewModel,
     bool canSubmit,
+    AppLocalizations l10n,
   ) {
     return SectionColumn(
       children: [
         FilledButton(
           onPressed: canSubmit ? viewModel.fetchCover : null,
           child: Text(
-            'Generate Cover',
+            l10n.btnGenerateCover,
             style: AppTextStyles.button(context),
           ),
         ),
@@ -667,7 +676,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
             viewModel.clearFields();
           },
           child: Text(
-            'Clear Fields',
+            l10n.btnClearFields,
             style: AppTextStyles.button(context),
           ),
         ),
@@ -679,7 +688,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
               ? viewModel.saveCover
               : null,
           child: Text(
-            'Save Cover',
+            l10n.btnSaveCover,
             style: AppTextStyles.button(context),
           ),
         ),
@@ -757,54 +766,54 @@ class _LeftOffsetSlider extends StatelessWidget {
   }
 }
 
-String _backgroundImageModeLabel(BackgroundImageMode mode) {
+String _backgroundImageModeLabel(BackgroundImageMode mode, AppLocalizations l10n) {
   switch (mode) {
     case BackgroundImageMode.cover:
-      return 'Cover';
+      return l10n.imgModeCover;
     case BackgroundImageMode.contain:
-      return 'Fit';
+      return l10n.imgModeFit;
     case BackgroundImageMode.stretch:
-      return 'Stretch';
+      return l10n.imgModeStretch;
     case BackgroundImageMode.center:
-      return 'Center';
+      return l10n.imgModeCenter;
     case BackgroundImageMode.tile:
-      return 'Tile X and Y';
+      return l10n.imgModeTileXY;
     case BackgroundImageMode.tileX:
-      return 'Tile X';
+      return l10n.imgModeTileX;
     case BackgroundImageMode.tileY:
-      return 'Tile Y';
+      return l10n.imgModeTileY;
   }
 }
 
-const _backgroundAlignments = {
-  'Top Left': Alignment.topLeft,
-  'Top Center': Alignment.topCenter,
-  'Top Right': Alignment.topRight,
-  'Center Left': Alignment.centerLeft,
-  'Center': Alignment.center,
-  'Center Right': Alignment.centerRight,
-  'Bottom Left': Alignment.bottomLeft,
-  'Bottom Center': Alignment.bottomCenter,
-  'Bottom Right': Alignment.bottomRight,
+Map<String, Alignment> _backgroundAlignments(AppLocalizations l10n) => {
+  l10n.alignTopLeft: Alignment.topLeft,
+  l10n.alignTopCenter: Alignment.topCenter,
+  l10n.alignTopRight: Alignment.topRight,
+  l10n.alignCenterLeft: Alignment.centerLeft,
+  l10n.alignCenter: Alignment.center,
+  l10n.alignCenterRight: Alignment.centerRight,
+  l10n.alignBottomLeft: Alignment.bottomLeft,
+  l10n.alignBottomCenter: Alignment.bottomCenter,
+  l10n.alignBottomRight: Alignment.bottomRight,
 };
 
-const _backgroundBlendModes = {
-  'Normal': BlendMode.srcOver,
-  'Multiply': BlendMode.multiply,
-  'Screen': BlendMode.screen,
-  'Overlay': BlendMode.overlay,
-  'Darken': BlendMode.darken,
-  'Lighten': BlendMode.lighten,
-  'Color Dodge': BlendMode.colorDodge,
-  'Color Burn': BlendMode.colorBurn,
-  'Hard Light': BlendMode.hardLight,
-  'Soft Light': BlendMode.softLight,
-  'Difference': BlendMode.difference,
-  'Exclusion': BlendMode.exclusion,
-  'Hue': BlendMode.hue,
-  'Saturation': BlendMode.saturation,
-  'Color': BlendMode.color,
-  'Luminosity': BlendMode.luminosity,
+Map<String, BlendMode> _backgroundBlendModes(AppLocalizations l10n) => {
+  l10n.blendNormal: BlendMode.srcOver,
+  l10n.blendMultiply: BlendMode.multiply,
+  l10n.blendScreen: BlendMode.screen,
+  l10n.blendOverlay: BlendMode.overlay,
+  l10n.blendDarken: BlendMode.darken,
+  l10n.blendLighten: BlendMode.lighten,
+  l10n.blendColorDodge: BlendMode.colorDodge,
+  l10n.blendColorBurn: BlendMode.colorBurn,
+  l10n.blendHardLight: BlendMode.hardLight,
+  l10n.blendSoftLight: BlendMode.softLight,
+  l10n.blendDifference: BlendMode.difference,
+  l10n.blendExclusion: BlendMode.exclusion,
+  l10n.blendHue: BlendMode.hue,
+  l10n.blendSaturation: BlendMode.saturation,
+  l10n.blendColor: BlendMode.color,
+  l10n.blendLuminosity: BlendMode.luminosity,
 };
 
 class _LabeledColorButton extends StatelessWidget {

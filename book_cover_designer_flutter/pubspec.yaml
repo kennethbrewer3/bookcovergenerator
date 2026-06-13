@@ -30,6 +30,9 @@ dependencies:
   either_dart: ^1.0.0
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
   serverpod_flutter: 3.4.8
   serverpod_auth_idp_flutter: 3.4.8
   get_it: ^8.2.0
@@ -68,6 +71,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:
