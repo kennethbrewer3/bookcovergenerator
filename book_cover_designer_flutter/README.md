@@ -1,15 +1,12 @@
 # book_cover_designer_flutter
 
-A new Flutter project with Serverpod.
+This is the Flutter web frontend for **Book Cover Designer**.
 
-## Getting Started
+For full documentation — including Docker Compose setup, build instructions, and project structure — see the [root README](../README.md).
 
-This project is a starting point for a Flutter application that is using
-Serverpod.
+## Quick start
 
-A great starting point for learning Serverpod is our documentation site at:
-[https://docs.serverpod.dev](https://docs.serverpod.dev).
-
-To run the project, first make sure that the server is running, then do:
-
-    flutter run
+```bash
+flutter pub get
+flutter run -d chrome --web-browser-flag "--user-data-dir=/tmp/flutter-chrome-dev-profile"
+```
