@@ -7,6 +7,7 @@ import 'package:book_cover_designer_flutter/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 late final ThemeService themeService;
@@ -14,6 +15,7 @@ late final LocaleService localeService;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   await setupLocator();
   themeService = await ThemeService.create();
