@@ -166,25 +166,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         Row(
           spacing: AppSpacing.sm,
           children: [
-            _LabeledColorButton(
-              label: l10n.btnChooseBackgroundColor,
-              color: viewModel.backgroundColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('background', color),
-            ),
-            FilledButton.icon(
-              onPressed: viewModel.pickBackgroundImage,
-              icon: const Icon(Icons.image),
-              label: Text(l10n.btnChooseBackgroundImage),
-            ),
-            if (viewModel.backgroundImageBytes != null)
-              OutlinedButton.icon(
-                onPressed: viewModel.clearBackgroundImage,
-                icon: const Icon(Icons.clear),
-                label: Text(l10n.btnClearImage),
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.btnChooseBackgroundColor,
+                color: viewModel.backgroundColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('background', color),
               ),
+            ),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: viewModel.pickBackgroundImage,
+                icon: const Icon(Icons.image),
+                label: Text(l10n.btnChooseBackgroundImage),
+              ),
+            ),
           ],
         ),
+        if (viewModel.backgroundImageBytes != null)
+          OutlinedButton.icon(
+            onPressed: viewModel.clearBackgroundImage,
+            icon: const Icon(Icons.clear),
+            label: Text(l10n.btnClearImage),
+          ),
         if (viewModel.backgroundImageName != null)
           Text(viewModel.backgroundImageName!),
         DropdownButtonFormField<BackgroundImageMode>(
@@ -321,34 +325,34 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   Widget _buildEbookAuthorSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
-        TextRow(
-          field: _QuillTextEntry(
-            label: l10n.fieldAuthorName,
-            controller: viewModel.authorQuillController,
-            validator: () => viewModel.validateAuthorName(
-              viewModel.authorNameController.text,
-              requiredMsg: l10n.validationAuthorRequired,
-              tooShortMsg: l10n.validationAuthorTooShort(HomeViewModel.minAuthorLength),
-            ),
+        _QuillTextEntry(
+          label: l10n.fieldAuthorName,
+          controller: viewModel.authorQuillController,
+          validator: () => viewModel.validateAuthorName(
+            viewModel.authorNameController.text,
+            requiredMsg: l10n.validationAuthorRequired,
+            tooShortMsg: l10n.validationAuthorTooShort(HomeViewModel.minAuthorLength),
           ),
-          buttons: [
-            _ColorButton(
-              label: l10n.colorAuthorText,
-              color: viewModel.authorTextColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('authorText', color),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Row(
+          children: [
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorAuthorBox,
+                color: viewModel.authorBoxColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('authorBox', color),
+              ),
             ),
-            _ColorButton(
-              label: l10n.colorAuthorBox,
-              color: viewModel.authorBoxColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('authorBox', color),
-            ),
-            _ColorButton(
-              label: l10n.colorAuthorBorder,
-              color: viewModel.authorBorderColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('authorBorder', color),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorAuthorBorder,
+                color: viewModel.authorBorderColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('authorBorder', color),
+              ),
             ),
           ],
         ),
@@ -369,29 +373,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   Widget _buildEbookSubtitleSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
-        TextRow(
-          field: _QuillTextEntry(
-            label: l10n.fieldSubtitle,
-            controller: viewModel.subtitleQuillController,
-          ),
-          buttons: [
-            _ColorButton(
-              label: l10n.colorSubtitleText,
-              color: viewModel.subtitleTextColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('subtitleText', color),
+        _QuillTextEntry(
+          label: l10n.fieldSubtitle,
+          controller: viewModel.subtitleQuillController,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Row(
+          children: [
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorSubtitleBox,
+                color: viewModel.subtitleBoxColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('subtitleBox', color),
+              ),
             ),
-            _ColorButton(
-              label: l10n.colorSubtitleBox,
-              color: viewModel.subtitleBoxColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('subtitleBox', color),
-            ),
-            _ColorButton(
-              label: l10n.colorSubtitleBorder,
-              color: viewModel.subtitleBorderColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('subtitleBorder', color),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorSubtitleBorder,
+                color: viewModel.subtitleBorderColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('subtitleBorder', color),
+              ),
             ),
           ],
         ),
@@ -415,19 +419,13 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         OptionalTextSection(
           controller: viewModel.taglineQuillController,
           label: l10n.fieldTagline,
-          textButton: _ColorButton(
-            label: l10n.colorTaglineText,
-            color: viewModel.taglineTextColor,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('taglineText', color),
-          ),
-          boxButton: _ColorButton(
+          boxButton: _LabeledColorButton(
             label: l10n.colorTaglineBox,
             color: viewModel.taglineBoxColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('taglineBox', color),
           ),
-          borderButton: _ColorButton(
+          borderButton: _LabeledColorButton(
             label: l10n.colorTaglineBorder,
             color: viewModel.taglineBorderColor,
             onColorSelected: (color) =>
@@ -451,29 +449,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   Widget _buildEbookSeriesTitleSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
-        TextRow(
-          field: _QuillTextEntry(
-            label: l10n.fieldSeriesTitle,
-            controller: viewModel.seriesTitleQuillController,
-          ),
-          buttons: [
-            _ColorButton(
-              label: l10n.colorSeriesTitleText,
-              color: viewModel.seriesTitleTextColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('seriesTitleText', color),
+        _QuillTextEntry(
+          label: l10n.fieldSeriesTitle,
+          controller: viewModel.seriesTitleQuillController,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Row(
+          children: [
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorSeriesTitleBox,
+                color: viewModel.seriesTitleBoxColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('seriesTitleBox', color),
+              ),
             ),
-            _ColorButton(
-              label: l10n.colorSeriesTitleBox,
-              color: viewModel.seriesTitleBoxColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('seriesTitleBox', color),
-            ),
-            _ColorButton(
-              label: l10n.colorSeriesTitleBorder,
-              color: viewModel.seriesTitleBorderColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('seriesTitleBorder', color),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorSeriesTitleBorder,
+                color: viewModel.seriesTitleBorderColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('seriesTitleBorder', color),
+              ),
             ),
           ],
         ),
@@ -497,19 +495,13 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
         OptionalTextSection(
           controller: viewModel.editionLineQuillController,
           label: l10n.fieldEditionLine,
-          textButton: _ColorButton(
-            label: l10n.colorEditionLineText,
-            color: viewModel.editionLineTextColor,
-            onColorSelected: (color) =>
-                viewModel.setCoverColor('editionLineText', color),
-          ),
-          boxButton: _ColorButton(
+          boxButton: _LabeledColorButton(
             label: l10n.colorEditionLineBox,
             color: viewModel.editionLineBoxColor,
             onColorSelected: (color) =>
                 viewModel.setCoverColor('editionLineBox', color),
           ),
-          borderButton: _ColorButton(
+          borderButton: _LabeledColorButton(
             label: l10n.colorEditionLineBorder,
             color: viewModel.editionLineBorderColor,
             onColorSelected: (color) =>
@@ -533,29 +525,29 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
   Widget _buildEbookBadgeSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
       children: [
-        TextRow(
-          field: _QuillTextEntry(
-            label: l10n.fieldCornerBadge,
-            controller: viewModel.cornerBadgeQuillController,
-          ),
-          buttons: [
-            _ColorButton(
-              label: l10n.colorBadgeText,
-              color: viewModel.cornerBadgeTextColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('cornerBadgeText', color),
+        _QuillTextEntry(
+          label: l10n.fieldCornerBadge,
+          controller: viewModel.cornerBadgeQuillController,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Row(
+          children: [
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorBadge,
+                color: viewModel.cornerBadgeColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('cornerBadge', color),
+              ),
             ),
-            _ColorButton(
-              label: l10n.colorBadge,
-              color: viewModel.cornerBadgeColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('cornerBadge', color),
-            ),
-            _ColorButton(
-              label: l10n.colorBadgeBorder,
-              color: viewModel.cornerBadgeBorderColor,
-              onColorSelected: (color) =>
-                  viewModel.setCoverColor('cornerBadgeBorder', color),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(
+              child: _LabeledColorButton(
+                label: l10n.colorBadgeBorder,
+                color: viewModel.cornerBadgeBorderColor,
+                onColorSelected: (color) =>
+                    viewModel.setCoverColor('cornerBadgeBorder', color),
+              ),
             ),
           ],
         ),
@@ -861,73 +853,10 @@ class _LabeledColorButton extends StatelessWidget {
   }
 }
 
-class _ColorButton extends StatelessWidget {
-  const _ColorButton({
-    required this.label,
-    required this.color,
-    required this.onColorSelected,
-  });
-
-  final String label;
-  final Color color;
-  final ValueChanged<Color> onColorSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: label,
-      child: IconButton(
-        onPressed: () async {
-          var selected = color;
-          final confirmed =
-              await ColorPicker(
-                color: selected,
-                onColorChanged: (newColor) => selected = newColor,
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                spacing: 8,
-                runSpacing: 8,
-                heading: Text(label),
-                subheading: const Text('Select shade'),
-                showMaterialName: true,
-                showColorName: true,
-                showColorCode: true,
-                enableOpacity: true,
-                pickersEnabled: const {
-                  ColorPickerType.both: true,
-                  ColorPickerType.primary: true,
-                  ColorPickerType.accent: true,
-                  ColorPickerType.bw: true,
-                  ColorPickerType.custom: true,
-                  ColorPickerType.wheel: true,
-                },
-              ).showPickerDialog(
-                context,
-              );
-
-          if (confirmed) {
-            onColorSelected(selected);
-          }
-        },
-        icon: Container(
-          width: 22,
-          height: 22,
-          decoration: BoxDecoration(
-            color: color,
-            border: Border.all(color: Theme.of(context).colorScheme.outline),
-            borderRadius: BorderRadius.circular(6),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class SectionColumn extends StatelessWidget {
   final List<Widget> children;
   final double spacing;
-  const SectionColumn({Key? key, required this.children, this.spacing = 0}) : super(key: key);
+  const SectionColumn({Key? key, required this.children, this.spacing = AppSpacing.xs}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -942,8 +871,7 @@ class SectionColumn extends StatelessWidget {
 class OptionalTextSection extends StatelessWidget {
   final quill.QuillController controller;
   final String label;
-  final Widget textButton,
-      boxButton,
+  final Widget boxButton,
       borderButton,
       verticalSlider,
       horizontalSlider;
@@ -953,7 +881,6 @@ class OptionalTextSection extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.label,
-    required this.textButton,
     required this.boxButton,
     required this.borderButton,
     required this.verticalSlider,
@@ -965,12 +892,17 @@ class OptionalTextSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionColumn(
       children: [
-        TextRow(
-          field: _QuillTextEntry(
-            label: label,
-            controller: controller,
-          ),
-          buttons: [textButton, boxButton, borderButton],
+        _QuillTextEntry(
+          label: label,
+          controller: controller,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Row(
+          children: [
+            Expanded(child: boxButton),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(child: borderButton),
+          ],
         ),
         verticalSlider,
         horizontalSlider,
@@ -1095,7 +1027,9 @@ class _QuillTextEntryState extends State<_QuillTextEntry> {
           ),
           child: Column(
             children: [
-              quill.QuillSimpleToolbar(
+              Align(
+                alignment: Alignment.centerLeft,
+                child: quill.QuillSimpleToolbar(
                 controller: widget.controller,
                 config: quill.QuillSimpleToolbarConfig(
                   showUndo: false,
@@ -1138,6 +1072,7 @@ class _QuillTextEntryState extends State<_QuillTextEntry> {
                     ),
                   ),
                 ),
+              ),
               ),
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
