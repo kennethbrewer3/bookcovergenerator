@@ -18,31 +18,20 @@ A Flutter web application for designing ebook covers. Compose rich-text titles, 
 
 ## Running with Docker Compose
 
-The simplest way to run the app is to pull the pre-built web assets and serve them via the included nginx container.
+The app is published as a pre-built container image. You do **not** need Flutter installed locally.
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed
-- Flutter web build output already present at `book_cover_designer_flutter/build/web/`
-  (see [Building the web assets](#building-the-web-assets) below if you need to build first)
 
-### Create a docker-compose.yaml file
+### Pull and run
 
-```yaml
-version: '3.8'
-services:
-  book-cover-designer:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "53589:80"
-    restart: unless-stopped
-```
-
-### Start the container
+The repository includes a `docker-compose.yaml` that pulls the latest image from GitHub Container Registry:
 
 ```bash
+git clone https://github.com/kennethbrewer3/bookcovergenerator.git
+cd bookcovergenerator
+docker compose pull
 docker compose up -d
 ```
 
@@ -54,17 +43,45 @@ The app will be available at **http://localhost:53589**.
 docker compose down
 ```
 
-### Rebuild after a code change
+### Minimal compose file (without cloning the repo)
+
+```yaml
+services:
+  book-cover-designer:
+    image: ghcr.io/kennethbrewer3/bookcovergenerator:latest
+    ports:
+      - "53589:80"
+    restart: unless-stopped
+```
+
+Save as `docker-compose.yaml`, then run `docker compose up -d`.
+
+> **Note:** The GHCR package must be **public** for anonymous pulls. In GitHub, open **Packages → bookcovergenerator → Package settings → Change visibility → Public**.
+
+---
+
+## Publishing the Docker image (maintainers)
+
+Pushes to `main` (and version tags like `v1.0.0`) trigger the [Publish Docker image](.github/workflows/docker-publish.yml) workflow, which builds the Flutter web app inside Docker and pushes to:
+
+`ghcr.io/kennethbrewer3/bookcovergenerator:latest`
+
+### Build locally
 
 ```bash
-# 1. Build fresh web assets (see below)
-# 2. Rebuild the Docker image and restart
-docker compose up -d --build
+docker build -t ghcr.io/kennethbrewer3/bookcovergenerator:local .
+docker run --rm -p 53589:80 ghcr.io/kennethbrewer3/bookcovergenerator:local
+```
+
+Or use the build override compose file:
+
+```bash
+docker compose -f docker-compose.yaml -f docker-compose.build.yaml up -d --build
 ```
 
 ---
 
-## Building the web assets
+## Building the web assets (without Docker)
 
 You need the [Flutter SDK](https://docs.flutter.dev/get-started/install) (stable channel) with web support enabled.
 
@@ -113,9 +130,11 @@ book_cover_designer/
 │   │   ├── screens/home/          # Main UI view, viewmodel, and widgets
 │   │   ├── services/              # Cover generation, theme, and locale services
 │   │   └── ui/theme/              # AppTheme, colour palettes, text styles
-│   └── build/web/                 # Generated web output (git-ignored except for Docker)
-├── Dockerfile                     # nginx image serving the web build
-├── docker-compose.yaml            # Single-service compose config (port 53589)
+│   └── assets/                    # Config and bundled fonts
+│   └── build/web/                 # Generated web output (local dev; built in Docker for releases)
+├── Dockerfile                     # Multi-stage build (Flutter web + nginx)
+├── docker-compose.yaml            # Pull pre-built image (port 53589)
+├── docker-compose.build.yaml      # Optional local build override
 └── nginx.conf                     # nginx site config with Flutter web routing
 ```
 

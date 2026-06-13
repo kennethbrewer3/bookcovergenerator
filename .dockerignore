@@ -1,0 +1,12 @@
+.git
+.github
+**/.dart_tool
+**/.pub-cache
+**/.pub
+**/build
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+book_cover_designer_server
+agent-transcripts
+*.md
+!book_cover_designer_flutter/README.md

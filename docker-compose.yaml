@@ -1,8 +1,6 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  book-cover-designer:
+    image: ghcr.io/kennethbrewer3/bookcovergenerator:latest
     ports:
       - "53589:80"
     restart: unless-stopped

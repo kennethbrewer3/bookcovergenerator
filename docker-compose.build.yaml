@@ -1,0 +1,8 @@
+# Local development: build the image from source instead of pulling.
+# Usage: docker compose -f docker-compose.yaml -f docker-compose.build.yaml up -d --build
+services:
+  book-cover-designer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/kennethbrewer3/bookcovergenerator:local
