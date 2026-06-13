@@ -25,6 +25,13 @@ abstract class EbookCoverSettings with _$EbookCoverSettings {
     String? seriesTitle,
     String? editionLine,
     String? cornerBadgeText,
+    List<Map<String, dynamic>>? titleQuillDelta,
+    List<Map<String, dynamic>>? authorQuillDelta,
+    List<Map<String, dynamic>>? subtitleQuillDelta,
+    List<Map<String, dynamic>>? taglineQuillDelta,
+    List<Map<String, dynamic>>? seriesTitleQuillDelta,
+    List<Map<String, dynamic>>? editionLineQuillDelta,
+    List<Map<String, dynamic>>? cornerBadgeQuillDelta,
 
     @ColorJsonConverter()
     @Default(Color(0xFF1E1E1E))

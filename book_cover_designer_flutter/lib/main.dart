@@ -1,6 +1,7 @@
 import 'package:book_cover_designer_flutter/app/app.locator.dart';
 import 'package:book_cover_designer_flutter/app/app.router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 Future<void> main() async {
@@ -21,6 +22,9 @@ class EbookCoverGeneratorApp extends StatelessWidget {
     return MaterialApp(
       title: 'Book Cover Designer',
       theme: ThemeData(primarySwatch: Colors.blue),
+      localizationsDelegates: const [
+        FlutterQuillLocalizations.delegate,
+      ],
       navigatorKey: StackedService.navigatorKey,
       onGenerateRoute: _router.onGenerateRoute,
       initialRoute: Routes.homeView,
