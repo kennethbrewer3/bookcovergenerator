@@ -18,6 +18,27 @@ _EbookCoverSettings _$EbookCoverSettingsFromJson(
   seriesTitle: json['seriesTitle'] as String?,
   editionLine: json['editionLine'] as String?,
   cornerBadgeText: json['cornerBadgeText'] as String?,
+  titleQuillDelta: (json['titleQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  authorQuillDelta: (json['authorQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  subtitleQuillDelta: (json['subtitleQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  taglineQuillDelta: (json['taglineQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  seriesTitleQuillDelta: (json['seriesTitleQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  editionLineQuillDelta: (json['editionLineQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
+  cornerBadgeQuillDelta: (json['cornerBadgeQuillDelta'] as List<dynamic>?)
+      ?.map((e) => e as Map<String, dynamic>)
+      .toList(),
   backgroundColor: json['backgroundColor'] == null
       ? const Color(0xFF1E1E1E)
       : const ColorJsonConverter().fromJson(
@@ -219,6 +240,13 @@ Map<String, dynamic> _$EbookCoverSettingsToJson(
   'seriesTitle': instance.seriesTitle,
   'editionLine': instance.editionLine,
   'cornerBadgeText': instance.cornerBadgeText,
+  'titleQuillDelta': instance.titleQuillDelta,
+  'authorQuillDelta': instance.authorQuillDelta,
+  'subtitleQuillDelta': instance.subtitleQuillDelta,
+  'taglineQuillDelta': instance.taglineQuillDelta,
+  'seriesTitleQuillDelta': instance.seriesTitleQuillDelta,
+  'editionLineQuillDelta': instance.editionLineQuillDelta,
+  'cornerBadgeQuillDelta': instance.cornerBadgeQuillDelta,
   'backgroundColor': const ColorJsonConverter().toJson(
     instance.backgroundColor,
   ),

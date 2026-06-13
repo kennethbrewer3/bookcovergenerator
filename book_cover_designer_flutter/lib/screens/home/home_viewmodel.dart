@@ -8,6 +8,7 @@ import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/services/generate_ebook_cover_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:stacked/stacked.dart';
 
 enum HomeFormSection {
@@ -61,6 +62,13 @@ class HomeViewModel extends BaseViewModel {
   final seriesTitleController = TextEditingController();
   final editionLineController = TextEditingController();
   final cornerBadgeTextController = TextEditingController();
+  final titleQuillController = quill.QuillController.basic();
+  final authorQuillController = quill.QuillController.basic();
+  final subtitleQuillController = quill.QuillController.basic();
+  final taglineQuillController = quill.QuillController.basic();
+  final seriesTitleQuillController = quill.QuillController.basic();
+  final editionLineQuillController = quill.QuillController.basic();
+  final cornerBadgeQuillController = quill.QuillController.basic();
   final authorFocusNode = FocusNode();
   final seriesTitleFocusNode = FocusNode();
 
@@ -180,6 +188,13 @@ class HomeViewModel extends BaseViewModel {
     seriesTitleController.addListener(_onFieldsChanged);
     editionLineController.addListener(_onFieldsChanged);
     cornerBadgeTextController.addListener(_onFieldsChanged);
+    titleQuillController.addListener(_onQuillFieldsChanged);
+    authorQuillController.addListener(_onQuillFieldsChanged);
+    subtitleQuillController.addListener(_onQuillFieldsChanged);
+    taglineQuillController.addListener(_onQuillFieldsChanged);
+    seriesTitleQuillController.addListener(_onQuillFieldsChanged);
+    editionLineQuillController.addListener(_onQuillFieldsChanged);
+    cornerBadgeQuillController.addListener(_onQuillFieldsChanged);
   }
 
   // SegmentedButton expects a Set
@@ -526,6 +541,49 @@ class HomeViewModel extends BaseViewModel {
     _scheduleCoverUpdate();
   }
 
+  void _onQuillFieldsChanged() {
+    _syncTextControllerFromQuill(ebookTitleController, titleQuillController);
+    _syncTextControllerFromQuill(authorNameController, authorQuillController);
+    _syncTextControllerFromQuill(subtitleController, subtitleQuillController);
+    _syncTextControllerFromQuill(taglineController, taglineQuillController);
+    _syncTextControllerFromQuill(
+      seriesTitleController,
+      seriesTitleQuillController,
+    );
+    _syncTextControllerFromQuill(
+      editionLineController,
+      editionLineQuillController,
+    );
+    _syncTextControllerFromQuill(
+      cornerBadgeTextController,
+      cornerBadgeQuillController,
+    );
+    ebookTitle = ebookTitleController.text;
+    authorName = authorNameController.text;
+    notifyListeners();
+    _scheduleCoverUpdate();
+  }
+
+  void _syncTextControllerFromQuill(
+    TextEditingController textController,
+    quill.QuillController quillController,
+  ) {
+    final plainText = _quillPlainText(quillController);
+    if (textController.text == plainText) return;
+    textController.text = plainText;
+  }
+
+  String _quillPlainText(quill.QuillController controller) {
+    return controller.document.toPlainText().trimRight();
+  }
+
+  List<Map<String, dynamic>>? _quillDeltaJson(
+    quill.QuillController controller,
+  ) {
+    if (_quillPlainText(controller).trim().isEmpty) return null;
+    return controller.document.toDelta().toJson().cast<Map<String, dynamic>>();
+  }
+
   // --- ViewModel validators (UI will call these in TextFormField.validator) ---
   String? validateEbookTitle(String? value) {
     final v = (value ?? '').trim();
@@ -568,6 +626,13 @@ class HomeViewModel extends BaseViewModel {
           tagline: _optionalText(taglineController.text),
           seriesTitle: _optionalText(seriesTitleController.text),
           editionLine: _optionalText(editionLineController.text),
+          titleQuillDelta: _quillDeltaJson(titleQuillController),
+          authorQuillDelta: _quillDeltaJson(authorQuillController),
+          subtitleQuillDelta: _quillDeltaJson(subtitleQuillController),
+          taglineQuillDelta: _quillDeltaJson(taglineQuillController),
+          seriesTitleQuillDelta: _quillDeltaJson(seriesTitleQuillController),
+          editionLineQuillDelta: _quillDeltaJson(editionLineQuillController),
+          cornerBadgeQuillDelta: _quillDeltaJson(cornerBadgeQuillController),
           taglineTopOffset: taglineTopOffset,
           seriesTitleTopOffset: seriesTitleTopOffset,
           editionLineTopOffset: editionLineTopOffset,
@@ -674,6 +739,13 @@ class HomeViewModel extends BaseViewModel {
     seriesTitleController.clear();
     editionLineController.clear();
     cornerBadgeTextController.clear();
+    titleQuillController.document = quill.Document();
+    authorQuillController.document = quill.Document();
+    subtitleQuillController.document = quill.Document();
+    taglineQuillController.document = quill.Document();
+    seriesTitleQuillController.document = quill.Document();
+    editionLineQuillController.document = quill.Document();
+    cornerBadgeQuillController.document = quill.Document();
     _taglineTopOffset = 0;
     _seriesTitleTopOffset = 0;
     _editionLineTopOffset = 0;
@@ -738,6 +810,13 @@ class HomeViewModel extends BaseViewModel {
     seriesTitleController.removeListener(_onFieldsChanged);
     editionLineController.removeListener(_onFieldsChanged);
     cornerBadgeTextController.removeListener(_onFieldsChanged);
+    titleQuillController.removeListener(_onQuillFieldsChanged);
+    authorQuillController.removeListener(_onQuillFieldsChanged);
+    subtitleQuillController.removeListener(_onQuillFieldsChanged);
+    taglineQuillController.removeListener(_onQuillFieldsChanged);
+    seriesTitleQuillController.removeListener(_onQuillFieldsChanged);
+    editionLineQuillController.removeListener(_onQuillFieldsChanged);
+    cornerBadgeQuillController.removeListener(_onQuillFieldsChanged);
     ebookTitleController.dispose();
     authorNameController.dispose();
     subtitleController.dispose();
@@ -745,6 +824,13 @@ class HomeViewModel extends BaseViewModel {
     seriesTitleController.dispose();
     editionLineController.dispose();
     cornerBadgeTextController.dispose();
+    titleQuillController.dispose();
+    authorQuillController.dispose();
+    subtitleQuillController.dispose();
+    taglineQuillController.dispose();
+    seriesTitleQuillController.dispose();
+    editionLineQuillController.dispose();
+    cornerBadgeQuillController.dispose();
     authorFocusNode.dispose();
     seriesTitleFocusNode.dispose();
     super.dispose();
