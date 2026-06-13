@@ -8,6 +8,7 @@ Desktop.ini
 # IDE and editor files
 .idea/
 .vscode/
+!.vscode/launch.json
 *.iml
 *.ipr
 *.iws

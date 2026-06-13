@@ -1,5 +1,29 @@
-// lib/theme/app_tokens.dart
+// lib/ui/theme/app_theme.dart
 import 'package:flutter/material.dart';
+
+/// The four selectable theme variants.
+enum AppThemeVariant {
+  light,
+  dark,
+  militaryLight,
+  militaryDark;
+
+  String get label {
+    switch (this) {
+      case AppThemeVariant.light:
+        return 'Light';
+      case AppThemeVariant.dark:
+        return 'Dark';
+      case AppThemeVariant.militaryLight:
+        return 'Military Light';
+      case AppThemeVariant.militaryDark:
+        return 'Military Dark';
+    }
+  }
+
+  bool get isDark =>
+      this == AppThemeVariant.dark || this == AppThemeVariant.militaryDark;
+}
 
 /// Centralized app palette. Update values here to retheme the whole app.
 class AppColors {
@@ -41,6 +65,26 @@ class AppColors {
 
   // Dark borders
   static const Color borderDark = Color(0xFF2A3A2D);
+
+  // ── Military Light palette ──────────────────────────────────────────────
+  static const Color milBrand        = Color(0xFF6B7C3B); // olive drab
+  static const Color milBackground   = Color(0xFFF2EDD6); // khaki parchment
+  static const Color milSurface      = Color(0xFFFAF6E4); // light khaki
+  static const Color milSurfaceVar   = Color(0xFFE5D9B0); // tan
+  static const Color milTextPrimary  = Color(0xFF1C1A0E); // near-black olive
+  static const Color milTextSecondary= Color(0xFF4A4628); // dark khaki
+  static const Color milAccent       = Color(0xFF8B7355); // coyote brown
+  static const Color milHighlight    = Color(0xFFD4C98A); // warm sand
+  static const Color milBorder       = Color(0xFFC5B87A); // tan border
+
+  // ── Military Dark palette ───────────────────────────────────────────────
+  static const Color milBrandDark        = Color(0xFF8A9A3C); // bright OD green
+  static const Color milBackgroundDark   = Color(0xFF1A1C0E); // very dark olive
+  static const Color milSurfaceDark      = Color(0xFF252714); // dark olive
+  static const Color milSurfaceVarDark   = Color(0xFF30321C); // muted olive
+  static const Color milTextPrimaryDark  = Color(0xFFEDE9CC); // cream
+  static const Color milTextSecondaryDark= Color(0xFFB8B07A); // khaki text
+  static const Color milBorderDark       = Color(0xFF484A28); // dark border
 }
 
 /// App theme builder (Flutter 3.22+ / Material 3 friendly).
@@ -49,6 +93,20 @@ class AppTheme {
 
   static const double _radius = 14.0;
   static const double _borderWidth = 1.2;
+
+  /// Returns the [ThemeData] for a given [AppThemeVariant].
+  static ThemeData forVariant(AppThemeVariant variant) {
+    switch (variant) {
+      case AppThemeVariant.light:
+        return light();
+      case AppThemeVariant.dark:
+        return dark();
+      case AppThemeVariant.militaryLight:
+        return militaryLight();
+      case AppThemeVariant.militaryDark:
+        return militaryDark();
+    }
+  }
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
@@ -355,6 +413,302 @@ class AppTheme {
     );
   }
 
+  static ThemeData militaryLight() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.milBrand,
+      brightness: Brightness.light,
+      surface: AppColors.milSurface,
+      error: AppColors.error,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: AppColors.milBackground,
+
+      textTheme: _customTextTheme(
+        AppColors.milTextPrimary,
+        AppColors.milTextSecondary,
+      ),
+
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.milSurface,
+        foregroundColor: AppColors.milTextPrimary,
+        elevation: 0,
+        centerTitle: false,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: AppColors.milTextPrimary,
+        ),
+      ),
+
+      cardTheme: CardThemeData(
+        color: AppColors.milSurface,
+        elevation: 0.5,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+          side: BorderSide(
+            color: AppColors.milBorder.withValues(alpha: 0.70),
+            width: 1,
+          ),
+        ),
+        margin: const EdgeInsets.all(8),
+      ),
+
+      dividerTheme: DividerThemeData(
+        color: AppColors.milBorder.withValues(alpha: 0.90),
+        thickness: 1,
+        space: 1,
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.milSurface,
+        labelStyle: const TextStyle(color: AppColors.milTextSecondary),
+        hintStyle: const TextStyle(color: AppColors.milTextSecondary),
+        errorStyle: const TextStyle(height: 1.2),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: _outlineBorder(AppColors.milBorder),
+        enabledBorder: _outlineBorder(AppColors.milBorder),
+        focusedBorder: _outlineBorder(scheme.primary, width: 1.6),
+        errorBorder: _outlineBorder(scheme.error),
+        focusedErrorBorder: _outlineBorder(scheme.error, width: 1.6),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          disabledBackgroundColor: scheme.primary.withValues(alpha: 0.35),
+          disabledForegroundColor: scheme.onPrimary.withValues(alpha: 0.70),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_radius),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_radius),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: AppColors.milBorder, width: _borderWidth),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_radius),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.primary,
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.milSurfaceVar,
+        selectedColor: AppColors.milHighlight,
+        labelStyle: const TextStyle(color: AppColors.milTextPrimary),
+        secondaryLabelStyle: const TextStyle(color: AppColors.milTextPrimary),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+          side: BorderSide(color: AppColors.milBorder.withValues(alpha: 0.80)),
+        ),
+      ),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.milSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+          side: BorderSide(color: AppColors.milBorder.withValues(alpha: 0.70)),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.milSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+        ),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.milTextPrimary,
+        contentTextStyle: const TextStyle(color: Colors.white),
+        actionTextColor: scheme.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+        ),
+      ),
+    );
+  }
+
+  static ThemeData militaryDark() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.milBrandDark,
+      brightness: Brightness.dark,
+      surface: AppColors.milSurfaceDark,
+      error: AppColors.error,
+    ).copyWith(
+      surfaceContainerHighest: AppColors.milSurfaceVarDark,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: scheme,
+      scaffoldBackgroundColor: AppColors.milBackgroundDark,
+
+      textTheme: _customTextTheme(
+        AppColors.milTextPrimaryDark,
+        AppColors.milTextSecondaryDark,
+      ),
+
+      appBarTheme: const AppBarTheme(
+        backgroundColor: AppColors.milSurfaceDark,
+        foregroundColor: AppColors.milTextPrimaryDark,
+        elevation: 0,
+        centerTitle: false,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: AppColors.milTextPrimaryDark,
+        ),
+      ),
+
+      cardTheme: CardThemeData(
+        color: AppColors.milSurfaceDark,
+        elevation: 0.5,
+        shadowColor: Colors.black.withValues(alpha: 0.30),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+          side: BorderSide(
+            color: AppColors.milBorderDark.withValues(alpha: 0.90),
+            width: 1,
+          ),
+        ),
+        margin: const EdgeInsets.all(8),
+      ),
+
+      dividerTheme: DividerThemeData(
+        color: AppColors.milBorderDark.withValues(alpha: 0.90),
+        thickness: 1,
+        space: 1,
+      ),
+
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.milSurfaceDark,
+        labelStyle: const TextStyle(color: AppColors.milTextSecondaryDark),
+        hintStyle: const TextStyle(color: AppColors.milTextSecondaryDark),
+        errorStyle: const TextStyle(height: 1.2),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: _outlineBorder(AppColors.milBorderDark),
+        enabledBorder: _outlineBorder(AppColors.milBorderDark),
+        focusedBorder: _outlineBorder(scheme.primary, width: 1.6),
+        errorBorder: _outlineBorder(scheme.error),
+        focusedErrorBorder: _outlineBorder(scheme.error, width: 1.6),
+      ),
+
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
+          disabledBackgroundColor: scheme.primary.withValues(alpha: 0.28),
+          disabledForegroundColor: scheme.onPrimary.withValues(alpha: 0.65),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_radius),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_radius),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: AppColors.milBorderDark, width: _borderWidth),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_radius),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: scheme.primary,
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
+
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.milSurfaceVarDark,
+        selectedColor: AppColors.milSurfaceVarDark.withValues(alpha: 0.70),
+        labelStyle: const TextStyle(color: AppColors.milTextPrimaryDark),
+        secondaryLabelStyle: const TextStyle(color: AppColors.milTextPrimaryDark),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(999),
+          side: BorderSide(color: AppColors.milBorderDark.withValues(alpha: 0.80)),
+        ),
+      ),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.milSurfaceDark,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+          side: BorderSide(color: AppColors.milBorderDark.withValues(alpha: 0.80)),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.milSurfaceDark,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+        ),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.milSurfaceVarDark,
+        contentTextStyle: const TextStyle(color: AppColors.milTextPrimaryDark),
+        actionTextColor: scheme.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_radius),
+        ),
+      ),
+    );
+  }
+
   static TextTheme _textTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
     final primary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
@@ -378,6 +732,26 @@ class AppTheme {
       bodyMedium: TextStyle(color: primary),
       bodySmall: TextStyle(color: secondary),
 
+      labelLarge: TextStyle(color: primary, fontWeight: FontWeight.w700),
+      labelMedium: TextStyle(color: primary, fontWeight: FontWeight.w600),
+      labelSmall: TextStyle(color: secondary, fontWeight: FontWeight.w600),
+    );
+  }
+
+  static TextTheme _customTextTheme(Color primary, Color secondary) {
+    return TextTheme(
+      displayLarge: TextStyle(color: primary, fontWeight: FontWeight.w800),
+      displayMedium: TextStyle(color: primary, fontWeight: FontWeight.w800),
+      displaySmall: TextStyle(color: primary, fontWeight: FontWeight.w800),
+      headlineLarge: TextStyle(color: primary, fontWeight: FontWeight.w800),
+      headlineMedium: TextStyle(color: primary, fontWeight: FontWeight.w800),
+      headlineSmall: TextStyle(color: primary, fontWeight: FontWeight.w800),
+      titleLarge: TextStyle(color: primary, fontWeight: FontWeight.w700),
+      titleMedium: TextStyle(color: primary, fontWeight: FontWeight.w700),
+      titleSmall: TextStyle(color: primary, fontWeight: FontWeight.w700),
+      bodyLarge: TextStyle(color: primary),
+      bodyMedium: TextStyle(color: primary),
+      bodySmall: TextStyle(color: secondary),
       labelLarge: TextStyle(color: primary, fontWeight: FontWeight.w700),
       labelMedium: TextStyle(color: primary, fontWeight: FontWeight.w600),
       labelSmall: TextStyle(color: secondary, fontWeight: FontWeight.w600),
