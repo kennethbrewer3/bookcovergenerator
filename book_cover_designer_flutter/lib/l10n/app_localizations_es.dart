@@ -27,6 +27,63 @@ class AppLocalizationsEs extends AppLocalizations {
   String get themeMilitaryDark => 'Militar Oscuro';
 
   @override
+  String get settingsTitle => 'Configuración';
+
+  @override
+  String get settingsTooltip => 'Configuración';
+
+  @override
+  String get settingsAppearanceSection => 'Apariencia';
+
+  @override
+  String get settingsLanguageSection => 'Idioma';
+
+  @override
+  String get settingsFontsSection => 'Fuentes personalizadas';
+
+  @override
+  String get settingsFontsDescription =>
+      'Importe archivos .ttf u .otf para usar fuentes adicionales en el texto de la portada. Las fuentes se guardan localmente en este dispositivo.';
+
+  @override
+  String get settingsFontsEmpty =>
+      'Aún no se han importado fuentes personalizadas.';
+
+  @override
+  String get settingsAddFont => 'Importar archivos de fuente';
+
+  @override
+  String get settingsFontImportSuccess => 'Archivos de fuente importados.';
+
+  @override
+  String settingsFontImportFailed(String fileNames) {
+    return 'No se pudo importar: $fileNames';
+  }
+
+  @override
+  String get settingsRemoveFontTitle => '¿Eliminar fuente?';
+
+  @override
+  String settingsRemoveFontMessage(String name) {
+    return '¿Eliminar \"$name\" de sus fuentes personalizadas?';
+  }
+
+  @override
+  String get settingsRemoveFontTooltip => 'Eliminar fuente';
+
+  @override
+  String get settingsFontCustomLabel => 'Fuente personalizada';
+
+  @override
+  String get settingsCancel => 'Cancelar';
+
+  @override
+  String get settingsRemove => 'Eliminar';
+
+  @override
+  String get fontClear => 'Borrar';
+
+  @override
   String get sectionBackground => 'Color e imagen de fondo';
 
   @override

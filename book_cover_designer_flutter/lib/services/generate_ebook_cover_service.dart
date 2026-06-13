@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:book_cover_designer_flutter/app/app_services.dart';
 import 'package:book_cover_designer_flutter/app/logging/logger.dart';
 import 'package:book_cover_designer_flutter/models/ebook_cover_settings.dart';
 import 'package:book_cover_designer_flutter/models/enums.dart';
@@ -24,7 +25,17 @@ class GenerateEbookCoverService {
     GoogleFonts.pacifico();
     try {
       await GoogleFonts.pendingFonts();
+      await customFontService.preloadAll();
     } catch (_) {}
+  }
+
+  TextStyle? _resolveFontStyle(String fontKey, TextStyle base) {
+    final builtIn = _googleFontStyle(fontKey, base);
+    if (builtIn != null) return builtIn;
+    if (customFontService.isCustomFontKey(fontKey)) {
+      return base.copyWith(fontFamily: fontKey);
+    }
+    return null;
   }
 
   TextStyle? _googleFontStyle(String fontKey, TextStyle base) {
@@ -1076,7 +1087,7 @@ class GenerateEbookCoverService {
 
     final fontKey = attributes['font'];
     if (fontKey is String && fontKey.trim().isNotEmpty) {
-      final gfStyle = _googleFontStyle(fontKey.trim(), overrides);
+      final gfStyle = _resolveFontStyle(fontKey.trim(), overrides);
       if (gfStyle != null) return gfStyle;
     }
 

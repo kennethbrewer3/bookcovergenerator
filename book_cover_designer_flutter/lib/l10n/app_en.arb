@@ -19,6 +19,67 @@
   "themeMilitaryDark": "Military Dark",
   "@themeMilitaryDark": { "description": "Military dark theme label" },
 
+  "settingsTitle": "Settings",
+  "@settingsTitle": { "description": "Settings screen title" },
+
+  "settingsTooltip": "Settings",
+  "@settingsTooltip": { "description": "Tooltip on the settings button" },
+
+  "settingsAppearanceSection": "Appearance",
+  "@settingsAppearanceSection": { "description": "Settings section for theme selection" },
+
+  "settingsLanguageSection": "Language",
+  "@settingsLanguageSection": { "description": "Settings section for language selection" },
+
+  "settingsFontsSection": "Custom fonts",
+  "@settingsFontsSection": { "description": "Settings section for imported fonts" },
+
+  "settingsFontsDescription": "Import .ttf or .otf files to use additional fonts in your cover text. Fonts are stored locally on this device.",
+  "@settingsFontsDescription": { "description": "Help text for custom font import" },
+
+  "settingsFontsEmpty": "No custom fonts imported yet.",
+  "@settingsFontsEmpty": { "description": "Shown when the user has not imported fonts" },
+
+  "settingsAddFont": "Import font files",
+  "@settingsAddFont": { "description": "Button to import font files" },
+
+  "settingsFontImportSuccess": "Font files imported.",
+  "@settingsFontImportSuccess": { "description": "Snackbar after successful font import" },
+
+  "settingsFontImportFailed": "Could not import: {fileNames}",
+  "@settingsFontImportFailed": {
+    "description": "Snackbar when one or more font files fail to import",
+    "placeholders": {
+      "fileNames": { "type": "String" }
+    }
+  },
+
+  "settingsRemoveFontTitle": "Remove font?",
+  "@settingsRemoveFontTitle": { "description": "Dialog title when removing a custom font" },
+
+  "settingsRemoveFontMessage": "Remove \"{name}\" from your custom fonts?",
+  "@settingsRemoveFontMessage": {
+    "description": "Dialog message when removing a custom font",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "settingsRemoveFontTooltip": "Remove font",
+  "@settingsRemoveFontTooltip": { "description": "Tooltip on remove font button" },
+
+  "settingsFontCustomLabel": "Custom font",
+  "@settingsFontCustomLabel": { "description": "Subtitle label for imported fonts" },
+
+  "settingsCancel": "Cancel",
+  "@settingsCancel": { "description": "Cancel button label" },
+
+  "settingsRemove": "Remove",
+  "@settingsRemove": { "description": "Remove button label" },
+
+  "fontClear": "Clear",
+  "@fontClear": { "description": "Quill toolbar option to clear font formatting" },
+
   "sectionBackground": "Background Color and Image",
   "@sectionBackground": { "description": "Expansion panel title for background section" },
 

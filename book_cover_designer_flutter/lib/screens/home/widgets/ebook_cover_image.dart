@@ -25,13 +25,19 @@ class EbookCoverImage extends ViewModelWidget<HomeViewModel> {
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final width = viewModel.coverWidth;
+          final height = viewModel.coverHeight;
+          if (width <= 0 || height <= 0) {
+            return const Icon(Icons.image_not_supported);
+          }
+
           return ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: constraints.maxWidth,
               maxHeight: constraints.maxHeight,
             ),
             child: AspectRatio(
-              aspectRatio: viewModel.coverWidth / viewModel.coverHeight,
+              aspectRatio: width / height,
               child: Image.memory(
                 bytes,
                 gaplessPlayback: true,

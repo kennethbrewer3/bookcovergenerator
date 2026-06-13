@@ -27,6 +27,62 @@ class AppLocalizationsFr extends AppLocalizations {
   String get themeMilitaryDark => 'Militaire sombre';
 
   @override
+  String get settingsTitle => 'Paramètres';
+
+  @override
+  String get settingsTooltip => 'Paramètres';
+
+  @override
+  String get settingsAppearanceSection => 'Apparence';
+
+  @override
+  String get settingsLanguageSection => 'Langue';
+
+  @override
+  String get settingsFontsSection => 'Polices personnalisées';
+
+  @override
+  String get settingsFontsDescription =>
+      'Importez des fichiers .ttf ou .otf pour utiliser des polices supplémentaires sur votre couverture. Les polices sont stockées localement sur cet appareil.';
+
+  @override
+  String get settingsFontsEmpty => 'Aucune police personnalisée importée.';
+
+  @override
+  String get settingsAddFont => 'Importer des fichiers de police';
+
+  @override
+  String get settingsFontImportSuccess => 'Fichiers de police importés.';
+
+  @override
+  String settingsFontImportFailed(String fileNames) {
+    return 'Import impossible : $fileNames';
+  }
+
+  @override
+  String get settingsRemoveFontTitle => 'Supprimer la police ?';
+
+  @override
+  String settingsRemoveFontMessage(String name) {
+    return 'Supprimer « $name » de vos polices personnalisées ?';
+  }
+
+  @override
+  String get settingsRemoveFontTooltip => 'Supprimer la police';
+
+  @override
+  String get settingsFontCustomLabel => 'Police personnalisée';
+
+  @override
+  String get settingsCancel => 'Annuler';
+
+  @override
+  String get settingsRemove => 'Supprimer';
+
+  @override
+  String get fontClear => 'Effacer';
+
+  @override
   String get sectionBackground => 'Couleur et image de fond';
 
   @override

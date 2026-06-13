@@ -1,9 +1,12 @@
+import 'package:book_cover_designer_flutter/app/app_services.dart';
 import 'package:book_cover_designer_flutter/l10n/app_localizations.dart';
 import 'package:book_cover_designer_flutter/models/cover_size_preset.dart';
 import 'package:book_cover_designer_flutter/models/enums.dart';
 import 'package:book_cover_designer_flutter/screens/home/home_viewmodel.dart';
+import 'package:book_cover_designer_flutter/services/cover_fonts.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_text_styles.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_tokens.dart';
+import 'package:book_cover_designer_flutter/ui/widgets/cover_font_family_button.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
@@ -1010,13 +1013,16 @@ class _QuillTextEntryState extends State<_QuillTextEntry> {
   @override
   Widget build(BuildContext context) {
     final errorText = widget.validator?.call();
+    final l10n = AppLocalizations.of(context)!;
+    final quillL10n = quill.FlutterQuillLocalizations.of(context);
+    const toolbarSectionHeight = quill.kDefaultToolbarSize + AppSpacing.xs;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(widget.label, style: AppTextStyles.caption(context)),
         const SizedBox(height: AppSpacing.xs),
-        DecoratedBox(
+        Container(
           decoration: BoxDecoration(
             border: Border.all(
               color: errorText == null
@@ -1025,54 +1031,103 @@ class _QuillTextEntryState extends State<_QuillTextEntry> {
             ),
             borderRadius: BorderRadius.circular(4),
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: quill.QuillSimpleToolbar(
-                controller: widget.controller,
-                config: quill.QuillSimpleToolbarConfig(
-                  showUndo: false,
-                  showRedo: false,
-                  showAlignmentButtons: true,
-                  showJustifyAlignment: true,
-                  showFontFamily: true,
-                  showFontSize: true,
-                  showBackgroundColorButton: true,
-                  showColorButton: true,
-                  showSearchButton: false,
-                  showCodeBlock: false,
-                  showQuote: false,
-                  showInlineCode: false,
-                  showLink: false,
-                  showListBullets: false,
-                  showListNumbers: false,
-                  showListCheck: false,
-                  showIndent: false,
-                  showSubscript: true,
-                  showSuperscript: true,
-                  showHeaderStyle: false,
-                  showDividers: false,
-                  buttonOptions: quill.QuillSimpleToolbarButtonOptions(
-                    color: quill.QuillToolbarColorButtonOptions(
-                      customOnPressedCallback: (controller, isBackground) =>
-                          _showQuillColorPicker(
-                            context: context,
-                            controller: controller,
-                            isBackground: isBackground,
-                          ),
-                    ),
-                    backgroundColor: quill.QuillToolbarColorButtonOptions(
-                      customOnPressedCallback: (controller, isBackground) =>
-                          _showQuillColorPicker(
-                            context: context,
-                            controller: controller,
-                            isBackground: isBackground,
-                          ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: errorText == null
+                          ? Theme.of(context).colorScheme.outline
+                          : Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),
-              ),
+                child: SizedBox(
+                  height: toolbarSectionHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ListenableBuilder(
+                        listenable: customFontService.fonts,
+                        builder: (context, _) {
+                          final fontFamilyItems = CoverFonts.fontFamilyItems(
+                            clearLabel: l10n.fontClear,
+                            customFonts: customFontService.fonts.value,
+                          );
+
+                          return ListenableBuilder(
+                            listenable: widget.controller,
+                            builder: (context, _) {
+                              return CoverFontFamilyButton(
+                                controller: widget.controller,
+                                items: fontFamilyItems,
+                                defaultLabel: quillL10n?.font ?? 'Font',
+                                toolbarHeight: toolbarSectionHeight,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      const quill.QuillToolbarDivider.vertical(),
+                      Expanded(
+                        child: quill.QuillSimpleToolbar(
+                          controller: widget.controller,
+                          config: quill.QuillSimpleToolbarConfig(
+                            multiRowsDisplay: false,
+                            toolbarSize: toolbarSectionHeight,
+                            color: Colors.transparent,
+                            decoration: const BoxDecoration(),
+                            showUndo: false,
+                            showRedo: false,
+                            showAlignmentButtons: true,
+                            showJustifyAlignment: true,
+                            showFontFamily: false,
+                            showFontSize: true,
+                            showBackgroundColorButton: true,
+                            showColorButton: true,
+                            showSearchButton: false,
+                            showCodeBlock: false,
+                            showQuote: false,
+                            showInlineCode: false,
+                            showLink: false,
+                            showListBullets: false,
+                            showListNumbers: false,
+                            showListCheck: false,
+                            showIndent: false,
+                            showSubscript: true,
+                            showSuperscript: true,
+                            showHeaderStyle: false,
+                            showDividers: false,
+                            buttonOptions: quill.QuillSimpleToolbarButtonOptions(
+                              color: quill.QuillToolbarColorButtonOptions(
+                                customOnPressedCallback:
+                                    (controller, isBackground) =>
+                                        _showQuillColorPicker(
+                                          context: context,
+                                          controller: controller,
+                                          isBackground: isBackground,
+                                        ),
+                              ),
+                              backgroundColor:
+                                  quill.QuillToolbarColorButtonOptions(
+                                customOnPressedCallback:
+                                    (controller, isBackground) =>
+                                        _showQuillColorPicker(
+                                          context: context,
+                                          controller: controller,
+                                          isBackground: isBackground,
+                                        ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               GestureDetector(
                 behavior: HitTestBehavior.translucent,

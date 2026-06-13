@@ -136,6 +136,108 @@ abstract class AppLocalizations {
   /// **'Military Dark'**
   String get themeMilitaryDark;
 
+  /// Settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Tooltip on the settings button
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTooltip;
+
+  /// Settings section for theme selection
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearanceSection;
+
+  /// Settings section for language selection
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguageSection;
+
+  /// Settings section for imported fonts
+  ///
+  /// In en, this message translates to:
+  /// **'Custom fonts'**
+  String get settingsFontsSection;
+
+  /// Help text for custom font import
+  ///
+  /// In en, this message translates to:
+  /// **'Import .ttf or .otf files to use additional fonts in your cover text. Fonts are stored locally on this device.'**
+  String get settingsFontsDescription;
+
+  /// Shown when the user has not imported fonts
+  ///
+  /// In en, this message translates to:
+  /// **'No custom fonts imported yet.'**
+  String get settingsFontsEmpty;
+
+  /// Button to import font files
+  ///
+  /// In en, this message translates to:
+  /// **'Import font files'**
+  String get settingsAddFont;
+
+  /// Snackbar after successful font import
+  ///
+  /// In en, this message translates to:
+  /// **'Font files imported.'**
+  String get settingsFontImportSuccess;
+
+  /// Snackbar when one or more font files fail to import
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import: {fileNames}'**
+  String settingsFontImportFailed(String fileNames);
+
+  /// Dialog title when removing a custom font
+  ///
+  /// In en, this message translates to:
+  /// **'Remove font?'**
+  String get settingsRemoveFontTitle;
+
+  /// Dialog message when removing a custom font
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{name}\" from your custom fonts?'**
+  String settingsRemoveFontMessage(String name);
+
+  /// Tooltip on remove font button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove font'**
+  String get settingsRemoveFontTooltip;
+
+  /// Subtitle label for imported fonts
+  ///
+  /// In en, this message translates to:
+  /// **'Custom font'**
+  String get settingsFontCustomLabel;
+
+  /// Cancel button label
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get settingsCancel;
+
+  /// Remove button label
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get settingsRemove;
+
+  /// Quill toolbar option to clear font formatting
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get fontClear;
+
   /// Expansion panel title for background section
   ///
   /// In en, this message translates to:

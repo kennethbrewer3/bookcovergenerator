@@ -1,9 +1,8 @@
+import 'package:book_cover_designer_flutter/app/app.router.dart';
 import 'package:book_cover_designer_flutter/app/logging/logger.dart';
-import 'package:book_cover_designer_flutter/main.dart';
+import 'package:book_cover_designer_flutter/l10n/app_localizations.dart';
 import 'package:book_cover_designer_flutter/screens/home/widgets/ebook_cover_image.dart';
 import 'package:book_cover_designer_flutter/screens/home/widgets/ebook_info_form.dart';
-import 'package:book_cover_designer_flutter/services/locale_service.dart';
-import 'package:book_cover_designer_flutter/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:resizable_widget/resizable_widget.dart';
 import 'package:stacked/stacked.dart';
@@ -16,68 +15,16 @@ class HomeView extends StackedView<HomeViewModel> {
 
   @override
   Widget builder(BuildContext context, HomeViewModel viewModel, Widget? child) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book Cover Designer'),
+        title: Text(l10n.appTitle),
         actions: [
-          ValueListenableBuilder<AppThemeVariant>(
-            valueListenable: themeService.variant,
-            builder: (context, current, _) {
-              return PopupMenuButton<AppThemeVariant>(
-                tooltip: 'Select theme',
-                icon: const Icon(Icons.palette_outlined),
-                onSelected: (v) => themeService.setVariant(v),
-                itemBuilder: (_) => AppThemeVariant.values
-                    .map(
-                      (v) => PopupMenuItem(
-                        value: v,
-                        child: Row(
-                          children: [
-                            Icon(
-                              v == current
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_unchecked,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(v.label),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
-          ),
-          ValueListenableBuilder<Locale>(
-            valueListenable: localeService.locale,
-            builder: (context, currentLocale, _) {
-              return PopupMenuButton<Locale>(
-                tooltip: 'Select language',
-                icon: const Icon(Icons.language),
-                onSelected: (l) => localeService.setLocale(l),
-                itemBuilder: (_) => AppLocaleOption.all
-                    .map(
-                      (opt) => PopupMenuItem(
-                        value: opt.locale,
-                        child: Row(
-                          children: [
-                            Icon(
-                              opt.locale.languageCode ==
-                                      currentLocale.languageCode
-                                  ? Icons.radio_button_checked
-                                  : Icons.radio_button_unchecked,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Text('${opt.flag}  ${opt.label}'),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
+          IconButton(
+            tooltip: l10n.settingsTooltip,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => Navigator.of(context).pushNamed(Routes.settingsView),
           ),
           const SizedBox(width: 8),
         ],

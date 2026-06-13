@@ -27,6 +27,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeMilitaryDark => 'Military Dark';
 
   @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsTooltip => 'Settings';
+
+  @override
+  String get settingsAppearanceSection => 'Appearance';
+
+  @override
+  String get settingsLanguageSection => 'Language';
+
+  @override
+  String get settingsFontsSection => 'Custom fonts';
+
+  @override
+  String get settingsFontsDescription =>
+      'Import .ttf or .otf files to use additional fonts in your cover text. Fonts are stored locally on this device.';
+
+  @override
+  String get settingsFontsEmpty => 'No custom fonts imported yet.';
+
+  @override
+  String get settingsAddFont => 'Import font files';
+
+  @override
+  String get settingsFontImportSuccess => 'Font files imported.';
+
+  @override
+  String settingsFontImportFailed(String fileNames) {
+    return 'Could not import: $fileNames';
+  }
+
+  @override
+  String get settingsRemoveFontTitle => 'Remove font?';
+
+  @override
+  String settingsRemoveFontMessage(String name) {
+    return 'Remove \"$name\" from your custom fonts?';
+  }
+
+  @override
+  String get settingsRemoveFontTooltip => 'Remove font';
+
+  @override
+  String get settingsFontCustomLabel => 'Custom font';
+
+  @override
+  String get settingsCancel => 'Cancel';
+
+  @override
+  String get settingsRemove => 'Remove';
+
+  @override
+  String get fontClear => 'Clear';
+
+  @override
   String get sectionBackground => 'Background Color and Image';
 
   @override
