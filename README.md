@@ -26,6 +26,20 @@ The simplest way to run the app is to pull the pre-built web assets and serve th
 - Flutter web build output already present at `book_cover_designer_flutter/build/web/`
   (see [Building the web assets](#building-the-web-assets) below if you need to build first)
 
+### Create a docker-compose.yaml file
+
+```yaml
+version: '3.8'
+services:
+  book-cover-designer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "53589:80"
+    restart: unless-stopped
+```
+
 ### Start the container
 
 ```bash
