@@ -2,6 +2,7 @@ import 'package:book_cover_designer_flutter/app/logging/logger.dart';
 import 'package:book_cover_designer_flutter/main.dart';
 import 'package:book_cover_designer_flutter/screens/home/widgets/ebook_cover_image.dart';
 import 'package:book_cover_designer_flutter/screens/home/widgets/ebook_info_form.dart';
+import 'package:book_cover_designer_flutter/services/locale_service.dart';
 import 'package:book_cover_designer_flutter/ui/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:resizable_widget/resizable_widget.dart';
@@ -40,6 +41,36 @@ class HomeView extends StackedView<HomeViewModel> {
                             ),
                             const SizedBox(width: 10),
                             Text(v.label),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+          ValueListenableBuilder<Locale>(
+            valueListenable: localeService.locale,
+            builder: (context, currentLocale, _) {
+              return PopupMenuButton<Locale>(
+                tooltip: 'Select language',
+                icon: const Icon(Icons.language),
+                onSelected: (l) => localeService.setLocale(l),
+                itemBuilder: (_) => AppLocaleOption.all
+                    .map(
+                      (opt) => PopupMenuItem(
+                        value: opt.locale,
+                        child: Row(
+                          children: [
+                            Icon(
+                              opt.locale.languageCode ==
+                                      currentLocale.languageCode
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Text('${opt.flag}  ${opt.label}'),
                           ],
                         ),
                       ),

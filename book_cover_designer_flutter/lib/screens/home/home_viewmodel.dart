@@ -585,20 +585,20 @@ class HomeViewModel extends BaseViewModel {
   }
 
   // --- ViewModel validators (UI will call these in TextFormField.validator) ---
-  String? validateEbookTitle(String? value) {
+  String? validateEbookTitle(String? value, {String? requiredMsg, String? tooShortMsg}) {
     final v = (value ?? '').trim();
-    if (v.isEmpty) return 'Ebook title is required';
+    if (v.isEmpty) return requiredMsg ?? 'Ebook title is required';
     if (v.length < minTitleLength) {
-      return 'Ebook title must be at least $minTitleLength characters';
+      return tooShortMsg ?? 'Ebook title must be at least $minTitleLength characters';
     }
     return null;
   }
 
-  String? validateAuthorName(String? value) {
+  String? validateAuthorName(String? value, {String? requiredMsg, String? tooShortMsg}) {
     final v = (value ?? '').trim();
-    if (v.isEmpty) return 'Author name is required';
+    if (v.isEmpty) return requiredMsg ?? 'Author name is required';
     if (v.length < minAuthorLength) {
-      return 'Author name must be at least $minAuthorLength characters';
+      return tooShortMsg ?? 'Author name must be at least $minAuthorLength characters';
     }
     return null;
   }

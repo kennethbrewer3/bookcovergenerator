@@ -1,0 +1,316 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Book Cover Designer",
+  "@appTitle": { "description": "The application title shown in the app bar" },
+
+  "themeSelectTooltip": "Select theme",
+  "@themeSelectTooltip": { "description": "Tooltip on the theme picker button" },
+
+  "themeLight": "Light",
+  "@themeLight": { "description": "Light theme label" },
+
+  "themeDark": "Dark",
+  "@themeDark": { "description": "Dark theme label" },
+
+  "themeMilitaryLight": "Military Light",
+  "@themeMilitaryLight": { "description": "Military light theme label" },
+
+  "themeMilitaryDark": "Military Dark",
+  "@themeMilitaryDark": { "description": "Military dark theme label" },
+
+  "sectionBackground": "Background Color and Image",
+  "@sectionBackground": { "description": "Expansion panel title for background section" },
+
+  "sectionTitle": "Title",
+  "@sectionTitle": { "description": "Expansion panel title for title section" },
+
+  "sectionAuthor": "Author",
+  "@sectionAuthor": { "description": "Expansion panel title for author section" },
+
+  "sectionSubtitle": "Subtitle",
+  "@sectionSubtitle": { "description": "Expansion panel title for subtitle section" },
+
+  "sectionTagline": "Tagline",
+  "@sectionTagline": { "description": "Expansion panel title for tagline section" },
+
+  "sectionSeries": "Series Title",
+  "@sectionSeries": { "description": "Expansion panel title for series title section" },
+
+  "sectionEdition": "Edition",
+  "@sectionEdition": { "description": "Expansion panel title for edition section" },
+
+  "sectionBadge": "Corner Badge",
+  "@sectionBadge": { "description": "Expansion panel title for corner badge section" },
+
+  "sectionLayout": "Cover Layout",
+  "@sectionLayout": { "description": "Expansion panel title for cover layout section" },
+
+  "sectionActions": "Actions",
+  "@sectionActions": { "description": "Expansion panel title for actions section" },
+
+  "fieldEbookTitle": "Ebook Title",
+  "@fieldEbookTitle": { "description": "Label for ebook title input" },
+
+  "fieldAuthorName": "Author Name",
+  "@fieldAuthorName": { "description": "Label for author name input" },
+
+  "fieldSubtitle": "Subtitle",
+  "@fieldSubtitle": { "description": "Label for subtitle input" },
+
+  "fieldTagline": "Tagline",
+  "@fieldTagline": { "description": "Label for tagline input" },
+
+  "fieldSeriesTitle": "Series Title",
+  "@fieldSeriesTitle": { "description": "Label for series title input" },
+
+  "fieldEditionLine": "Edition Line",
+  "@fieldEditionLine": { "description": "Label for edition line input" },
+
+  "fieldCornerBadge": "Corner Badge",
+  "@fieldCornerBadge": { "description": "Label for corner badge text input" },
+
+  "colorBackground": "Background Color",
+  "@colorBackground": { "description": "Label for background color button" },
+
+  "colorTitleBox": "Box Color",
+  "@colorTitleBox": { "description": "Label for title box color button" },
+
+  "colorTitleBorder": "Border Color",
+  "@colorTitleBorder": { "description": "Label for title border color button" },
+
+  "colorAuthorText": "Author Text Color",
+  "@colorAuthorText": { "description": "Label for author text color button" },
+
+  "colorAuthorBox": "Author Box Color",
+  "@colorAuthorBox": { "description": "Label for author box color button" },
+
+  "colorAuthorBorder": "Author Border Color",
+  "@colorAuthorBorder": { "description": "Label for author border color button" },
+
+  "colorSubtitleText": "Subtitle Text Color",
+  "@colorSubtitleText": { "description": "Label for subtitle text color button" },
+
+  "colorSubtitleBox": "Subtitle Box Color",
+  "@colorSubtitleBox": { "description": "Label for subtitle box color button" },
+
+  "colorSubtitleBorder": "Subtitle Border Color",
+  "@colorSubtitleBorder": { "description": "Label for subtitle border color button" },
+
+  "colorTaglineText": "Tagline Text Color",
+  "@colorTaglineText": { "description": "Label for tagline text color button" },
+
+  "colorTaglineBox": "Tagline Box Color",
+  "@colorTaglineBox": { "description": "Label for tagline box color button" },
+
+  "colorTaglineBorder": "Tagline Border Color",
+  "@colorTaglineBorder": { "description": "Label for tagline border color button" },
+
+  "colorSeriesTitleText": "Series Title Text Color",
+  "@colorSeriesTitleText": { "description": "Label for series title text color button" },
+
+  "colorSeriesTitleBox": "Series Title Box Color",
+  "@colorSeriesTitleBox": { "description": "Label for series title box color button" },
+
+  "colorSeriesTitleBorder": "Series Title Border Color",
+  "@colorSeriesTitleBorder": { "description": "Label for series title border color button" },
+
+  "colorEditionLineText": "Edition Line Text Color",
+  "@colorEditionLineText": { "description": "Label for edition line text color button" },
+
+  "colorEditionLineBox": "Edition Line Box Color",
+  "@colorEditionLineBox": { "description": "Label for edition line box color button" },
+
+  "colorEditionLineBorder": "Edition Line Border Color",
+  "@colorEditionLineBorder": { "description": "Label for edition line border color button" },
+
+  "colorBadgeText": "Badge Text Color",
+  "@colorBadgeText": { "description": "Label for badge text color button" },
+
+  "colorBadge": "Badge Color",
+  "@colorBadge": { "description": "Label for badge color button" },
+
+  "colorBadgeBorder": "Badge Border Color",
+  "@colorBadgeBorder": { "description": "Label for badge border color button" },
+
+  "colorPickerShadeSubheading": "Select shade",
+  "@colorPickerShadeSubheading": { "description": "Subheading in the color picker dialog" },
+
+  "coverSizeLabel": "Cover Size",
+  "@coverSizeLabel": { "description": "Label for cover size dropdown" },
+
+  "backgroundImageMode": "Background Image Mode",
+  "@backgroundImageMode": { "description": "Label for background image mode dropdown" },
+
+  "backgroundImageAlignment": "Background Image Alignment",
+  "@backgroundImageAlignment": { "description": "Label for background image alignment dropdown" },
+
+  "backgroundImageScaleX": "Background Image Scale X",
+  "@backgroundImageScaleX": { "description": "Label for background image scale X slider" },
+
+  "backgroundImageScaleY": "Background Image Scale Y",
+  "@backgroundImageScaleY": { "description": "Label for background image scale Y slider" },
+
+  "backgroundMixMode": "Background Mix Mode",
+  "@backgroundMixMode": { "description": "Label for background blend mode dropdown" },
+
+  "backgroundImageOpacity": "Background Image Opacity",
+  "@backgroundImageOpacity": { "description": "Label for background image opacity slider" },
+
+  "btnChooseBackgroundImage": "Choose Background Image",
+  "@btnChooseBackgroundImage": { "description": "Button to pick a background image" },
+
+  "btnClearImage": "Clear Image",
+  "@btnClearImage": { "description": "Button to remove the background image" },
+
+  "sliderTitleTopOffset": "Title Top Offset",
+  "@sliderTitleTopOffset": { "description": "Slider label for title vertical offset" },
+
+  "sliderTitleHorizontalOffset": "Title Horizontal Offset",
+  "@sliderTitleHorizontalOffset": { "description": "Slider label for title horizontal offset" },
+
+  "sliderAuthorTopOffset": "Author Top Offset",
+  "@sliderAuthorTopOffset": { "description": "Slider label for author vertical offset" },
+
+  "sliderAuthorLeftOffset": "Author Left Offset",
+  "@sliderAuthorLeftOffset": { "description": "Slider label for author horizontal offset" },
+
+  "sliderSubtitleTopOffset": "Subtitle Top Offset",
+  "@sliderSubtitleTopOffset": { "description": "Slider label for subtitle vertical offset" },
+
+  "sliderSubtitleLeftOffset": "Subtitle Left Offset",
+  "@sliderSubtitleLeftOffset": { "description": "Slider label for subtitle horizontal offset" },
+
+  "sliderTaglineTopOffset": "Tagline Top Offset",
+  "@sliderTaglineTopOffset": { "description": "Slider label for tagline vertical offset" },
+
+  "sliderTaglineLeftOffset": "Tagline Left Offset",
+  "@sliderTaglineLeftOffset": { "description": "Slider label for tagline horizontal offset" },
+
+  "sliderSeriesTitleTopOffset": "Series Title Top Offset",
+  "@sliderSeriesTitleTopOffset": { "description": "Slider label for series title vertical offset" },
+
+  "sliderSeriesTitleLeftOffset": "Series Title Left Offset",
+  "@sliderSeriesTitleLeftOffset": { "description": "Slider label for series title horizontal offset" },
+
+  "sliderEditionLineTopOffset": "Edition Line Top Offset",
+  "@sliderEditionLineTopOffset": { "description": "Slider label for edition line vertical offset" },
+
+  "sliderEditionLineLeftOffset": "Edition Line Left Offset",
+  "@sliderEditionLineLeftOffset": { "description": "Slider label for edition line horizontal offset" },
+
+  "sliderTopBottomTopOffset": "Top / Bottom Top Offset",
+  "@sliderTopBottomTopOffset": { "description": "Slider label for top/bottom layout offset" },
+
+  "sliderTopCenterTopOffset": "Top / Center Top Offset",
+  "@sliderTopCenterTopOffset": { "description": "Slider label for top/center layout offset" },
+
+  "layoutModern": "Modern",
+  "@layoutModern": { "description": "Layout segment button label: modern" },
+
+  "layoutTopBottom": "Top / Bottom",
+  "@layoutTopBottom": { "description": "Layout segment button label: top/bottom" },
+
+  "layoutTopCenter": "Top / Center",
+  "@layoutTopCenter": { "description": "Layout segment button label: top/center" },
+
+  "layoutModernTooltip": "Big centered title layout",
+  "@layoutModernTooltip": { "description": "Tooltip for modern layout button" },
+
+  "layoutTopBottomTooltip": "Title near top, author near bottom",
+  "@layoutTopBottomTooltip": { "description": "Tooltip for top/bottom layout button" },
+
+  "layoutTopCenterTooltip": "Author near top, title centered",
+  "@layoutTopCenterTooltip": { "description": "Tooltip for top/center layout button" },
+
+  "badgePositionTopLeft": "Top Left",
+  "@badgePositionTopLeft": { "description": "Badge position: top left" },
+
+  "badgePositionTopRight": "Top Right",
+  "@badgePositionTopRight": { "description": "Badge position: top right" },
+
+  "badgePositionBottomLeft": "Bottom Left",
+  "@badgePositionBottomLeft": { "description": "Badge position: bottom left" },
+
+  "badgePositionBottomRight": "Bottom Right",
+  "@badgePositionBottomRight": { "description": "Badge position: bottom right" },
+
+  "imgModeCover": "Cover",
+  "@imgModeCover": { "description": "Background image mode: cover" },
+
+  "imgModeFit": "Fit",
+  "@imgModeFit": { "description": "Background image mode: fit/contain" },
+
+  "imgModeStretch": "Stretch",
+  "@imgModeStretch": { "description": "Background image mode: stretch" },
+
+  "imgModeCenter": "Center",
+  "@imgModeCenter": { "description": "Background image mode: center" },
+
+  "imgModeTileXY": "Tile X and Y",
+  "@imgModeTileXY": { "description": "Background image mode: tile both axes" },
+
+  "imgModeTileX": "Tile X",
+  "@imgModeTileX": { "description": "Background image mode: tile X axis" },
+
+  "imgModeTileY": "Tile Y",
+  "@imgModeTileY": { "description": "Background image mode: tile Y axis" },
+
+  "blendNormal": "Normal",
+  "blendMultiply": "Multiply",
+  "blendScreen": "Screen",
+  "blendOverlay": "Overlay",
+  "blendDarken": "Darken",
+  "blendLighten": "Lighten",
+  "blendColorDodge": "Color Dodge",
+  "blendColorBurn": "Color Burn",
+  "blendHardLight": "Hard Light",
+  "blendSoftLight": "Soft Light",
+  "blendDifference": "Difference",
+  "blendExclusion": "Exclusion",
+  "blendHue": "Hue",
+  "blendSaturation": "Saturation",
+  "blendColor": "Color",
+  "blendLuminosity": "Luminosity",
+
+  "alignTopLeft": "Top Left",
+  "alignTopCenter": "Top Center",
+  "alignTopRight": "Top Right",
+  "alignCenterLeft": "Center Left",
+  "alignCenter": "Center",
+  "alignCenterRight": "Center Right",
+  "alignBottomLeft": "Bottom Left",
+  "alignBottomCenter": "Bottom Center",
+  "alignBottomRight": "Bottom Right",
+
+  "btnGenerateCover": "Generate Cover",
+  "@btnGenerateCover": { "description": "Button to generate the ebook cover" },
+
+  "btnClearFields": "Clear Fields",
+  "@btnClearFields": { "description": "Button to clear all form fields" },
+
+  "btnSaveCover": "Save Cover",
+  "@btnSaveCover": { "description": "Button to save the generated cover" },
+
+  "validationTitleRequired": "Ebook title is required",
+  "@validationTitleRequired": { "description": "Validation error when title is empty" },
+
+  "validationTitleTooShort": "Ebook title must be at least {min} characters",
+  "@validationTitleTooShort": {
+    "description": "Validation error when title is too short",
+    "placeholders": {
+      "min": { "type": "int" }
+    }
+  },
+
+  "validationAuthorRequired": "Author name is required",
+  "@validationAuthorRequired": { "description": "Validation error when author is empty" },
+
+  "validationAuthorTooShort": "Author name must be at least {min} characters",
+  "@validationAuthorTooShort": {
+    "description": "Validation error when author name is too short",
+    "placeholders": {
+      "min": { "type": "int" }
+    }
+  }
+}
