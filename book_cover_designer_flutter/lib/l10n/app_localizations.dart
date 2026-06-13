@@ -412,6 +412,12 @@ abstract class AppLocalizations {
   /// **'Background Image Opacity'**
   String get backgroundImageOpacity;
 
+  /// Button to pick a background color
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Background Color'**
+  String get btnChooseBackgroundColor;
+
   /// Button to pick a background image
   ///
   /// In en, this message translates to:

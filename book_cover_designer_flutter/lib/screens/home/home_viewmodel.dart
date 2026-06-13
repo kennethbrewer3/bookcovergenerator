@@ -177,6 +177,7 @@ class HomeViewModel extends BaseViewModel {
   final Set<HomeFormSection> _expandedFormSections = {
     HomeFormSection.title,
     HomeFormSection.author,
+    HomeFormSection.actions,
   };
 
   HomeViewModel() {
@@ -773,6 +774,7 @@ class HomeViewModel extends BaseViewModel {
     _coverUpdateDebounce?.cancel();
     _hasPendingCoverUpdate = false;
     notifyListeners();
+    fetchCover();
   }
 
   void _scheduleCoverUpdate() {

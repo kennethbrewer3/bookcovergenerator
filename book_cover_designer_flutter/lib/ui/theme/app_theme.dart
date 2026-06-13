@@ -203,12 +203,22 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
+          disabledForegroundColor: AppColors.textPrimary.withValues(alpha: 0.30),
           side: const BorderSide(color: AppColors.border, width: _borderWidth),
+          disabledMouseCursor: SystemMouseCursors.forbidden,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return const BorderSide(color: AppColors.border, width: _borderWidth)
+                  .copyWith(color: AppColors.border.withValues(alpha: 0.30));
+            }
+            return const BorderSide(color: AppColors.border, width: _borderWidth);
+          }),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -355,12 +365,21 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          side: const BorderSide(color: AppColors.borderDark, width: _borderWidth),
+          disabledForegroundColor: AppColors.textPrimaryDark.withValues(alpha: 0.30),
+          disabledMouseCursor: SystemMouseCursors.forbidden,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return const BorderSide(color: AppColors.borderDark, width: _borderWidth)
+                  .copyWith(color: AppColors.borderDark.withValues(alpha: 0.30));
+            }
+            return const BorderSide(color: AppColors.borderDark, width: _borderWidth);
+          }),
         ),
       ),
 
@@ -505,12 +524,20 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          side: BorderSide(color: AppColors.milBorder, width: _borderWidth),
+          disabledForegroundColor: AppColors.milTextPrimary.withValues(alpha: 0.30),
+          disabledMouseCursor: SystemMouseCursors.forbidden,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return BorderSide(color: AppColors.milBorder.withValues(alpha: 0.30), width: _borderWidth);
+            }
+            return BorderSide(color: AppColors.milBorder, width: _borderWidth);
+          }),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -654,12 +681,20 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.primary,
-          side: BorderSide(color: AppColors.milBorderDark, width: _borderWidth),
+          disabledForegroundColor: AppColors.milTextPrimaryDark.withValues(alpha: 0.30),
+          disabledMouseCursor: SystemMouseCursors.forbidden,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(_radius),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return BorderSide(color: AppColors.milBorderDark.withValues(alpha: 0.30), width: _borderWidth);
+            }
+            return BorderSide(color: AppColors.milBorderDark, width: _borderWidth);
+          }),
         ),
       ),
       textButtonTheme: TextButtonThemeData(

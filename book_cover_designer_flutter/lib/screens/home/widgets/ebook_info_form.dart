@@ -130,7 +130,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.md,
-          0,
+          AppSpacing.sm,
           AppSpacing.md,
           AppSpacing.md,
         ),
@@ -141,48 +141,37 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
 
   Widget _buildBackgroundSection(BuildContext context, HomeViewModel viewModel, AppLocalizations l10n) {
     return SectionColumn(
+      spacing: AppSpacing.xs,
       children: [
+        DropdownButtonFormField<CoverSizePreset>(
+          value: viewModel.selectedCoverSizePreset,
+          decoration: InputDecoration(
+            labelText: l10n.coverSizeLabel,
+            border: const OutlineInputBorder(),
+          ),
+          items: viewModel.coverSizePresets
+              .map(
+                (preset) => DropdownMenuItem(
+                  value: preset,
+                  child: Text(preset.label),
+                ),
+              )
+              .toList(),
+          onChanged: (preset) {
+            if (preset != null) {
+              viewModel.setCoverSizePreset(preset);
+            }
+          },
+        ),
         Row(
-          spacing: AppSpacing.md,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: AppSpacing.sm,
           children: [
-            _ColorButton(
-              label: l10n.colorBackground,
+            _LabeledColorButton(
+              label: l10n.btnChooseBackgroundColor,
               color: viewModel.backgroundColor,
-              width: 80,
-              height: 50,
               onColorSelected: (color) =>
                   viewModel.setCoverColor('background', color),
             ),
-            Expanded(
-              child: DropdownButtonFormField<CoverSizePreset>(
-                value: viewModel.selectedCoverSizePreset,
-                decoration: InputDecoration(
-                  labelText: l10n.coverSizeLabel,
-                  border: const OutlineInputBorder(),
-                ),
-                items: viewModel.coverSizePresets
-                    .map(
-                      (preset) => DropdownMenuItem(
-                        value: preset,
-                        child: Text(preset.label),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (preset) {
-                  if (preset != null) {
-                    viewModel.setCoverSizePreset(preset);
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
             FilledButton.icon(
               onPressed: viewModel.pickBackgroundImage,
               icon: const Icon(Icons.image),
@@ -194,10 +183,10 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
                 icon: const Icon(Icons.clear),
                 label: Text(l10n.btnClearImage),
               ),
-            if (viewModel.backgroundImageName != null)
-              Text(viewModel.backgroundImageName!),
           ],
         ),
+        if (viewModel.backgroundImageName != null)
+          Text(viewModel.backgroundImageName!),
         DropdownButtonFormField<BackgroundImageMode>(
           value: viewModel.backgroundImageMode,
           decoration: InputDecoration(
@@ -662,6 +651,7 @@ class EbookInfoForm extends ViewModelWidget<HomeViewModel> {
     AppLocalizations l10n,
   ) {
     return SectionColumn(
+      spacing: AppSpacing.xs,
       children: [
         FilledButton(
           onPressed: canSubmit ? viewModel.fetchCover : null,
@@ -876,15 +866,11 @@ class _ColorButton extends StatelessWidget {
     required this.label,
     required this.color,
     required this.onColorSelected,
-    this.width = 22,
-    this.height = 22,
   });
 
   final String label;
   final Color color;
   final ValueChanged<Color> onColorSelected;
-  final double width;
-  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -925,8 +911,8 @@ class _ColorButton extends StatelessWidget {
           }
         },
         icon: Container(
-          width: width,
-          height: height,
+          width: 22,
+          height: 22,
           decoration: BoxDecoration(
             color: color,
             border: Border.all(color: Theme.of(context).colorScheme.outline),
@@ -940,12 +926,14 @@ class _ColorButton extends StatelessWidget {
 
 class SectionColumn extends StatelessWidget {
   final List<Widget> children;
-  const SectionColumn({Key? key, required this.children}) : super(key: key);
+  final double spacing;
+  const SectionColumn({Key? key, required this.children, this.spacing = 0}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: spacing,
       children: children,
     );
   }

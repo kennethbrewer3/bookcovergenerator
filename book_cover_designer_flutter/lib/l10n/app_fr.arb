@@ -122,6 +122,7 @@
   "alignBottomCenter": "En bas au centre",
   "alignBottomRight": "En bas à droite",
 
+  "btnChooseBackgroundColor": "Choisir la couleur de fond",
   "btnGenerateCover": "Générer la couverture",
   "btnClearFields": "Effacer les champs",
   "btnSaveCover": "Enregistrer la couverture",

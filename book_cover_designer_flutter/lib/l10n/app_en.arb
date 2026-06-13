@@ -157,6 +157,9 @@
   "backgroundImageOpacity": "Background Image Opacity",
   "@backgroundImageOpacity": { "description": "Label for background image opacity slider" },
 
+  "btnChooseBackgroundColor": "Choose Background Color",
+  "@btnChooseBackgroundColor": { "description": "Button to pick a background color" },
+
   "btnChooseBackgroundImage": "Choose Background Image",
   "@btnChooseBackgroundImage": { "description": "Button to pick a background image" },
 

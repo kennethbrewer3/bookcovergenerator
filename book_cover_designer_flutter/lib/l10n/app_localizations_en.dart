@@ -165,6 +165,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backgroundImageOpacity => 'Background Image Opacity';
 
   @override
+  String get btnChooseBackgroundColor => 'Choose Background Color';
+
+  @override
   String get btnChooseBackgroundImage => 'Choose Background Image';
 
   @override
