@@ -26,13 +26,19 @@ The app is published as a pre-built container image. You do **not** need Flutter
 
 ### Pull and run
 
-The repository includes a `docker-compose.yaml` that pulls the latest image from GitHub Container Registry:
+The repository includes a `docker-compose.yaml` that pulls a pinned release image from GitHub Container Registry:
 
 ```bash
 git clone https://github.com/kennethbrewer3/bookcovergenerator.git
 cd bookcovergenerator
 docker compose pull
 docker compose up -d
+```
+
+The compose file pins `ghcr.io/kennethbrewer3/bookcovergenerator:1.0` (matching git tag `v1.0`) for reproducible installs. To pull a specific version directly:
+
+```bash
+docker pull ghcr.io/kennethbrewer3/bookcovergenerator:1.0
 ```
 
 The app will be available at **http://localhost:53589**.
@@ -48,7 +54,7 @@ docker compose down
 ```yaml
 services:
   book-cover-designer:
-    image: ghcr.io/kennethbrewer3/bookcovergenerator:latest
+    image: ghcr.io/kennethbrewer3/bookcovergenerator:1.0
     ports:
       - "53589:80"
     restart: unless-stopped
@@ -62,9 +68,10 @@ Save as `docker-compose.yaml`, then run `docker compose up -d`.
 
 ## Publishing the Docker image (maintainers)
 
-Pushes to `main` (and version tags like `v1.0.0`) trigger the [Publish Docker image](.github/workflows/docker-publish.yml) workflow, which builds the Flutter web app inside Docker and pushes to:
+Pushes to `main` publish `:latest`. Git version tags like `v1.0` publish matching image tags (for example `1.0`) via the [Publish Docker image](.github/workflows/docker-publish.yml) workflow:
 
-`ghcr.io/kennethbrewer3/bookcovergenerator:latest`
+- `ghcr.io/kennethbrewer3/bookcovergenerator:1.0` — pinned release (recommended)
+- `ghcr.io/kennethbrewer3/bookcovergenerator:latest` — moving tag on `main`
 
 ### Build locally
 

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM ghcr.io/cirruslabs/flutter:3.32.8 AS build
+FROM ghcr.io/cirruslabs/flutter:3.44.0 AS build
 
 WORKDIR /app
 
