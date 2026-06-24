@@ -35,11 +35,13 @@ docker compose pull
 docker compose up -d
 ```
 
-The compose file pins `ghcr.io/kennethbrewer3/book-cover-designer:1.0` (matching git tag `v1.0`) for reproducible installs. The same image is also available as `ghcr.io/kennethbrewer3/bookcovergenerator:1.0`. To pull a specific version directly:
+The compose file pins `ghcr.io/kennethbrewer3/bookcovergenerator:1.0` (matching git tag `v1.0`) for reproducible installs. To pull a specific version directly:
 
 ```bash
-docker pull ghcr.io/kennethbrewer3/book-cover-designer:1.0
+docker pull ghcr.io/kennethbrewer3/bookcovergenerator:1.0
 ```
+
+> **Important:** The GHCR image name is `bookcovergenerator` (the GitHub repo name), not `book-cover-designer`. If your container manager auto-generated a different image name, override it with the value above.
 
 The app will be available at **http://localhost:53589**.
 
@@ -54,7 +56,7 @@ docker compose down
 ```yaml
 services:
   book-cover-designer:
-    image: ghcr.io/kennethbrewer3/book-cover-designer:1.0
+    image: ghcr.io/kennethbrewer3/bookcovergenerator:1.0
     ports:
       - "53589:80"
     restart: unless-stopped
@@ -70,9 +72,8 @@ Save as `docker-compose.yaml`, then run `docker compose up -d`.
 
 Pushes to `main` publish `:latest`. Git version tags like `v1.0` publish matching image tags (for example `1.0`) via the [Publish Docker image](.github/workflows/docker-publish.yml) workflow:
 
-- `ghcr.io/kennethbrewer3/book-cover-designer:1.0` — pinned release (recommended)
-- `ghcr.io/kennethbrewer3/bookcovergenerator:1.0` — same image, repo package name
-- `ghcr.io/kennethbrewer3/book-cover-designer:latest` — moving tag on `main`
+- `ghcr.io/kennethbrewer3/bookcovergenerator:1.0` — pinned release (recommended)
+- `ghcr.io/kennethbrewer3/bookcovergenerator:latest` — moving tag on `main`
 
 ### Build locally
 

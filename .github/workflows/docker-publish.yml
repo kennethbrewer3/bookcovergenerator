@@ -31,9 +31,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.REGISTRY }}/${{ github.repository }}
-            ${{ env.REGISTRY }}/kennethbrewer3/book-cover-designer
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=match,pattern=v(.+),group=1
