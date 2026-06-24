@@ -1,6 +1,6 @@
 services:
   book-cover-designer:
-    image: ghcr.io/kennethbrewer3/bookcovergenerator:1.0
+    image: ghcr.io/kennethbrewer3/book-cover-designer:1.0
     ports:
       - "53589:80"
     restart: unless-stopped
